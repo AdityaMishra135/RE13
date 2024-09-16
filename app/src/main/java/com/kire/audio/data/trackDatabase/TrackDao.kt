@@ -34,10 +34,13 @@ interface TrackDao {
 
     @Query("SELECT * FROM track ORDER BY artist DESC")
     fun getTracksOrderedByArtistDESC(): Flow<List<TrackEntity>>
+
     @Query("SELECT * FROM track ORDER BY duration ASC")
     fun getTracksOrderedByDurationASC(): Flow<List<TrackEntity>>
+
     @Query("SELECT * FROM track ORDER BY duration DESC")
     fun getTracksOrderedByDurationDESC(): Flow<List<TrackEntity>>
+
     @Query("SELECT * FROM track WHERE id = (:id)")
     fun getTrack(id: String): TrackEntity
 

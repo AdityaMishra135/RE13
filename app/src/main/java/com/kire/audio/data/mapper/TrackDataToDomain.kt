@@ -3,7 +3,7 @@ package com.kire.audio.data.mapper
 import com.kire.audio.data.model.TrackEntity
 import com.kire.audio.domain.model.TrackDomain
 
-fun TrackEntity.asTrackDomain() = TrackDomain(
+fun TrackEntity.toDomain() = TrackDomain(
     title = title,
     album = album,
     artist = artist,

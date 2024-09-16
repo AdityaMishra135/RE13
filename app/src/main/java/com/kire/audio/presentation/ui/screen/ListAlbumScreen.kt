@@ -2,161 +2,122 @@ package com.kire.audio.presentation.ui.screen
 
 import androidx.activity.compose.BackHandler
 
-import androidx.compose.animation.core.tween
-
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-
 import androidx.compose.ui.Alignment
+
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.media3.session.MediaController
 
-import com.kire.audio.R
-
 import com.kire.audio.presentation.navigation.transitions.ListAlbumScreenTransitions
-import com.kire.audio.presentation.ui.album_screen_ui.AlbumItem
-import com.kire.audio.presentation.ui.cross_screen_ui.OnScrollListener
-import com.kire.audio.presentation.ui.cross_screen_ui.ScrollToTopButton
-import com.kire.audio.presentation.ui.list_screen_ui.top_block.Header
+
+import com.kire.audio.presentation.ui.details.album_screen_ui.list_item_album_wrapper.ListItemAlbumWrapper
+import com.kire.audio.presentation.ui.details.common.ListWithTopAndFab
+import com.kire.audio.presentation.ui.details.common.ScreenHeader
 import com.kire.audio.presentation.ui.screen.destinations.AlbumScreenDestination
 import com.kire.audio.presentation.ui.screen.destinations.ListScreenDestination
-import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
+import com.kire.audio.presentation.ui.theme.animation.Animation
+import com.kire.audio.presentation.ui.theme.dimen.Dimens
+import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
+
 import com.kire.audio.presentation.viewmodel.TrackViewModel
 
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-import kotlinx.coroutines.launch
-
 @Destination(style = ListAlbumScreenTransitions::class)
 @Composable
 fun ListAlbumScreen(
     trackViewModel: TrackViewModel,
+    shiftBottomBar: () -> Unit,
     mediaController: MediaController?,
     navigator: DestinationsNavigator
 ){
-    val coroutineScope = rememberCoroutineScope()
+    val trackState by trackViewModel.trackState.collectAsStateWithLifecycle()
 
-    val trackUiState by trackViewModel.trackUiState.collectAsStateWithLifecycle()
-    val albumUiState by trackViewModel.albumUiState.collectAsStateWithLifecycle()
-
-    val listState = rememberLazyListState()
-    val showButton by remember {
+    val albumsWithTracks by trackViewModel.artistWithTracks.collectAsStateWithLifecycle()
+    val albums by remember {
         derivedStateOf {
-            listState.firstVisibleItemIndex > 2 && trackUiState.isPlayerBottomCardShown
+            albumsWithTracks.keys.toList()
         }
     }
 
-    val configuration = LocalConfiguration.current
-    val widthDP = configuration.screenWidthDp
-    val blockWidth = widthDP / 2
+    BackHandler {
+        navigator.navigateUp()
+        return@BackHandler
+    }
 
-    val albumsWithTracks by trackViewModel.artistWithTracks.collectAsStateWithLifecycle()
-    val albums = albumsWithTracks.keys.toList()
-
-    OnScrollListener(
-        listState = listState,
-        trackUiState = trackUiState,
-        changeTrackUiState = trackViewModel::updateTrackUiState
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = AudioExtendedTheme.extendedColors.background)
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures { change, dragAmount ->
-                    change.consume()
-
-                    val x = dragAmount
-
-                    if (x > 60)
-                        navigator.popBackStack(AlbumScreenDestination.route, inclusive = true)
-                }
-            }
-            .padding(horizontal = dimensionResource(id = R.dimen.app_universal_pad)),
-        contentAlignment = Alignment.Center
-    ) {
-
-        BackHandler {
-            navigator.navigateUp()
-            return@BackHandler
-        }
-
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxSize(),
-            contentPadding = PaddingValues(bottom = dimensionResource(id = R.dimen.column_universal_vertical_content_pad)),
-            verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.column_and_row_universal_spacedby))
-        ) {
-
-            item {
-                Header(
-                    text = stringResource(id = R.string.albumscreen_header),
+    ListWithTopAndFab(
+        listSize = albums.size,
+        shiftBottomBar = shiftBottomBar,
+        topBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(top = Dimens.screenTitleTopPad, bottom = Dimens.universalPad)
+                    .windowInsetsPadding(WindowInsets.displayCutout)
+                    .padding(horizontal = Dimens.universalPad),
+                contentAlignment = Alignment.BottomStart
+            ) {
+                ScreenHeader(
+                    screenTitle = LocalizationProvider.strings.albumScreenHeader,
+                    isClicked = false,
                     onTitleClick = {
                         navigator.popBackStack(ListScreenDestination, inclusive = false)
                     }
                 )
-                Spacer(modifier = Modifier.height(16.dp))
             }
+        }
+    ) { modifier, state ->
 
-            itemsIndexed(albums){ _, album ->
-                AlbumItem(
+        LazyColumn(
+            state = state,
+            modifier = modifier
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures { _, dragAmount ->
+                        if (dragAmount > 60)
+                            navigator.popBackStack(AlbumScreenDestination.route, inclusive = true)
+                    }
+                },
+            contentPadding = PaddingValues(bottom = Dimens.columnUniversalVerticalContentPad),
+            verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy)
+        ) {
+
+            itemsIndexed(albums, key = {_, title -> title}){ _, album ->
+                ListItemAlbumWrapper(
+                    modifier = Modifier
+                        .animateItem(
+                            Animation.universalFiniteSpring()
+                        ),
+                    trackState = trackState,
                     tracks = albumsWithTracks[album] ?: emptyList(),
-                    trackUiState = trackUiState,
-                    changeTrackUiState = trackViewModel::updateTrackUiState,
-                    upsertTrack = trackViewModel::upsertTrack,
+                    onEvent = trackViewModel::onEvent,
                     mediaController = mediaController,
                     onImageClick = {
-                        navigator.navigate(AlbumScreenDestination())
-                        trackViewModel.updateAlbumUiState(albumUiState.copy(tracks = albumsWithTracks[album] ?: emptyList(), albumTitle = album))
+                        navigator.navigate(AlbumScreenDestination)
                     }
                 )
             }
         }
     }
-
-    val itemSize = blockWidth.dp
-    val density = LocalDensity.current
-    val itemSizePx = with(density) { itemSize.toPx() }
-    val itemsScrollCount = albums.size
-
-    ScrollToTopButton(
-        showButton = showButton,
-        onClick = {
-            coroutineScope.launch {
-                listState.animateScrollBy(
-                    value = -1 * itemSizePx * itemsScrollCount,
-                    animationSpec = tween(durationMillis = 4000)
-                )
-            }
-        }
-    )
 }

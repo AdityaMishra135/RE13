@@ -30,6 +30,7 @@ import com.kire.audio.device.audio.util.MediaCommands
 import com.kire.audio.device.notification.CustomMediaNotificationProvider
 import com.kire.audio.device.notification.NotificationPlayerCustomCommandButton
 import com.kire.audio.presentation.activity.MainActivity
+import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 
 class AudioPlayerService: MediaSessionService() {
 
@@ -319,11 +320,8 @@ class AudioPlayerService: MediaSessionService() {
             ensureNotificationChannel(notificationManagerCompat)
             val builder =
                 NotificationCompat.Builder(this@AudioPlayerService, CHANNEL_ID)
-                    .setSmallIcon(R.drawable.music_icon)
-                    .setContentTitle(getString(R.string.notification_content_title))
-//                    .setStyle(
-//                        NotificationCompat.BigTextStyle()
-//                    )
+                    .setSmallIcon(R.drawable.logo)
+                    .setContentTitle(LocalizationProvider.strings.notificationContentTitle)
                     .setStyle(
                         MediaStyleNotificationHelper.MediaStyle(mediaSession)
                         .setShowActionsInCompactView(0, 1, 2)
@@ -338,14 +336,13 @@ class AudioPlayerService: MediaSessionService() {
     }
 
     private fun ensureNotificationChannel(notificationManagerCompat: NotificationManagerCompat) {
-        if (notificationManagerCompat.getNotificationChannel(CHANNEL_ID) != null) {
+        if (notificationManagerCompat.getNotificationChannel(CHANNEL_ID) != null)
             return
-        }
 
         val channel =
             NotificationChannel(
                 CHANNEL_ID,
-                getString(R.string.notification_channel_name),
+                LocalizationProvider.strings.notificationChannelName,
                 NotificationManager.IMPORTANCE_DEFAULT
             )
         notificationManagerCompat.createNotificationChannel(channel)

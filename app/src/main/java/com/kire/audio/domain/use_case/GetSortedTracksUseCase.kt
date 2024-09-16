@@ -1,10 +1,11 @@
 package com.kire.audio.domain.use_case
 
-import com.kire.audio.domain.util.PreferencesDataStoreConstants
+import com.kire.audio.domain.constants.PreferencesDataStoreConstants
 import com.kire.audio.domain.model.TrackDomain
 import com.kire.audio.domain.repository.IPreferencesRepository
 import com.kire.audio.domain.repository.ITrackRepository
-import com.kire.audio.domain.util.SortTypeDomain
+import com.kire.audio.domain.constants.SortTypeDomain
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import javax.inject.Inject
@@ -14,7 +15,8 @@ class GetSortedTracksUseCase @Inject constructor(
     private val trackRepository: ITrackRepository
 ) {
 
-    operator fun invoke(): Flow<List<TrackDomain>> =
+    @OptIn(ExperimentalCoroutinesApi::class)
+    suspend operator fun invoke(): Flow<List<TrackDomain>> =
         preferencesDataStoreRepository.readSortOption(PreferencesDataStoreConstants.SORT_OPTION_KEY)
             .flatMapLatest { sortType ->
                 when(sortType) {

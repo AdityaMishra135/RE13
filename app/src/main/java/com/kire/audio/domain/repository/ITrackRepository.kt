@@ -8,25 +8,30 @@ import kotlinx.coroutines.flow.Flow
 
 interface ITrackRepository {
 
+    // Base functions
     suspend fun getTrack(id: String): TrackEntity
-
     suspend fun upsertTrack(track: TrackDomain)
     suspend fun deleteTrack(track: TrackEntity)
 
+    // Favourite tracks handling funcs
     suspend fun updateIsLoved(track: TrackDomain)
+    suspend fun getFavouriteTracks(): Flow<List<TrackDomain>>
 
-    fun getFavouriteTracks(): Flow<List<TrackDomain>>
-    fun getTracksOrderedByDateAddedASC(): Flow<List<TrackDomain>>
-    fun getTracksOrderedByDateAddedDESC(): Flow<List<TrackDomain>>
-    fun getTracksOrderedByTitleASC(): Flow<List<TrackDomain>>
-    fun getTracksOrderedByTitleDESC(): Flow<List<TrackDomain>>
-    fun getTracksOrderedByArtistASC(): Flow<List<TrackDomain>>
-    fun getTracksOrderedByArtistDESC(): Flow<List<TrackDomain>>
-    fun getTracksOrderedByDurationASC(): Flow<List<TrackDomain>>
-    fun getTracksOrderedByDurationDESC(): Flow<List<TrackDomain>>
+    // Sorted tracks
+    suspend fun getTracksOrderedByDateAddedASC(): Flow<List<TrackDomain>>
+    suspend fun getTracksOrderedByDateAddedDESC(): Flow<List<TrackDomain>>
+    suspend fun getTracksOrderedByTitleASC(): Flow<List<TrackDomain>>
+    suspend fun getTracksOrderedByTitleDESC(): Flow<List<TrackDomain>>
+    suspend fun getTracksOrderedByArtistASC(): Flow<List<TrackDomain>>
+    suspend fun getTracksOrderedByArtistDESC(): Flow<List<TrackDomain>>
+    suspend fun getTracksOrderedByDurationASC(): Flow<List<TrackDomain>>
+    suspend fun getTracksOrderedByDurationDESC(): Flow<List<TrackDomain>>
 
+    // Get albums
     suspend fun getAlbumsWithTracks(): Map<String, List<TrackDomain>>
 
+    // Tracks storing funcs
     suspend fun loadTracksToDatabase()
     suspend fun deleteNoLongerExistingTracksFromDatabase()
+    suspend fun updateTracks()
 }

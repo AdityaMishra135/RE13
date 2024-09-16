@@ -13,25 +13,6 @@ import com.kire.audio.data.trackDatabase.util.Converters
     version = 6
 )
 @TypeConverters(Converters::class)
-abstract class TrackDatabase : RoomDatabase(){
+abstract class TrackDatabase : RoomDatabase() {
     abstract val dao: TrackDao
-
-    companion object {
-        private var instance: TrackDatabase? = null
-
-        @Synchronized
-        fun getInstance(context: Context): TrackDatabase {
-            if (instance == null)
-                instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    TrackDatabase::class.java,
-                    "tracks.db"
-                )
-                    .fallbackToDestructiveMigration()
-                    .build()
-
-            return instance!!
-
-        }
-    }
 }

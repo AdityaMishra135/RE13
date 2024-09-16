@@ -8,7 +8,7 @@ import javax.inject.Inject
 class GetFavouriteTracksUseCase @Inject constructor(
     private val trackRepository: ITrackRepository
 ) {
-    operator fun invoke(): Flow<List<TrackDomain>> =
+    suspend operator fun invoke(): Flow<List<TrackDomain>> =
         trackRepository.getFavouriteTracks()
 
 }

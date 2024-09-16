@@ -2,6 +2,7 @@ package com.kire.audio.di
 
 import android.content.Context
 import androidx.room.Room
+import com.kire.audio.data.constants.StorageConstants
 import com.kire.audio.data.trackDatabase.TrackDatabase
 import dagger.Module
 import dagger.Provides
@@ -20,7 +21,7 @@ object TrackDataBaseModule {
         return Room.databaseBuilder(
             context.applicationContext,
             TrackDatabase::class.java,
-            "tracks.db"
+            StorageConstants.DATABASE_NAME
         )
             .fallbackToDestructiveMigration()
             .build()

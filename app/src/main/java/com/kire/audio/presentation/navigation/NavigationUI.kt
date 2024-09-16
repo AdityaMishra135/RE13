@@ -1,10 +1,13 @@
 package com.kire.audio.presentation.navigation
 
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 
 import androidx.media3.session.MediaController
 
 import androidx.navigation.NavHostController
+import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.ui.screen.AlbumScreen
 
 import com.kire.audio.presentation.ui.screen.ListAlbumScreen
@@ -25,6 +28,7 @@ import com.ramcosta.composedestinations.spec.NavHostEngine
 @Composable
 fun NavigationUI(
     trackViewModel: TrackViewModel,
+    shiftBottomBar: () -> Unit,
     mediaController: MediaController?,
     navHostController: NavHostController,
     navHostEngine: NavHostEngine
@@ -35,6 +39,7 @@ fun NavigationUI(
             ListScreen(
                 trackViewModel = trackViewModel,
                 navigator = destinationsNavigator,
+                shiftBottomBar = shiftBottomBar,
                 mediaController = mediaController
             )
         }
@@ -43,7 +48,11 @@ fun NavigationUI(
                 trackViewModel = trackViewModel,
                 navigateBack = {
                     destinationsNavigator.popBackStack(route = PlayerScreenDestination, inclusive = true)
-                    trackViewModel.updateTrackUiState(trackViewModel.trackUiState.value.copy(isPlayerBottomCardShown = true))
+                    trackViewModel.onEvent(
+                        TrackUiEvent.updateTrackState(
+                            trackViewModel.trackState.value.copy(isPlayerBottomCardShown = true)
+                        )
+                    )
                 },
                 mediaController = mediaController
             )
@@ -51,6 +60,7 @@ fun NavigationUI(
         composable(ListAlbumScreenDestination) {
             ListAlbumScreen(
                 trackViewModel = trackViewModel,
+                shiftBottomBar = shiftBottomBar,
                 mediaController = mediaController,
                 navigator = destinationsNavigator
             )

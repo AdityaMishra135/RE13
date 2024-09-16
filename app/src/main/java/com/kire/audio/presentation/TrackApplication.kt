@@ -14,21 +14,18 @@ class TrackApplication: Application(), ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader {
         return ImageLoader(this).newBuilder()
+            .diskCachePolicy(CachePolicy.ENABLED)
             .memoryCachePolicy(CachePolicy.ENABLED)
             .memoryCache {
                 MemoryCache.Builder(this)
-                    .maxSizePercent(0.01)
-                    .strongReferencesEnabled(true)
+                    .maxSizePercent(0.25)
                     .build()
             }
-            .diskCachePolicy(CachePolicy.ENABLED)
             .diskCache {
                 DiskCache.Builder()
-                    .maxSizePercent(0.01)
-                    .directory(cacheDir)
+                    .directory(this.cacheDir.resolve("image_cache"))
+                    .maxSizePercent(0.02)
                     .build()
-            }
-            .logger(DebugLogger())
-            .build()
+            }.build()
     }
 }

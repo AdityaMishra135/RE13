@@ -3,7 +3,7 @@ package com.kire.audio.domain.use_case.util
 import com.kire.audio.domain.use_case.GetAlbumsWithTracksUseCase
 import com.kire.audio.domain.use_case.GetFavouriteTracksUseCase
 import com.kire.audio.domain.use_case.GetSortedTracksUseCase
-import com.kire.audio.domain.use_case.GetTrackLyricsFromGenius
+import com.kire.audio.domain.use_case.GetTrackLyricsFromGeniusUseCase
 import com.kire.audio.domain.use_case.ReadRepeatModeUseCase
 import com.kire.audio.domain.use_case.ReadSortOptionUseCase
 import com.kire.audio.domain.use_case.SaveRepeatModeUseCase
@@ -20,6 +20,6 @@ data class TrackUseCases @Inject constructor(
     override val readRepeatModeUseCase: ReadRepeatModeUseCase,
     override val upsertTrackUseCase: UpsertTrackUseCase,
     override val updateTrackDataBaseUseCase: UpdateTrackDataBaseUseCase,
-    override val getTrackLyricsFromGenius: GetTrackLyricsFromGenius,
+    override val getTrackLyricsFromGeniusUseCase: GetTrackLyricsFromGeniusUseCase,
     override val getAlbumsWithTracksUseCase: GetAlbumsWithTracksUseCase
 ): ITrackUseCases

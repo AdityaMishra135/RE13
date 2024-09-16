@@ -1,26 +1,40 @@
 package com.kire.audio.data.repository
 
-import com.kire.audio.data.mapper.asFlowSortType
+import com.kire.audio.data.mapper.toDomain
 import com.kire.audio.data.preferencesDataStore.PreferencesDataStore
 import com.kire.audio.domain.repository.IPreferencesRepository
 import com.kire.audio.device.audio.util.RepeatMode
-import com.kire.audio.domain.util.SortTypeDomain
+import com.kire.audio.di.IoDispatcher
+import com.kire.audio.domain.constants.SortTypeDomain
+
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
+
 import javax.inject.Inject
 
 class PreferencesRepository @Inject constructor(
-    private val preferencesDataStore: PreferencesDataStore
+    private val preferencesDataStore: PreferencesDataStore,
+    @IoDispatcher private val coroutineDispatcher: CoroutineDispatcher
 ) : IPreferencesRepository {
 
     override suspend fun saveSortOption(key: String, value: String) =
-        preferencesDataStore.saveSortOption(key, value)
+        withContext(coroutineDispatcher) {
+            preferencesDataStore.saveSortOption(key, value)
+        }
 
-    override fun readSortOption(key: String): Flow<SortTypeDomain> =
-        preferencesDataStore.readSortOption(key).asFlowSortType()
+    override suspend fun readSortOption(key: String): Flow<SortTypeDomain> =
+        withContext(coroutineDispatcher) {
+            preferencesDataStore.readSortOption(key).toDomain()
+        }
 
     override suspend fun saveRepeatMode(key: String, value: String) =
-        preferencesDataStore.saveRepeatMode(key, value)
+        withContext(coroutineDispatcher) {
+            preferencesDataStore.saveRepeatMode(key, value)
+        }
 
-    override fun readRepeatMode(key: String): Flow<RepeatMode> =
-        preferencesDataStore.readRepeatMode(key)
+    override suspend fun readRepeatMode(key: String): Flow<RepeatMode> =
+        withContext(coroutineDispatcher) {
+            preferencesDataStore.readRepeatMode(key)
+        }
 }

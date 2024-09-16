@@ -7,8 +7,8 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 
-fun getAlbumart(
-    album_id: Long?,
+fun getAlbumArt(
+    trackAlbumId: Long?,
     context: Context
 ): Uri? {
 
@@ -19,7 +19,7 @@ fun getAlbumart(
     try {
         val sArtworkUri = Uri
             .parse("content://media/external/audio/albumart")
-        album_id?.let {id ->
+        trackAlbumId?.let { id ->
             uri = ContentUris.withAppendedId(sArtworkUri, id)
         }
         uri?.let {

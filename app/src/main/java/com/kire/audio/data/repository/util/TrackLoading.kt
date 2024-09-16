@@ -1,12 +1,13 @@
 package com.kire.audio.data.repository.util
 
 import android.annotation.SuppressLint
+import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
+import com.kire.audio.data.mapper.toDomain
 
-import com.kire.audio.data.mapper.asTrackDomain
 import com.kire.audio.data.model.TrackEntity
 import com.kire.audio.domain.model.TrackDomain
 
@@ -16,6 +17,7 @@ import javax.inject.Inject
 class TracksLoading @Inject constructor(
     private val context: Context
 ) {
+
     @SuppressLint("Range")
     suspend fun getTracksFromLocalStorage(
         getTrack: suspend (String) -> TrackEntity,
@@ -29,60 +31,59 @@ class TracksLoading @Inject constructor(
             null,
             null
         )
+        val sArtworkUri = Uri
+            .parse("content://media/external/audio/albumart")
 
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                val trackTitle =
-                    cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
-                val trackId = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID))
-                val trackAlbum =
-                    cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM))
-                val trackArtist =
-                    cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
-                val trackPath = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                val trackDuration =
-                    cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
-                val trackAlbum_id =
-                    cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))
+        cursor?.apply {
 
-                val date_addedC =
-                    File(trackPath).lastModified().toString()
+            if (moveToFirst()) {
+                do {
+                    val trackTitle =
+                        getString(getColumnIndex(MediaStore.Audio.Media.TITLE))
 
-                val imageUriC: Uri? = getAlbumart(trackAlbum_id, context)
+                    val trackArtist =
+                        getString(getColumnIndex(MediaStore.Audio.Media.ARTIST))
 
-                val track = TrackEntity(
-                    id = trackId,
-                    title = when (trackTitle) {
-                        null -> "No title"
-                        else -> trackTitle
-                    },
-                    album = trackAlbum,
-                    artist = when (trackArtist) {
-                        null -> "Unknown artist"
-                        "<unknown>" -> "Unknown artist"
-                        else -> trackArtist
-                    },
-                    path = trackPath,
-                    duration = trackDuration,
-                    albumId = trackAlbum_id,
-                    imageUri = imageUriC,
-                    dateAdded = date_addedC,
-                    isFavourite = false,
-                    defaultImageUri = imageUriC
-                )
+                    val trackPath = getString(getColumnIndex(MediaStore.Audio.Media.DATA))
 
-                if (File(trackPath).exists()) {
-                    val existingTrack: TrackEntity = getTrack(track.id)
+                    val trackAlbumId =
+                        getLong(getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))
 
-                    if (existingTrack != null && existingTrack.path != track.path)
-                        upsertTrack(track.asTrackDomain())
-                    else if (existingTrack == null)
-                        upsertTrack(track.asTrackDomain())
-                }
+                    val trackImageUri = ContentUris.withAppendedId(sArtworkUri, trackAlbumId)
 
-            } while (cursor.moveToNext())
+//                    val trackImageUri: Uri? = getAlbumArt(trackAlbumId, context)
+
+                    val track = TrackEntity(
+                        id = getString(getColumnIndex(MediaStore.Audio.Media._ID)),
+                        title = when (trackTitle) {
+                            null -> "No title"
+                            else -> trackTitle
+                        },
+                        album = getString(getColumnIndex(MediaStore.Audio.Media.ALBUM)),
+                        artist = when (trackArtist) {
+                            null, "<unknown>" -> "Unknown artist"
+                            else -> trackArtist
+                        },
+                        path = trackPath,
+                        duration = getLong(getColumnIndex(MediaStore.Audio.Media.DURATION)),
+                        albumId = trackAlbumId,
+                        imageUri = trackImageUri,
+                        dateAdded = File(trackPath).lastModified().toString(),
+                        isFavourite = false,
+                        defaultImageUri = trackImageUri
+                    )
+
+                    if (File(trackPath).exists()) {
+                        val existingTrack: TrackEntity? = getTrack(track.id)
+
+                        if (existingTrack?.path != track.path)
+                            upsertTrack(track.toDomain())
+                    }
+
+                } while (moveToNext())
+            }
+
+            close()
         }
-
-        cursor?.close()
     }
 }

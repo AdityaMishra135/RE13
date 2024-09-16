@@ -4,29 +4,23 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
-import com.kire.audio.di.IoDispatcher
 import com.kire.audio.domain.use_case.util.ITrackUseCases
 import com.kire.audio.presentation.model.SortOption
-import com.kire.audio.presentation.util.ListSelector
-import com.kire.audio.presentation.mapper.asILyricsRequestState
-import com.kire.audio.presentation.util.SortType
-import com.kire.audio.presentation.mapper.asListOfTrack
-import com.kire.audio.presentation.mapper.asLyricsRequestModeDomain
-import com.kire.audio.presentation.mapper.asMapAlbumListTrack
-import com.kire.audio.presentation.mapper.asSortType
-import com.kire.audio.presentation.mapper.asSortTypeDomain
-import com.kire.audio.presentation.mapper.asTrackDomain
-import com.kire.audio.presentation.model.AlbumUiState
+import com.kire.audio.presentation.constants.ListSelector
+import com.kire.audio.presentation.mapper.toPresentation
+import com.kire.audio.presentation.constants.SortType
+import com.kire.audio.presentation.mapper.toDomain
+import com.kire.audio.presentation.model.state.AlbumState
 import com.kire.audio.presentation.model.ILyricsRequestState
-import com.kire.audio.presentation.model.LyricsUiState
-import com.kire.audio.presentation.model.SearchUiState
+import com.kire.audio.presentation.model.state.LyricsState
+import com.kire.audio.presentation.model.state.SearchState
 import com.kire.audio.presentation.model.Track
-import com.kire.audio.presentation.model.TrackUiState
-import com.kire.audio.presentation.util.LyricsRequestMode
+import com.kire.audio.presentation.model.state.TrackState
+import com.kire.audio.presentation.constants.LyricsRequestMode
+import com.kire.audio.presentation.model.event.TrackUiEvent
+import com.kire.audio.presentation.ui.details.player_screen_ui.image_lyrics_flip_block.LyricsResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,75 +29,36 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 import javax.inject.Inject
 
 @HiltViewModel
 class TrackViewModel @Inject constructor(
-    private val trackUseCases: ITrackUseCases,
-    @IoDispatcher private val coroutineDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val trackUseCases: ITrackUseCases
 ) : ViewModel(){
 
 
     /*
     * Tracks-providing params and funcs
     * */
-
     private val _sortType = MutableStateFlow(SortType.DATA_DESC_ORDER)
     val sortType : StateFlow<SortType>
         get() = _sortType.asStateFlow()
 
+    private val _tracks: MutableStateFlow<List<Track>> = MutableStateFlow(emptyList())
+    val tracks: StateFlow<List<Track>> = _tracks.asStateFlow()
 
-    private var _tracks = trackUseCases.getSortedTracksUseCase().asListOfTrack()
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            mutableListOf()
-        )
-
-
-    fun updateSortOption(event: SortOption) {
-        _sortType.value = event.sortType
-    }
-
-    private var _favouriteTracks:  StateFlow<List<Track>> =
-        trackUseCases.getFavouriteTracksUseCase().asListOfTrack()
-            .stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList()
-            )
+    private val _favouriteTracks: MutableStateFlow<List<Track>> = MutableStateFlow(emptyList())
+    val favouriteTracks: StateFlow<List<Track>> = _favouriteTracks.asStateFlow()
 
     private val _artistWithTracks: MutableStateFlow<Map<String, List<Track>>> = MutableStateFlow(emptyMap())
     val artistWithTracks: StateFlow<Map<String, List<Track>>> = _artistWithTracks.asStateFlow()
 
-    fun updateArtistWithTracks() =
-        viewModelScope.launch(coroutineDispatcher) {
-            _artistWithTracks.value = trackUseCases.getAlbumsWithTracksUseCase().asMapAlbumListTrack()
-            updateAlbumUiState(_albumUiState.value.copy(tracks = _artistWithTracks.value[_albumUiState.value.albumTitle] ?: emptyList()))
-        }
-
-    fun selectListOfTracks(selectList: ListSelector): StateFlow<List<Track>> =
-        when(selectList){
-            ListSelector.MAIN_LIST -> _tracks
-            ListSelector.SEARCH_LIST -> _searchResult
-            ListSelector.FAVOURITE_LIST -> _favouriteTracks
-        }
-
-
     /*
-    TrackUiState params and funcs
+    TrackState params and funcs
     * */
-
-    private val _trackUiState: MutableStateFlow<TrackUiState> = MutableStateFlow(TrackUiState())
-    val trackUiState: StateFlow<TrackUiState> = _trackUiState.asStateFlow()
-
-    fun updateTrackUiState(
-        trackUiState: TrackUiState
-    ) = _trackUiState.update { _ ->
-        trackUiState
-    }
+    private val _trackState: MutableStateFlow<TrackState> = MutableStateFlow(TrackState())
+    val trackState: StateFlow<TrackState> = _trackState.asStateFlow()
 
     suspend fun getTrackLyricsFromGenius(
         mode: LyricsRequestMode,
@@ -111,53 +66,30 @@ class TrackViewModel @Inject constructor(
         artist: String?,
         userInput: String?,
     ): ILyricsRequestState =
-        trackUseCases.getTrackLyricsFromGenius(
-            mode = mode.asLyricsRequestModeDomain(),
+        trackUseCases.getTrackLyricsFromGeniusUseCase(
+            mode = mode.toDomain(),
             title,
             artist,
             userInput
-        ).asILyricsRequestState()
-
+        ).toPresentation()
 
     /*
     LyricsUiState params and funcs
     * */
-
-    private val _lyricsUiState: MutableStateFlow<LyricsUiState> = MutableStateFlow(LyricsUiState())
-    val lyricsUiState: StateFlow<LyricsUiState> = _lyricsUiState
-
-    fun updateLyricsUiState(
-       lyricsUiState: LyricsUiState
-    ) = _lyricsUiState.update { _ ->
-            lyricsUiState
-        }
-
-
-    /*
-    AlbumUiState params and funcs
-    * */
-
-    private val _albumUiState: MutableStateFlow<AlbumUiState> = MutableStateFlow(AlbumUiState())
-    val albumUiState: StateFlow<AlbumUiState> = _albumUiState.asStateFlow()
-
-    fun updateAlbumUiState(
-        albumUiState: AlbumUiState
-    ) = _albumUiState.update { _ ->
-        albumUiState
-    }
+    private val _lyricsState: MutableStateFlow<LyricsState> = MutableStateFlow(LyricsState())
+    val lyricsState: StateFlow<LyricsState> = _lyricsState
 
 
     /*
      * DataStore funcs
      * */
-
     fun saveSortOption(value: SortType) =
-        viewModelScope.launch(coroutineDispatcher) {
-            trackUseCases.saveSortOptionUseCase(value.asSortTypeDomain())
+        viewModelScope.launch {
+            trackUseCases.saveSortOptionUseCase(value.toDomain())
         }
 
     fun saveRepeatMode(value: Int) =
-        viewModelScope.launch(coroutineDispatcher) {
+        viewModelScope.launch {
             trackUseCases.saveRepeatModeUseCase(value)
         }
 
@@ -165,39 +97,26 @@ class TrackViewModel @Inject constructor(
     /*
     * Database funcs
     * */
-
-    fun upsertTrack(track: Track) =
-        viewModelScope.launch(coroutineDispatcher) {
-            trackUseCases.upsertTrackUseCase(track.asTrackDomain())
-        }
-
     fun updateTrackDataBase() =
-        viewModelScope.launch(coroutineDispatcher) {
-            trackUseCases.updateTrackDataBaseUseCase(coroutineDispatcher)
+        viewModelScope.launch {
+            trackUseCases.updateTrackDataBaseUseCase()
         }
-
 
 
     /*
     * Search params and funcs
     * */
+    private val _searchState = MutableStateFlow(SearchState())
+    val searchState: StateFlow<SearchState> = _searchState.asStateFlow()
 
-    private val _searchUiState = MutableStateFlow(SearchUiState())
-    val searchUiState: StateFlow<SearchUiState> = _searchUiState.asStateFlow()
 
-    fun updateSearchUiState(searchUiState: SearchUiState) {
-        _searchUiState.update { _ ->
-            searchUiState
-        }
-    }
-
-    private val _searchResult = searchUiState
-        .combine(_tracks) { searchUiState, _ ->
-            if (searchUiState.searchText.isBlank())
+    var searchResult = searchState
+        .combine(_tracks) { searchState: SearchState, tracks ->
+            if (searchState.searchText.isBlank())
                 emptyList()
             else
-                _tracks.value.filter{
-                    it.doesMatchSearchQuery(searchUiState.searchText)
+                tracks.filter{
+                    it.doesMatchSearchQuery(searchState.searchText)
                 }
         }
         .stateIn(
@@ -206,28 +125,100 @@ class TrackViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    fun search(searchString: String) {
+
+    }
+
+    /**
+     * Handle Ui events
+     *
+     * @param event Event triggered by user
+     *
+     * @return Unit
+     *
+     * @author Michael Gontarev (KiREHwYE)
+    * */
+    fun onEvent(event: TrackUiEvent) {
+        when(event) {
+            is TrackUiEvent.updateTrackState -> {
+                _trackState.update { _ ->
+                    event.trackState
+                }
+            }
+            is TrackUiEvent.upsertTrack -> {
+                viewModelScope.launch {
+                    trackUseCases.upsertTrackUseCase(event.track.toDomain())
+                }
+            }
+
+            is TrackUiEvent.updateLyricsState -> {
+                _lyricsState.update { _ ->
+                    event.lyricsState
+                }
+            }
+
+            is TrackUiEvent.updateSearchState -> {
+                _searchState.update { _ ->
+                    event.searchState
+                }
+            }
+
+            is TrackUiEvent.updateArtistWithTracks -> {
+                viewModelScope.launch {
+                    _artistWithTracks.value = trackUseCases.getAlbumsWithTracksUseCase().toPresentation()
+                }
+            }
+
+            is TrackUiEvent.updateSortOption -> {
+                _sortType.value = event.sortOption.sortType
+            }
+
+            is TrackUiEvent.upsertAndUpdateCurrentTrack -> {
+                onEvent(TrackUiEvent.upsertTrack(event.track
+                    .also {
+                        _trackState.update { currentState ->
+                            currentState.copy(
+                                currentTrackPlaying = it,
+                                currentList = currentState.currentList.map {
+                                    if (it.id == event.track.id) event.track else it
+                                }
+                            )
+                        }
+                    })
+                )
+            }
+        }
+    }
+
 
     /*
     * Initialization block
     * */
-
     init {
         viewModelScope.launch {
-            withContext(coroutineDispatcher){
-                launch {
-                    trackUseCases.readSortOptionUseCase().collect { sortTypeDomain ->
-                        _sortType.value = sortTypeDomain.asSortType()
-                    }
-
+            launch {
+                trackUseCases.getSortedTracksUseCase().collect {
+                    _tracks.value = it.toPresentation()
                 }
-                launch {
-                    trackUseCases.readRepeatModeUseCase().collect {
-                        _trackUiState.update { currentState ->
-                            currentState.copy(
-                                trackRepeatMode = it
-                            )
-                        }
+            }
+            launch {
+                trackUseCases.readSortOptionUseCase().collect { sortTypeDomain ->
+                    _sortType.value = sortTypeDomain.toPresentation()
+                }
+
+            }
+            launch {
+                trackUseCases.readRepeatModeUseCase().collect {
+                    _trackState.update { currentState ->
+                        currentState.copy(
+                            trackRepeatMode = it
+                        )
                     }
+                }
+            }
+            launch {
+                trackUseCases.getFavouriteTracksUseCase().collect {
+                    _favouriteTracks.value = it.toPresentation()
                 }
             }
         }

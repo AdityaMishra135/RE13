@@ -21,20 +21,21 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.ui.res.dimensionResource
 
 import androidx.media3.session.MediaController
-import com.kire.audio.R
 
-import com.kire.audio.device.audio.media_controller.skipTrack
 import com.kire.audio.presentation.navigation.transitions.PlayerScreenTransitions
-import com.kire.audio.presentation.ui.player_screen_ui.Background
-import com.kire.audio.presentation.ui.player_screen_ui.functional_block.FunctionalBlock
-import com.kire.audio.presentation.ui.player_screen_ui.Header
-import com.kire.audio.presentation.ui.player_screen_ui.image_lyrics_flip_block.ImageLyricsFlipBlock
-import com.kire.audio.presentation.ui.player_screen_ui.TextAndHeart
+import com.kire.audio.presentation.ui.details.player_screen_ui.Background
+import com.kire.audio.presentation.ui.details.player_screen_ui.Header
+import com.kire.audio.presentation.ui.details.player_screen_ui.TextAndHeart
+import com.kire.audio.presentation.ui.details.player_screen_ui.functional_block.FunctionalBlock
+import com.kire.audio.presentation.ui.details.player_screen_ui.image_lyrics_flip_block.ImageLyricsFlipBlock
 import com.kire.audio.presentation.viewmodel.TrackViewModel
-import com.kire.audio.presentation.util.ListSelector
+import com.kire.audio.presentation.ui.details.common.BlurPanel
+import com.kire.audio.presentation.ui.details.player_screen_ui.dialog.favourite_panel.FavouritePanel
+import com.kire.audio.presentation.ui.details.player_screen_ui.image_lyrics_flip_block.LyricsCardSide
+import com.kire.audio.presentation.ui.details.player_screen_ui.panel.track_info_panel.TrackInfoPanel
+import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -46,17 +47,11 @@ fun PlayerScreen(
     navigateBack: () -> Unit
 ){
 
-    val trackUiState by trackViewModel.trackUiState.collectAsStateWithLifecycle()
-
-    val currentTrackList = trackViewModel.selectListOfTracks(trackUiState.currentListSelector).collectAsStateWithLifecycle().value
-
-    if (currentTrackList.isEmpty() && (trackUiState.currentListSelector != ListSelector.MAIN_LIST)) {
-        trackViewModel.updateTrackUiState(trackUiState.copy(currentListSelector = ListSelector.MAIN_LIST))
-    }
+    val trackState by trackViewModel.trackState.collectAsStateWithLifecycle()
 
     var duration: Float by remember { mutableFloatStateOf(0f) }
 
-    trackUiState.currentTrackPlaying?.let {
+    trackState.currentTrackPlaying?.let {
         duration = it.duration.toFloat()
     } ?: 0f
 
@@ -65,92 +60,82 @@ fun PlayerScreen(
         return@BackHandler
     }
 
-    Background(imageUri = trackUiState.currentTrackPlaying?.imageUri)
-
-    Column(modifier = Modifier
-        .padding(horizontal = dimensionResource(id = R.dimen.app_universal_pad))
-        .fillMaxSize()
-        .pointerInput(Unit) {
-            detectVerticalDragGestures { _, dragAmount ->
-                val y = dragAmount
-
-                if (y > 50)
-                    navigateBack()
-            }
+    BlurPanel(
+        onTopOfBlurredPanel1 = {
+            TrackInfoPanel(
+                trackState = trackState,
+                onEvent = trackViewModel::onEvent
+            )
         },
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceAround
-    ) {
+        onTopOfBlurredPanel2 = {
+            FavouritePanel(
+                favouriteTracks = trackViewModel.favouriteTracks,
+                trackState = trackState,
+                onEvent = trackViewModel::onEvent,
+                mediaController = mediaController
+            )
+        },
+        onTopOfBlurredPanel3 = {
+            LyricsCardSide(
+                trackState = trackViewModel.trackState,
+                lyricsState = trackViewModel.lyricsState,
+                onEvent = trackViewModel::onEvent,
+                getTrackLyricsFromGenius = trackViewModel::getTrackLyricsFromGenius
+            )
+        }
+    ) { modifierToExpandPopUpBar1, modifierToExpandPopUpBar2, modifierToExpandPopUpBar3 ->
 
-        Header(
-            trackUiState = trackUiState,
-            changeTrackUiState = trackViewModel::updateTrackUiState,
-            upsertTrack = trackViewModel::upsertTrack,
-            navigateBack = navigateBack
-        )
-
-        ImageLyricsFlipBlock(
-            trackUiState = trackUiState,
-            lyricsUiState = trackViewModel.lyricsUiState,
-            updateLyricsUiState = trackViewModel::updateLyricsUiState,
-            updateTrackUiState = trackViewModel::updateTrackUiState,
-            upsertTrack = trackViewModel::upsertTrack,
-            getTrackLyricsFromGenius = trackViewModel::getTrackLyricsFromGenius
-        )
+        Background(imageUri = trackState.currentTrackPlaying?.imageUri)
 
         Column(
             modifier = Modifier
-                .wrapContentHeight()
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.column_and_row_universal_spacedby))
-        ) {
-
-            TextAndHeart(
-                trackUiState = trackUiState,
-                changeTrackUiState = trackViewModel::updateTrackUiState,
-                upsertTrack = trackViewModel::upsertTrack
-            )
-
-            FunctionalBlock(
-                trackUiState = trackUiState,
-                changeTrackUiState = trackViewModel::updateTrackUiState,
-                upsertTrack = trackViewModel::upsertTrack,
-                saveRepeatMode = trackViewModel::saveRepeatMode,
-                skipTrack = { skipTrackAction ->
-                    mediaController?.skipTrack(
-                        skipTrackAction = skipTrackAction,
-                        currentTrackList = trackViewModel.selectListOfTracks(trackUiState.currentListSelector).value,
-                        trackUiState = trackUiState,
-                        updateTrackUiState = trackViewModel::updateTrackUiState
-                    )
-                },
-                mediaController = mediaController,
-                durationGet = { duration },
-                play = {
-                    mediaController?.apply {
-                        if (!trackUiState.isPlaying) {
-                            play()
-                            trackViewModel.updateTrackUiState(trackUiState.copy(isPlaying = true))
-                        }
-                        else {
-                            pause()
-                            trackViewModel.updateTrackUiState(trackUiState.copy(isPlaying = false))
-                        }
+                .padding(horizontal = Dimens.universalPad)
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectVerticalDragGestures { _, dragAmount ->
+                        if (dragAmount > 50)
+                            navigateBack()
                     }
                 },
-                selectListOfTracks = trackViewModel::selectListOfTracks
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceAround
+        ) {
+
+            Header(
+                navigateBack = navigateBack,
+                modifierToExpandBlurPanel = modifierToExpandPopUpBar1
             )
+
+            ImageLyricsFlipBlock(
+                trackState = trackState,
+                lyricsState = trackViewModel.lyricsState,
+                getTrackLyricsFromGenius = trackViewModel::getTrackLyricsFromGenius,
+                onEvent = trackViewModel::onEvent,
+                modifierToExpandPopUpBar = modifierToExpandPopUpBar3
+            )
+
+            Column(
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy)
+            ) {
+
+                TextAndHeart(
+                    trackState = trackViewModel.trackState,
+                    onEvent = trackViewModel::onEvent
+                )
+
+                FunctionalBlock(
+                    modifierToExpandPopUpBar = modifierToExpandPopUpBar2,
+                    trackState = trackState,
+                    onEvent = trackViewModel::onEvent,
+                    saveRepeatMode = trackViewModel::saveRepeatMode,
+                    mediaController = mediaController,
+                    durationGet = { duration },
+                )
+            }
         }
     }
 }
-
-
-
-
-
-
-
-
-
-

@@ -24,7 +24,7 @@ object AlbumScreenTransitions : DestinationStyle.Animated {
 
     override fun AnimatedContentTransitionScope<NavBackStackEntry>.exitTransition(): ExitTransition {
         return if (targetState.route() == PlayerScreenDestination)
-            fadeOut(animationSpec = tween(300, easing = LinearOutSlowInEasing))
+            fadeOut(animationSpec = tween(2000, easing = LinearOutSlowInEasing))
         else
             slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down, animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing)) +
                     fadeOut(animationSpec = tween(300, easing = LinearOutSlowInEasing))
@@ -40,7 +40,7 @@ object AlbumScreenTransitions : DestinationStyle.Animated {
 
     override fun AnimatedContentTransitionScope<NavBackStackEntry>.popExitTransition(): ExitTransition {
         return if (targetState.route() == PlayerScreenDestination)
-            fadeOut(animationSpec = tween(300, easing = LinearOutSlowInEasing))
+            fadeOut(animationSpec = tween(2000, easing = LinearOutSlowInEasing))
         else
             slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down, animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing)) +
                     fadeOut(animationSpec = tween(300, easing = LinearOutSlowInEasing))

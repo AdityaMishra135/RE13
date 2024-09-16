@@ -5,6 +5,7 @@ import android.app.Activity
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.res.Configuration
 
 import android.os.Build
 import android.os.Bundle
@@ -17,10 +18,35 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntOffset
 
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -45,10 +71,15 @@ import com.kire.audio.device.audio.util.SkipTrackAction
 import com.kire.audio.device.audio.media_controller.performPlayMedia
 import com.kire.audio.device.audio.util.MediaCommands
 import com.kire.audio.device.audio.media_controller.rememberManagedMediaController
+import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.navigation.NavigationUI
-import com.kire.audio.presentation.ui.cross_screen_ui.PlayerBottomBar
-import com.kire.audio.presentation.ui.cross_screen_ui.AutoSkipOnRepeatMode
+import com.kire.audio.presentation.ui.details.common.AutoSkipOnRepeatMode
+import com.kire.audio.presentation.ui.details.common.NavigationBar
+import com.kire.audio.presentation.ui.details.common.PlayerBottomBar
+
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
+import com.kire.audio.presentation.ui.theme.dimen.Dimens
+import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 import com.kire.audio.presentation.viewmodel.TrackViewModel
 import com.kire.audio.screen.functional.GetPermissions
 
@@ -56,17 +87,15 @@ import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 
 import dagger.hilt.android.AndroidEntryPoint
 
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 @UnstableApi
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-//    @Inject lateinit var trackViewModel: TrackViewModel
-
-    val trackViewModel: TrackViewModel by viewModels()
+    private val trackViewModel: TrackViewModel by viewModels()
 
     private var factory: ListenableFuture<MediaController>? = null
 
@@ -74,6 +103,8 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterialNavigationApi::class, ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        LocalizationProvider.updateLocalization(this)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.hideSystemUi(extraAction = {
@@ -88,70 +119,172 @@ class MainActivity : ComponentActivity() {
 
             val mediaController by rememberManagedMediaController()
 
-            AudioExtendedTheme {
+            /** измерения контейнера в пикселях */
+            val localDensity = LocalDensity.current
 
-                Scaffold(
-                    bottomBar = {
-                        PlayerBottomBar(
-                            trackUiState = trackViewModel.trackUiState,
+            /** высота плавающей кнопки в пикселях */
+            val bottomBarHeightPx = remember { mutableStateOf(0f) }
+
+            /** свдиг нижнего бара по высоте */
+            val bottomBarOffsetHeightPx = remember { mutableStateOf(0f) }
+
+            /** отступ нижней системной панели навигации */
+            val bottomInsetPaddingPx = with(localDensity) {
+                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx()
+            }
+
+            /** слушатель скролла экрана */
+            val nestedScrollConnection = remember {
+                object : NestedScrollConnection {
+                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                        val delta = available.y
+
+                        val newBottomBarOffset = bottomBarOffsetHeightPx.value + delta
+                        bottomBarOffsetHeightPx.value =
+                            newBottomBarOffset.coerceIn(
+                                minimumValue = -bottomBarHeightPx.value - bottomInsetPaddingPx,
+                                maximumValue = 0f
+                            )
+
+                        return Offset.Zero
+                    }
+                }
+            }
+
+            val coroutineScope = rememberCoroutineScope()
+
+            fun shiftButtonDown() {
+                coroutineScope.launch {
+                    while (-bottomBarOffsetHeightPx.value < bottomBarHeightPx.value) {
+                        val newTopBarOffset = (bottomBarOffsetHeightPx.value - 5).coerceIn(
+                            minimumValue = -bottomBarHeightPx.value,
+                            maximumValue = 0f
+                        )
+                        bottomBarOffsetHeightPx.value = newTopBarOffset
+                        delay(1)
+                    }
+                }
+            }
+
+            fun shiftBarUp() {
+                coroutineScope.launch {
+                    while (bottomBarOffsetHeightPx.value < 0) {
+                        bottomBarOffsetHeightPx.value += 5
+                        delay(1)
+                    }
+                }
+            }
+
+            CompositionLocalProvider(
+                LocalDensity provides Density(
+                    LocalDensity.current.density,
+                    1f // дефолтный скейл текста
+                )
+            ) {
+                AudioExtendedTheme {
+
+                    Scaffold(
+                        modifier = Modifier
+                            .nestedScroll(nestedScrollConnection),
+                        bottomBar = {
+                            Box(
+                                modifier = Modifier
+                                    .navigationBarsPadding()
+                                    .wrapContentSize()
+                                    .background(color = Color.Transparent)
+                                    .padding(Dimens.universalPad)
+                                    .onGloballyPositioned {
+                                        bottomBarHeightPx.value =
+                                            it.size.height.toFloat() + with(localDensity) { 2 * Dimens.universalPad.toPx() }
+                                    }
+                                    .offset {
+                                        IntOffset(
+                                            x = 0,
+                                            y = -bottomBarOffsetHeightPx.value.roundToInt()
+                                        )
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                PlayerBottomBar(
+                                    trackState = trackViewModel.trackState,
+                                    mediaController = mediaController,
+                                    changeTrackUiState = {
+                                        trackViewModel.onEvent(
+                                            TrackUiEvent.updateTrackState(it)
+                                        )
+                                    },
+                                    navHostController = navHostController,
+                                    onDragDown = ::shiftButtonDown
+                                )
+                            }
+                        }
+                    ) { _ ->
+
+                        GetPermissions(
+                            lifecycleOwner = LocalLifecycleOwner.current,
+                            updateTrackDataBase = trackViewModel::updateTrackDataBase
+                        )
+
+                        AutoSkipOnRepeatMode(
+                            trackState = trackViewModel.trackState,
+                            mediaController = mediaController
+                        )
+
+                        NavigationUI(
+                            trackViewModel = trackViewModel,
+                            shiftBottomBar = {
+                                coroutineScope.launch {
+                                    if (bottomBarOffsetHeightPx.value <= ((-bottomBarHeightPx.value + with(localDensity) { Dimens.universalPad.toPx() }) / 2))
+                                        shiftButtonDown()
+                                    else
+                                        shiftBarUp()
+                                }
+                            },
                             mediaController = mediaController,
-                            selectListOfTracks = trackViewModel::selectListOfTracks,
-                            changeTrackUiState = trackViewModel::updateTrackUiState,
-                            navHostController = navHostController
+                            navHostController = navHostController,
+                            navHostEngine = navHostEngine
                         )
                     }
-                ) { _ ->
-
-                    GetPermissions(
-                        lifecycleOwner = LocalLifecycleOwner.current,
-                        updateTrackDataBase = trackViewModel::updateTrackDataBase
-                    )
-
-                    AutoSkipOnRepeatMode(
-                        trackUiState = trackViewModel.trackUiState,
-                        mediaController = mediaController
-                    )
-
-                    NavigationUI(
-                        trackViewModel = trackViewModel,
-                        mediaController = mediaController,
-                        navHostController = navHostController,
-                        navHostEngine = navHostEngine
-                    )
                 }
             }
         }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                withContext(Dispatchers.IO){
-
-                    launch {
-                        MediaCommands.isPlayRequired.collect {
-                            trackViewModel.updateTrackUiState(trackUiState = trackViewModel.trackUiState.value.copy(isPlaying = it))
-                        }
+                launch {
+                    MediaCommands.isPlayRequired.collect {
+                        trackViewModel.onEvent(
+                            TrackUiEvent.updateTrackState(
+                                trackViewModel.trackState.value.copy(isPlaying = it)
+                            )
+                        )
                     }
-                    launch {
-                        MediaCommands.isPreviousTrackRequired.collect {
-                            if (it)
-                                skipTrack(this@MainActivity, SkipTrackAction.PREVIOUS, trackViewModel)
-                        }
+                }
+                launch {
+                    MediaCommands.isPreviousTrackRequired.collect {
+                        if (it)
+                            skipTrack(this@MainActivity, SkipTrackAction.PREVIOUS, trackViewModel)
                     }
-                    launch {
-                        MediaCommands.isNextTrackRequired.collect {
-                            if (it)
-                                skipTrack(this@MainActivity, SkipTrackAction.NEXT, trackViewModel)
-                        }
+                }
+                launch {
+                    MediaCommands.isNextTrackRequired.collect {
+                        if (it)
+                            skipTrack(this@MainActivity, SkipTrackAction.NEXT, trackViewModel)
                     }
-                    launch {
-                        MediaCommands.isRepeatRequired.collect {
-                            if (it)
-                                skipTrack(this@MainActivity, SkipTrackAction.REPEAT, trackViewModel)
-                        }
+                }
+                launch {
+                    MediaCommands.isRepeatRequired.collect {
+                        if (it)
+                            skipTrack(this@MainActivity, SkipTrackAction.REPEAT, trackViewModel)
                     }
                 }
             }
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        LocalizationProvider.updateLocalization(this)
     }
 
     override fun onStart() {
@@ -168,8 +301,7 @@ class MainActivity : ComponentActivity() {
                 factory?.let {
                     if (it.isDone)
                         it.get()
-                    else
-                        null
+                    else null
                 }
             },
             MoreExecutors.directExecutor()
@@ -196,23 +328,24 @@ private fun skipTrack(context: Context, skipTrackAction: SkipTrackAction, viewMo
 
         val newINDEX =
             skipTrackAction.action(
-                trackUiState.value.currentTrackPlayingIndex!!,
-                selectListOfTracks(trackUiState.value.currentListSelector).value.size
+                trackState.value.currentTrackPlayingIndex!!,
+                trackState.value.currentList.size
             )
 
         if (skipTrackAction == SkipTrackAction.NEXT || skipTrackAction == SkipTrackAction.PREVIOUS) {
-            updateTrackUiState(
-                trackUiState.value.copy(
-                    currentTrackPlaying = selectListOfTracks(trackUiState.value.currentListSelector).value[newINDEX],
-                    currentTrackPlayingURI = selectListOfTracks(trackUiState.value.currentListSelector).value[newINDEX].path,
-                    currentTrackPlayingIndex = newINDEX
+            onEvent(
+                TrackUiEvent.updateTrackState(
+                    trackState.value.copy(
+                        currentTrackPlaying = trackState.value.currentList[newINDEX],
+                        currentTrackPlayingIndex = newINDEX
+                    )
                 )
             )
 
             MediaCommands.isTrackRepeated.value = false
         }
 
-        mediaController.controller.value?.performPlayMedia(selectListOfTracks(trackUiState.value.currentListSelector).value[newINDEX])
+        mediaController.controller.value?.performPlayMedia(trackState.value.currentList[newINDEX])
 
         MediaCommands.isRepeatRequired.value = false
     }
@@ -242,5 +375,3 @@ internal fun Activity.setDisplayCutoutMode() {
         }
     }
 }
-
-
