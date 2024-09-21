@@ -1,4 +1,4 @@
-package com.kire.audio.presentation.ui.details.list_screen_ui.top_block.album_suggestion_bar
+package com.kire.audio.presentation.ui.details.common
 
 import android.net.Uri
 
@@ -15,50 +15,43 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-import coil.compose.AsyncImage
-
-import com.kire.audio.R
-import com.kire.audio.presentation.ui.details.common.AsyncImageWithLoading
-import com.kire.audio.presentation.ui.details.common.RubikFontText
-import com.kire.audio.presentation.ui.details.common.TwoTextsInColumn
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
-import com.kire.audio.presentation.util.bounceClick
+import com.kire.audio.presentation.util.modifier.bounceClick
 
 /**
- * Компонент - элемент AlbumSuggestionBar. Представляет некоторый альбом.
+ * Плитка рекомендации трека / альбома
  *
- * @param imageUri Uri изображения альбома
- * @param albumTitle название альбома
- * @param albumArtist исполнитель
- * @param onAlbumSuggestionClick действие при нажатии на компонент
+ * @param imageUri Uri изображения
+ * @param mainText название
+ * @param satelliteText исполнитель
+ * @param onSuggestionClick действие при нажатии на компонент
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
-fun AlbumSuggestionItem(
+fun SuggestionItem(
     imageUri: Uri?,
-    albumTitle: String,
-    albumArtist: String,
-    onAlbumSuggestionClick: (String) -> Unit
+    mainText: String,
+    satelliteText: String,
+    onSuggestionClick: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
             .width(Dimens.albumSuggestionItemWidth)
             .wrapContentHeight()
             .bounceClick {
-                onAlbumSuggestionClick(albumTitle)
+                onSuggestionClick(mainText)
             },
         verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy),
         horizontalAlignment = Alignment.Start
     ) {
 
+        /** Обложка трека или альбома */
         AsyncImageWithLoading(
             model = imageUri,
             modifier = Modifier
@@ -67,9 +60,10 @@ fun AlbumSuggestionItem(
                 .clip(RoundedCornerShape(Dimens.universalRoundedCorner))
         )
 
+        /** Тексты для отображения */
         TwoTextsInColumn(
-            mainText = albumTitle,
-            satelliteText = albumArtist,
+            mainText = mainText,
+            satelliteText = satelliteText,
             mainTextStyle = TextStyle(
                 fontSize = 12.sp,
                 lineHeight = 12.sp,

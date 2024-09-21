@@ -16,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 
 import androidx.media3.session.MediaController
 
@@ -64,15 +63,6 @@ fun AlbumFastAccessBar(
                 else Color.White
             )
 
-            /** Анимирует цвет текста названия трека в зависимости от того он ли сейчас играет или нет */
-            val animatedTextColor by animateColorAsState(
-                targetValue =
-                    if (trackState.currentTrackPlaying?.id == track.id)
-                        Color.White
-                    else
-                        Color.Black
-            )
-
             /** Пролистывает до текущего выбранного трека, если он оказывается за пределами поля зрения */
             LaunchedEffect(trackState.currentTrackPlaying?.id == track.id) {
                 if (trackState.currentTrackPlaying?.id == track.id)
@@ -82,7 +72,6 @@ fun AlbumFastAccessBar(
             AlbumTrackFastAccessItem(
                 trackTitle = track.title,
                 animatedColor = animatedColor,
-                animatedTextColor = animatedTextColor,
                 onClick = {
                     onEvent(
                         TrackUiEvent.updateTrackState(

@@ -6,11 +6,8 @@ import androidx.compose.foundation.background
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,17 +18,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 
 import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
-import com.kire.audio.presentation.util.bounceClick
+import com.kire.audio.presentation.util.modifier.bounceClick
 
 /**
  * Контейнер с плавным эффектом размытия заднего фона

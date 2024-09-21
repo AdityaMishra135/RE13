@@ -1,6 +1,5 @@
 package com.kire.audio.presentation.model.event
 
-import com.kire.audio.presentation.constants.LyricsRequestMode
 import com.kire.audio.presentation.model.SortOption
 import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.state.AlbumState

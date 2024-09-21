@@ -1,4 +1,4 @@
-package com.kire.audio.presentation.ui.details.list_screen_ui.top_block.album_suggestion_bar
+package com.kire.audio.presentation.ui.details.list_screen_ui.top_block
 
 import android.net.Uri
 
@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 
 import androidx.compose.ui.Modifier
+import com.kire.audio.presentation.ui.details.common.SuggestionItem
 
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
@@ -26,13 +27,13 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
  * @author Michael Gontarev (KiREHwYE)
  */
 @Composable
-fun AlbumSuggestionBar(
+fun AlbumSuggestionPanel(
     albums: List<String>,
     onAlbumSuggestionClick: (String) -> Unit,
     getImageUri: (String) -> Uri?,
     getAlbumArtist: (String) -> String
 ) {
-    // Список с альбомами
+    /** Список с альбомами */
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -42,11 +43,12 @@ fun AlbumSuggestionBar(
     ) {
         items(albums) { album ->
 
-            AlbumSuggestionItem(
+            /** Элемент списка в виде плитки с обложкой и 2-мя текстами */
+            SuggestionItem(
                 imageUri = getImageUri(album),
-                albumTitle = album,
-                albumArtist = getAlbumArtist(album),
-                onAlbumSuggestionClick = onAlbumSuggestionClick,
+                mainText = album,
+                satelliteText = getAlbumArtist(album),
+                onSuggestionClick = onAlbumSuggestionClick,
             )
         }
     }

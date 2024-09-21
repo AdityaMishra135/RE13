@@ -20,13 +20,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -49,6 +53,7 @@ import com.ramcosta.composedestinations.navigation.navigate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 /**
  * Небольшая плавающая панель внизу экрана с информацией о текущем треке и кнопками управления
@@ -78,15 +83,19 @@ fun PlayerBottomBar(
     val currentDestination: Destination = navHostController.appCurrentDestinationAsState().value
         ?: NavGraphs.root.startAppDestination
 
+    var size by remember {
+        mutableStateOf(0)
+    }
+
     AnimatedVisibility(
         visible = trackState.isPlayerBottomCardShown &&
                 currentDestination != PlayerScreenDestination && currentDestination != AlbumScreenDestination,
         enter = slideInVertically(
-            initialOffsetY = { 120 },
+            initialOffsetY = { size },
             animationSpec = tween(durationMillis = 450, easing = LinearOutSlowInEasing)
         ) + fadeIn(animationSpec = tween(durationMillis = 100)),
         exit = slideOutVertically(
-            targetOffsetY = { 120 },
+            targetOffsetY = { size },
             animationSpec = tween(durationMillis = 450, easing = LinearOutSlowInEasing)
         ) + fadeOut(animationSpec = tween(durationMillis = 100))
     ) {
@@ -96,6 +105,9 @@ fun PlayerBottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
+                .onGloballyPositioned {
+                    size = it.size.height + Dimens.universalPad.value.roundToInt()
+                }
                 .shadow(
                     elevation = Dimens.universalShadowElevation,
                     spotColor = AudioExtendedTheme.extendedColors.shadow,

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -20,7 +19,7 @@ import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
 /**
- * Картинка, которая отображается в качестве бэкграунда PlayerScreen
+ * Картинка, которая отображается в качестве заднего фона экрана PlayerScreen
  *
  * @param imageUri изображение для отрисовки
  *
@@ -30,12 +29,12 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
 fun Background(
     imageUri: Uri?
 ){
+
     Crossfade(
         targetState = imageUri,
         label = "Background Image",
         animationSpec = Animation.universalFiniteSpring()
     ) {
-
         AsyncImageWithLoading(
             model = it,
             colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
@@ -46,7 +45,6 @@ fun Background(
             modifier = Modifier
                 .fillMaxSize()
                 .blur(Dimens.backgroundBlur)
-//                .alpha(1f)
         )
     }
 }

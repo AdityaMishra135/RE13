@@ -45,6 +45,7 @@ fun RowScope.AlbumMediaBar(
     trackState: TrackState,
     mediaController: MediaController?
 ) {
+
     Column(
         modifier = modifier
             .aspectRatio(1f / 1f)

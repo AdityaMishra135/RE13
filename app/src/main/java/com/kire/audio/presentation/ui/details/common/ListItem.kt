@@ -9,11 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ThumbDownOffAlt
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -22,19 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 
-import coil.compose.AsyncImage
-import coil.compose.SubcomposeAsyncImage
-
-import com.kire.audio.R
 import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
-import com.kire.audio.presentation.util.nonScaledSp
 
 /**
  * Элемент с картинкой и колонкой из двух текстов справа от нее
@@ -90,11 +78,11 @@ fun ListItem(
             satelliteText = satelliteText,
             mainTextStyle = TextStyle(
                 color = mainTextColor,
-                fontSize = 19.sp.nonScaledSp
+                fontSize = 19.sp
             ),
             satelliteTextStyle = TextStyle(
                 color = satelliteTextColor,
-                fontSize = 15.sp.nonScaledSp
+                fontSize = 15.sp
             )
         )
     }

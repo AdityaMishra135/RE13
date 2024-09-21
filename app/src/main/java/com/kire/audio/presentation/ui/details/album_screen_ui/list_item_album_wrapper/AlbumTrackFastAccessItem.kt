@@ -1,16 +1,11 @@
 package com.kire.audio.presentation.ui.details.album_screen_ui.list_item_album_wrapper
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.MarqueeAnimationMode
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-
-import androidx.compose.material3.Text
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -25,8 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.kire.audio.presentation.ui.details.common.RubikFontText
 
+import com.kire.audio.presentation.ui.details.common.RubikFontText
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
@@ -35,17 +30,14 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
  *
  * @param trackTitle название трека
  * @param animatedColor анимированный фон плитки
- * @param animatedTextColor анимированный цвет текста trackTitle
  * @param onClick действие при нажатии на весь компонент
  *
  * @author Michael Gontarev (KiREHwYE)
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AlbumTrackFastAccessItem(
     trackTitle: String,
     animatedColor: Color,
-    animatedTextColor: Color,
     onClick: () -> Unit
 ) {
 
@@ -84,7 +76,8 @@ fun AlbumTrackFastAccessItem(
             style = TextStyle(
                 fontWeight = FontWeight.Medium,
                 fontSize = 15.sp,
-                lineHeight = 15.sp
+                lineHeight = 15.sp,
+                color = AudioExtendedTheme.extendedColors.primaryText
             )
         )
     }

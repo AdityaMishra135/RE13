@@ -15,17 +15,4 @@ data class Track(
     val isFavourite: Boolean = false,
     val defaultImageUri: Uri? = null,
     val id: String = ""
-) {
-
-    fun doesMatchSearchQuery(query: String): Boolean {
-        val matchingCombinations = listOf(
-            title,
-            artist,
-            "$album"
-        )
-
-        return matchingCombinations.any {
-            it.contains(query, ignoreCase = true)
-        }
-    }
-}
+)

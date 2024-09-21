@@ -3,6 +3,7 @@ package com.kire.audio.presentation.ui.details.common
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -16,19 +17,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
 
-import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,18 +37,13 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
-import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
-import com.kire.audio.presentation.util.nonScaledSp
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -145,7 +138,7 @@ fun ListWithTopAndFab(
                         maximumValue = 0f
                     )
 
-                var consumed = Offset.Zero
+                var consumed: Offset
 
                 val newTopBarOffset = (topBarOffsetHeightPx.value + deltaY).coerceIn(
                     minimumValue = -topBarHeightPx.value,

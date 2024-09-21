@@ -1,4 +1,4 @@
-package com.kire.audio.presentation.ui.details.player_screen_ui.image_lyrics_flip_block
+package com.kire.audio.presentation.ui.details.player_screen_ui.panel.lyrics_panel
 
 import androidx.compose.animation.animateContentSize
 
@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.kire.audio.presentation.model.ILyricsRequestState
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
-import com.kire.audio.presentation.util.animatePlacement
+import com.kire.audio.presentation.util.modifier.animatePlacement
 
 @Composable
 fun LyricsResult(

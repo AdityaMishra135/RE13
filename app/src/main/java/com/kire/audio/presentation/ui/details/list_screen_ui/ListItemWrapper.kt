@@ -1,8 +1,6 @@
 package com.kire.audio.presentation.ui.details.list_screen_ui
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 
@@ -15,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -27,9 +24,6 @@ import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 
@@ -37,10 +31,10 @@ import androidx.media3.session.MediaController
 
 import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.state.TrackState
+import com.kire.audio.presentation.ui.details.common.Divider
 import com.kire.audio.presentation.ui.details.common.MediaControls
 import com.kire.audio.presentation.ui.details.common.SliderBlock
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
-import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
 /**
@@ -88,12 +82,12 @@ fun ListItemWrapper(
 
     /** Степень прозрачности фона */
     val backgroundAlpha by animateFloatAsState(targetValue = if (isClicked) 1f else 0f)
+
     /** Отступ от границы обертки внутреннего контента*/
     val padFromBorders by animateDpAsState(targetValue = if (isClicked) Dimens.universalPad else 0.dp)
 
     Column(
         modifier = modifier
-            .animateContentSize()
             .wrapContentSize()
             .background(
                 color = AudioExtendedTheme.extendedColors.controlElementsBackground.copy(alpha = backgroundAlpha),
@@ -108,49 +102,41 @@ fun ListItemWrapper(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-
+            /** Базовый компонент, представляющий отдельный трек его обложкой, названием и иссполнителем */
             listItem(
                 Modifier
                     .weight(1f)
                     .padding(end = Dimens.universalPad)
             ) { isClicked = !isClicked }
 
-            AnimatedContent(targetState = isClicked) {
-                if (it)
+            /** Кнопки управления воспроизведением */
+            AnimatedVisibility(visible = isClicked) {
                 MediaControls(
                     trackState = trackState,
                     mediaController = mediaController,
-                    modifier = modifier.weight(1f),
+                    modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy)
                 )
             }
         }
 
-        AnimatedContent(targetState = isClicked) {
-            if (it)
+        AnimatedVisibility(visible = isClicked) {
             Column(
-                modifier = Modifier
-                    .animateContentSize(Animation.universalFiniteSpring()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(Dimens.sliderAndDividerSpacedBy)
             ) {
-                SliderBlock(
-                    durationGet = {
-                        track.duration.toFloat()
-                    },
-                    mediaController = mediaController
-                )
-                HorizontalDivider(
+                /** Слайдер для перемотки трека */
+                SliderBlock(mediaController = mediaController)
+
+                /** Служит как кнопка для открытия экрана плеера */
+                Divider(
+                    color = AudioExtendedTheme.extendedColors.sliderDurationAndDivider,
                     modifier = Modifier
-                        .fillMaxWidth(0.25f)
-                        .clip(RoundedCornerShape(Dimens.universalRoundedCorner))
                         .pointerInput(Unit) {
                             detectTapGestures {
                                 goToPlayerScreen()
                             }
-                        },
-                    thickness = Dimens.horizontalDividerThickness,
-                    color = AudioExtendedTheme.extendedColors.sliderDurationAndDivider
+                        }
                 )
             }
         }

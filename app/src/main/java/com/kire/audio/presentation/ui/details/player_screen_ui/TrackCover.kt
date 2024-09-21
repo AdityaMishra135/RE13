@@ -1,10 +1,15 @@
-package com.kire.audio.presentation.ui.details.player_screen_ui.image_lyrics_flip_block
+package com.kire.audio.presentation.ui.details.player_screen_ui
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -13,11 +18,13 @@ import com.kire.audio.presentation.model.state.LyricsState
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.constants.LyricsRequestMode
 import com.kire.audio.presentation.model.event.TrackUiEvent
+import com.kire.audio.presentation.ui.details.common.AsyncImageWithLoading
+import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-fun ImageLyricsFlipBlock(
+fun TrackCover(
     trackState: TrackState,
     lyricsState: StateFlow<LyricsState>,
     onEvent: (TrackUiEvent) -> Unit,
@@ -58,8 +65,16 @@ fun ImageLyricsFlipBlock(
             }
     }
 
-    ImageCardSide(
-        imageUri = trackState.currentTrackPlaying?.imageUri,
-        modifierToExpandPopUpBar = modifierToExpandPopUpBar
-    )
+    Crossfade(
+        targetState = trackState.currentTrackPlaying?.imageUri,
+        label = "Track Image in foreground"
+    ) {
+        AsyncImageWithLoading(
+            model = it,
+            modifier = modifierToExpandPopUpBar
+                .fillMaxWidth()
+                .aspectRatio(1f / 1f)
+                .clip(RoundedCornerShape(Dimens.universalRoundedCorner))
+        )
+    }
 }

@@ -29,11 +29,11 @@ import com.kire.audio.presentation.ui.details.player_screen_ui.Background
 import com.kire.audio.presentation.ui.details.player_screen_ui.Header
 import com.kire.audio.presentation.ui.details.player_screen_ui.TextAndHeart
 import com.kire.audio.presentation.ui.details.player_screen_ui.functional_block.FunctionalBlock
-import com.kire.audio.presentation.ui.details.player_screen_ui.image_lyrics_flip_block.ImageLyricsFlipBlock
+import com.kire.audio.presentation.ui.details.player_screen_ui.TrackCover
 import com.kire.audio.presentation.viewmodel.TrackViewModel
 import com.kire.audio.presentation.ui.details.common.BlurPanel
 import com.kire.audio.presentation.ui.details.player_screen_ui.dialog.favourite_panel.FavouritePanel
-import com.kire.audio.presentation.ui.details.player_screen_ui.image_lyrics_flip_block.LyricsCardSide
+import com.kire.audio.presentation.ui.details.player_screen_ui.panel.lyrics_panel.LyricsPanel
 import com.kire.audio.presentation.ui.details.player_screen_ui.panel.track_info_panel.TrackInfoPanel
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
@@ -76,7 +76,7 @@ fun PlayerScreen(
             )
         },
         onTopOfBlurredPanel3 = {
-            LyricsCardSide(
+            LyricsPanel(
                 trackState = trackViewModel.trackState,
                 lyricsState = trackViewModel.lyricsState,
                 onEvent = trackViewModel::onEvent,
@@ -106,7 +106,7 @@ fun PlayerScreen(
                 modifierToExpandBlurPanel = modifierToExpandPopUpBar1
             )
 
-            ImageLyricsFlipBlock(
+            TrackCover(
                 trackState = trackState,
                 lyricsState = trackViewModel.lyricsState,
                 getTrackLyricsFromGenius = trackViewModel::getTrackLyricsFromGenius,
@@ -132,8 +132,7 @@ fun PlayerScreen(
                     trackState = trackState,
                     onEvent = trackViewModel::onEvent,
                     saveRepeatMode = trackViewModel::saveRepeatMode,
-                    mediaController = mediaController,
-                    durationGet = { duration },
+                    mediaController = mediaController
                 )
             }
         }

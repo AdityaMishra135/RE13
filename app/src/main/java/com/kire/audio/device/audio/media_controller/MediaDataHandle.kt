@@ -5,9 +5,7 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
 
 import com.kire.audio.device.audio.util.MediaCommands
-import com.kire.audio.device.audio.util.SkipTrackAction
 import com.kire.audio.presentation.model.Track
-import com.kire.audio.presentation.model.state.TrackState
 
 private fun getMetaDataFromMediaClass(media: Track): MediaMetadata {
     return MediaMetadata.Builder()
@@ -43,22 +41,4 @@ fun MediaController.performPlayMedia(media: Track) {
 
         MediaCommands.isPlayRequired.value = true
     }
-}
-
-fun MediaController.skipTrack(skipTrackAction: SkipTrackAction, currentTrackList: List<Track>, trackState: TrackState, updateTrackUiState: (TrackState) -> Unit){
-
-    MediaCommands.isTrackRepeated.value = false
-
-    val newINDEX = trackState.currentTrackPlayingIndex?.let { index ->
-        skipTrackAction.action(index, currentTrackList.size)
-    } ?: 0
-
-    updateTrackUiState(
-        trackState.copy(
-            currentTrackPlaying = currentTrackList[newINDEX],
-            currentTrackPlayingIndex = newINDEX
-        )
-    )
-
-    performPlayMedia(currentTrackList[newINDEX])
 }

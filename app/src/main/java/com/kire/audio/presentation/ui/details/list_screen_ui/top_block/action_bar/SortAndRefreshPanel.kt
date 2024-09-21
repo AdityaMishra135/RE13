@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -26,20 +25,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.unit.dp
 
-import com.kire.audio.presentation.util.bounceClick
+import com.kire.audio.presentation.util.modifier.bounceClick
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
+/**
+ * Панель сортировки и обновления списка треков
+ *
+ * @param refreshAction действие обновления списка треков
+ * @param dropDownMenu меню сортировки
+ * @param modifier модификатор
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @Composable
-fun SortAndRefreshBar(
+fun SortAndRefreshPanel(
     refreshAction: () -> Unit,
-    dropDownMenu: @Composable (isExpanded: () -> Boolean, onDismiss: () -> Unit) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    dropDownMenu: @Composable (isExpanded: () -> Boolean, onDismiss: () -> Unit) -> Unit = { _, _ -> }
 ){
 
+    /** Флаг открытия меню сортировки */
     var expanded by rememberSaveable { mutableStateOf(false) }
 
     Box(
@@ -57,6 +64,7 @@ fun SortAndRefreshBar(
             horizontalArrangement = Arrangement.spacedBy(Dimens.sortAndRefreshBarSpacedBy)
 
         ) {
+            /** Иконка-кнопка для сортировки списка треков */
             Icon(
                 Icons.AutoMirrored.Rounded.Sort,
                 contentDescription = null,
@@ -68,6 +76,7 @@ fun SortAndRefreshBar(
                     }
             )
 
+            /** Иконка-кнопка для обновления списка треков */
             Icon(
                 Icons.Rounded.Refresh,
                 contentDescription = "Refresh",
@@ -80,6 +89,7 @@ fun SortAndRefreshBar(
             )
         }
 
+        /** Меню сортировки */
         dropDownMenu(
             isExpanded = {
                 expanded

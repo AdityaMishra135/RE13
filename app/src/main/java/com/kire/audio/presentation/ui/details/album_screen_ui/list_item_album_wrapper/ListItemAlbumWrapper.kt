@@ -1,7 +1,6 @@
 package com.kire.audio.presentation.ui.details.album_screen_ui.list_item_album_wrapper
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 
@@ -32,17 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
 import androidx.media3.session.MediaController
 
-import coil.compose.AsyncImage
-
-import com.kire.audio.R
 import com.kire.audio.device.audio.media_controller.performPlayMedia
 import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.event.TrackUiEvent
@@ -88,7 +81,7 @@ fun ListItemAlbumWrapper(
 
     /** Определяет какой альбом сейчас играет, то есть должен отрисовывать обертку вокруг себя */
     LaunchedEffect(trackState.currentTrackPlaying) {
-        isClicked = (tracks == trackState.currentList)
+        isClicked = (tracks.contains(trackState.currentTrackPlaying))
             .also { if (it) showBottomBar(false) }
     }
 
@@ -111,7 +104,7 @@ fun ListItemAlbumWrapper(
     AnimatedContent(targetState = isClicked, label = "", modifier = modifier) { clicked ->
 
         if (!clicked)
-            // Базовый элемент
+            /** Базовый элемент */
             ListItem(
                 mainText = firstTrackInAlbum.album ?: LocalizationProvider.strings.nothingWasFound,
                 satelliteText = firstTrackInAlbum.artist,
@@ -131,7 +124,7 @@ fun ListItemAlbumWrapper(
                     mediaController?.performPlayMedia(firstTrackInAlbum)
                 })
         else
-            // Обертка
+            /** Обертка */
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

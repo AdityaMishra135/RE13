@@ -18,10 +18,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 
 import androidx.compose.animation.ExperimentalAnimationApi
+
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
@@ -29,12 +28,17 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+
 import androidx.compose.material3.Scaffold
+
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -71,10 +75,11 @@ import com.kire.audio.device.audio.util.SkipTrackAction
 import com.kire.audio.device.audio.media_controller.performPlayMedia
 import com.kire.audio.device.audio.util.MediaCommands
 import com.kire.audio.device.audio.media_controller.rememberManagedMediaController
+import com.kire.audio.device.audio.util.PlayerState
+import com.kire.audio.device.audio.util.state
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.navigation.NavigationUI
 import com.kire.audio.presentation.ui.details.common.AutoSkipOnRepeatMode
-import com.kire.audio.presentation.ui.details.common.NavigationBar
 import com.kire.audio.presentation.ui.details.common.PlayerBottomBar
 
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
@@ -182,6 +187,21 @@ class MainActivity : ComponentActivity() {
                 )
             ) {
                 AudioExtendedTheme {
+
+                    /** Текущее состояние плеера */
+                    var playerState: PlayerState? by remember {
+                        mutableStateOf(mediaController?.state())
+                    }
+
+                    /** Создаем экземпляр состояния плеера */
+                    DisposableEffect(key1 = mediaController) {
+                        mediaController?.run {
+                            playerState = state()
+                        }
+                        onDispose {
+                            playerState?.dispose()
+                        }
+                    }
 
                     Scaffold(
                         modifier = Modifier

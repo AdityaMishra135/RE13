@@ -1,7 +1,5 @@
 package com.kire.audio.presentation.ui.details.common
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,7 +12,6 @@ import androidx.compose.runtime.getValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -25,9 +22,7 @@ import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.details.list_screen_ui.ListItemWrapper
-import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
-import com.kire.audio.presentation.util.animatePlacement
 
 import kotlinx.coroutines.flow.StateFlow
 
@@ -39,7 +34,7 @@ import kotlinx.coroutines.flow.StateFlow
  * @param list список треков
  * @param mediaController для управления воспроизведением
  * @param modifier модификатор
- * @param goToPlayerScreen навигация на PlayerScreen
+ * @param navigateToPlayerScreen навигация на PlayerScreen
  * @param state состояние LazyColumn
  *
  * @author Michael Gontarev (KiREHwYE)
@@ -51,7 +46,7 @@ fun LazyListMainAndAlbumPattern(
     modifier: Modifier = Modifier,
     onEvent: (TrackUiEvent) -> Unit = {},
     list: List<Track> = emptyList(),
-    goToPlayerScreen: () -> Unit = {},
+    navigateToPlayerScreen: () -> Unit = {},
     state: LazyListState = rememberLazyListState()
 ) {
 
@@ -78,12 +73,13 @@ fun LazyListMainAndAlbumPattern(
                         )
                     )
                 },
-                goToPlayerScreen = goToPlayerScreen
+                modifier = Modifier
+                    .animateItem(),
+                goToPlayerScreen = navigateToPlayerScreen
             ) { trackItemModifier, changeIsClicked ->
 
                 ListItem(
-                    modifier = trackItemModifier
-                        .animateItem(),
+                    modifier = trackItemModifier,
                     track = track,
                     onClick = {
                         changeIsClicked()

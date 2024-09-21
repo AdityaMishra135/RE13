@@ -5,12 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
 import com.kire.audio.domain.use_case.util.ITrackUseCases
-import com.kire.audio.presentation.model.SortOption
-import com.kire.audio.presentation.constants.ListSelector
 import com.kire.audio.presentation.mapper.toPresentation
 import com.kire.audio.presentation.constants.SortType
 import com.kire.audio.presentation.mapper.toDomain
-import com.kire.audio.presentation.model.state.AlbumState
 import com.kire.audio.presentation.model.ILyricsRequestState
 import com.kire.audio.presentation.model.state.LyricsState
 import com.kire.audio.presentation.model.state.SearchState
@@ -18,7 +15,8 @@ import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.constants.LyricsRequestMode
 import com.kire.audio.presentation.model.event.TrackUiEvent
-import com.kire.audio.presentation.ui.details.player_screen_ui.image_lyrics_flip_block.LyricsResult
+import com.kire.audio.presentation.util.search.onSearchRequestChange
+
 import dagger.hilt.android.lifecycle.HiltViewModel
 
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +34,6 @@ import javax.inject.Inject
 class TrackViewModel @Inject constructor(
     private val trackUseCases: ITrackUseCases
 ) : ViewModel(){
-
 
     /*
     * Tracks-providing params and funcs
@@ -112,22 +109,13 @@ class TrackViewModel @Inject constructor(
 
     var searchResult = searchState
         .combine(_tracks) { searchState: SearchState, tracks ->
-            if (searchState.searchText.isBlank())
-                emptyList()
-            else
-                tracks.filter{
-                    it.doesMatchSearchQuery(searchState.searchText)
-                }
+            onSearchRequestChange(tracks, searchState.searchText)
         }
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
-
-    fun search(searchString: String) {
-
-    }
 
     /**
      * Handle Ui events
@@ -141,6 +129,7 @@ class TrackViewModel @Inject constructor(
     fun onEvent(event: TrackUiEvent) {
         when(event) {
             is TrackUiEvent.updateTrackState -> {
+                Log.d("MINE", "${event.trackState}")
                 _trackState.update { _ ->
                     event.trackState
                 }

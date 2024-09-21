@@ -5,7 +5,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,30 +18,28 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
-
-import androidx.compose.material3.HorizontalDivider
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.media3.session.MediaController
 
 import com.kire.audio.device.audio.media_controller.performPlayMedia
+
 import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.details.common.ListItem
-import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.model.event.TrackUiEvent
+import com.kire.audio.presentation.ui.details.common.Divider
 import com.kire.audio.presentation.ui.details.common.RubikFontText
 import com.kire.audio.presentation.ui.details.player_screen_ui.panel.favourite_panel.TrackItemFavouriteWrapper
 import com.kire.audio.presentation.ui.theme.animation.Animation
@@ -51,7 +48,6 @@ import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 
 import kotlinx.coroutines.flow.StateFlow
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavouritePanel(
     trackState: TrackState,
@@ -89,13 +85,8 @@ fun FavouritePanel(
                     color = Color.White
                 )
             )
-            HorizontalDivider(
-                modifier = Modifier
-                    .fillMaxWidth(0.25f)
-                    .clip(RoundedCornerShape(Dimens.universalRoundedCorner)),
-                thickness = Dimens.horizontalDividerThickness,
-                color = AudioExtendedTheme.extendedColors.roseAccent
-            )
+
+            Divider()
         }
 
         AnimatedVisibility(

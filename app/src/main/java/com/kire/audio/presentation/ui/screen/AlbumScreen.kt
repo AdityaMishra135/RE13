@@ -1,10 +1,7 @@
 package com.kire.audio.presentation.ui.screen
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -27,8 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowCircleLeft
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Icon
-
-import androidx.compose.material3.Text
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -67,7 +62,7 @@ import com.kire.audio.presentation.ui.screen.destinations.PlayerScreenDestinatio
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
-import com.kire.audio.presentation.util.bounceClick
+import com.kire.audio.presentation.util.modifier.bounceClick
 import com.kire.audio.presentation.viewmodel.TrackViewModel
 
 import com.ramcosta.composedestinations.annotation.Destination
@@ -76,7 +71,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalFoundationApi::class)
 @Destination(style = AlbumScreenTransitions::class)
 @Composable
 fun AlbumScreen(
@@ -260,7 +254,7 @@ fun AlbumScreen(
                     onEvent = trackViewModel::onEvent,
                     list = trackState.currentList,
                     mediaController = mediaController,
-                    goToPlayerScreen = {
+                    navigateToPlayerScreen = {
                         navigator.navigate(PlayerScreenDestination)
                     },
                     modifier = Modifier

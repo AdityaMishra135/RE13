@@ -36,7 +36,7 @@ import androidx.core.content.FileProvider
 
 import com.kire.audio.BuildConfig
 import com.kire.audio.presentation.util.createImageFile
-import com.kire.audio.presentation.util.bounceClick
+import com.kire.audio.presentation.util.modifier.bounceClick
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 

@@ -1,15 +1,12 @@
 package com.kire.audio.presentation.navigation
 
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 
 import androidx.media3.session.MediaController
 
 import androidx.navigation.NavHostController
-import com.kire.audio.presentation.model.event.TrackUiEvent
-import com.kire.audio.presentation.ui.screen.AlbumScreen
 
+import com.kire.audio.presentation.ui.screen.AlbumScreen
 import com.kire.audio.presentation.ui.screen.ListAlbumScreen
 import com.kire.audio.presentation.ui.screen.ListScreen
 import com.kire.audio.presentation.ui.screen.PlayerScreen
@@ -18,7 +15,6 @@ import com.kire.audio.presentation.ui.screen.destinations.AlbumScreenDestination
 import com.kire.audio.presentation.ui.screen.destinations.ListAlbumScreenDestination
 import com.kire.audio.presentation.ui.screen.destinations.ListScreenDestination
 import com.kire.audio.presentation.ui.screen.destinations.PlayerScreenDestination
-
 import com.kire.audio.presentation.viewmodel.TrackViewModel
 
 import com.ramcosta.composedestinations.DestinationsNavHost
@@ -34,7 +30,11 @@ fun NavigationUI(
     navHostEngine: NavHostEngine
 ){
 
-    DestinationsNavHost(navGraph = NavGraphs.root, engine = navHostEngine, navController = navHostController) {
+    DestinationsNavHost(
+        navGraph = NavGraphs.root,
+        engine = navHostEngine,
+        navController = navHostController
+    ) {
         composable(ListScreenDestination) {
             ListScreen(
                 trackViewModel = trackViewModel,
@@ -47,11 +47,9 @@ fun NavigationUI(
             PlayerScreen(
                 trackViewModel = trackViewModel,
                 navigateBack = {
-                    destinationsNavigator.popBackStack(route = PlayerScreenDestination, inclusive = true)
-                    trackViewModel.onEvent(
-                        TrackUiEvent.updateTrackState(
-                            trackViewModel.trackState.value.copy(isPlayerBottomCardShown = true)
-                        )
+                    destinationsNavigator.popBackStack(
+                        route = PlayerScreenDestination,
+                        inclusive = true
                     )
                 },
                 mediaController = mediaController

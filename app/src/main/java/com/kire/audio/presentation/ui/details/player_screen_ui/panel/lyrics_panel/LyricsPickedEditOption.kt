@@ -1,4 +1,4 @@
-package com.kire.audio.presentation.ui.details.player_screen_ui.image_lyrics_flip_block
+package com.kire.audio.presentation.ui.details.player_screen_ui.panel.lyrics_panel
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -7,7 +7,6 @@ import androidx.compose.foundation.text.BasicTextField
 
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,16 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 import com.kire.audio.presentation.model.ILyricsRequestState
-import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.constants.LyricsRequestMode
 import com.kire.audio.presentation.ui.details.common.RubikFontText
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
-import com.kire.audio.presentation.util.nonScaledSp
 
 @Composable
 fun LyricsPickedEditOption(

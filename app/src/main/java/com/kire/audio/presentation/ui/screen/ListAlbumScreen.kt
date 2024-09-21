@@ -2,7 +2,6 @@ package com.kire.audio.presentation.ui.screen
 
 import androidx.activity.compose.BackHandler
 
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,11 +21,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.media3.session.MediaController
+import com.kire.audio.presentation.model.event.TrackUiEvent
 
 import com.kire.audio.presentation.navigation.transitions.ListAlbumScreenTransitions
 
@@ -35,7 +34,6 @@ import com.kire.audio.presentation.ui.details.common.ListWithTopAndFab
 import com.kire.audio.presentation.ui.details.common.ScreenHeader
 import com.kire.audio.presentation.ui.screen.destinations.AlbumScreenDestination
 import com.kire.audio.presentation.ui.screen.destinations.ListScreenDestination
-import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 
@@ -62,7 +60,7 @@ fun ListAlbumScreen(
     }
 
     BackHandler {
-        navigator.navigateUp()
+        navigator.popBackStack(ListScreenDestination, inclusive = false)
         return@BackHandler
     }
 
@@ -92,29 +90,25 @@ fun ListAlbumScreen(
 
         LazyColumn(
             state = state,
-            modifier = modifier
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures { _, dragAmount ->
-                        if (dragAmount > 60)
-                            navigator.popBackStack(AlbumScreenDestination.route, inclusive = true)
-                    }
-                },
+            modifier = modifier,
             contentPadding = PaddingValues(bottom = Dimens.columnUniversalVerticalContentPad),
             verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy)
         ) {
 
-            itemsIndexed(albums, key = {_, title -> title}){ _, album ->
+            itemsIndexed(albums, key = {_, title -> title}) { _, album ->
                 ListItemAlbumWrapper(
-                    modifier = Modifier
-                        .animateItem(
-                            Animation.universalFiniteSpring()
-                        ),
+                    modifier = Modifier.animateItem(),
                     trackState = trackState,
                     tracks = albumsWithTracks[album] ?: emptyList(),
                     onEvent = trackViewModel::onEvent,
                     mediaController = mediaController,
                     onImageClick = {
                         navigator.navigate(AlbumScreenDestination)
+                        trackViewModel.onEvent(
+                            TrackUiEvent.updateTrackState(
+                                trackState = trackState.copy(isPlayerBottomCardShown = false)
+                            )
+                        )
                     }
                 )
             }

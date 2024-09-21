@@ -22,7 +22,6 @@ fun FunctionalBlock(
     trackState: TrackState,
     onEvent: (TrackUiEvent) -> Unit,
     saveRepeatMode: (Int) -> Unit,
-    durationGet: () -> Float,
     mediaController: MediaController?
 ){
 
@@ -35,7 +34,6 @@ fun FunctionalBlock(
 
         SliderBlock(
             isPlayerScreen = true,
-            durationGet = durationGet,
             mediaController = mediaController
         )
 

@@ -3,8 +3,6 @@ package com.kire.audio.presentation.ui.details.list_screen_ui.top_block
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 
@@ -52,13 +50,12 @@ import androidx.media3.session.MediaController
 
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.ui.details.common.ScreenHeader
-import com.kire.audio.presentation.ui.details.list_screen_ui.top_block.action_bar.ActionBar
-import com.kire.audio.presentation.ui.details.list_screen_ui.top_block.album_suggestion_bar.AlbumSuggestionBar
+import com.kire.audio.presentation.ui.details.list_screen_ui.top_block.action_bar.ActionPanel
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
-import com.kire.audio.presentation.util.animatePlacement
+import com.kire.audio.presentation.util.modifier.animatePlacement
 
 import com.kire.audio.presentation.viewmodel.TrackViewModel
 
@@ -68,17 +65,18 @@ import com.kire.audio.presentation.viewmodel.TrackViewModel
  *
  * @param trackViewModel ViewModel
  * @param mediaController для управления воспроизведением
- * @param onAlbumSuggestionClick определяет действие при нажатии на AlbumSuggestionItem
+ * @param onSearchResulItemClick определяет действие при клике на трек, найденный в поиске
+ * @param onAlbumSuggestionClick определяет действие при нажатии на AlbumSuggestionItem - плитку альбома
  * @param onTitleClick определяет действие при нажатии на название экрана
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun TopBlock(
     trackViewModel: TrackViewModel,
     mediaController: MediaController?,
+    onSearchResulItemClick: () -> Unit,
     onAlbumSuggestionClick: (String) -> Unit,
-    navigateToPlayerScreen: () -> Unit,
     onTitleClick: () -> Unit
 ){
 
@@ -132,9 +130,7 @@ fun TopBlock(
 
     Column(
         modifier = Modifier
-            .animateContentSize(
-                animationSpec = Animation.universalFiniteSpring()
-            )
+            .animateContentSize(animationSpec = Animation.universalFiniteSpring())
             .wrapContentHeight()
             .fillMaxWidth()
             .clip(roundedCorners)
@@ -147,12 +143,12 @@ fun TopBlock(
         horizontalAlignment = Alignment.Start
     ) {
 
-        // Содержит Header и кнопку для перехода на экран альбомов
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = Dimens.universalPad)
         ) {
+            /** Название экрана с возможностью перехода на экран альбомов */
             ScreenHeader(
                 screenTitle =
                     if (!isClicked)
@@ -169,6 +165,7 @@ fun TopBlock(
                     .align(alignment)
             )
 
+            /** Иконка-стрелка для перехода на экран альбомов */
             androidx.compose.animation.AnimatedVisibility(
                 visible = isClicked,
                 modifier = Modifier
@@ -189,10 +186,12 @@ fun TopBlock(
             }
         }
 
-        // Отображает AlbumSuggestionBar или ActionBar в зависимости от значения isClicked
+        /** Отображает список альбомов для быстрого доступа или
+         * панель с поиском и сортировкой в зависимости от значения isClicked
+         * */
         AnimatedContent(targetState = isClicked, label = "") { clicked ->
             if (clicked)
-                AlbumSuggestionBar(
+                AlbumSuggestionPanel(
                     albums = albums,
                     onAlbumSuggestionClick = onAlbumSuggestionClick,
                     getImageUri = { albumTitle ->
@@ -204,10 +203,10 @@ fun TopBlock(
                     }
                 )
             else
-                ActionBar(
+                ActionPanel(
                     trackViewModel = trackViewModel,
                     mediaController = mediaController,
-                    navigateToPlayerScreen = navigateToPlayerScreen,
+                    navigateToPlayerScreen = onSearchResulItemClick,
                     modifier = Modifier
                         .onGloballyPositioned {
                             actionBarHeight = it.size.height

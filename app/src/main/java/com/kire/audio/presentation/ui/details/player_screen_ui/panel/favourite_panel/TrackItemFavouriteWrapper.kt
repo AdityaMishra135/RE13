@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
-import com.kire.audio.presentation.util.bounceClick
+import com.kire.audio.presentation.util.modifier.bounceClick
 
 @Composable
 fun TrackItemFavouriteWrapper(

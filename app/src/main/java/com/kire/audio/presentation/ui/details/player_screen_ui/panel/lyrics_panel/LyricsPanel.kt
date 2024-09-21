@@ -1,4 +1,4 @@
-package com.kire.audio.presentation.ui.details.player_screen_ui.image_lyrics_flip_block
+package com.kire.audio.presentation.ui.details.player_screen_ui.panel.lyrics_panel
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
@@ -29,14 +29,14 @@ import com.kire.audio.presentation.constants.LyricsRequestMode
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
-import com.kire.audio.presentation.util.animatePlacement
+import com.kire.audio.presentation.util.modifier.animatePlacement
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @Composable
-fun LyricsCardSide(
+fun LyricsPanel(
     trackState: StateFlow<TrackState>,
     lyricsState: StateFlow<LyricsState>,
     onEvent: (TrackUiEvent) -> Unit,

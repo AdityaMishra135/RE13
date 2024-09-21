@@ -25,7 +25,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-import com.kire.audio.presentation.util.bounceClick
+import com.kire.audio.presentation.util.modifier.bounceClick
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.details.common.TwoTextsInColumn

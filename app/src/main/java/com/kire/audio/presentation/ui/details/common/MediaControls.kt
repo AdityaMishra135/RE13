@@ -1,7 +1,5 @@
 package com.kire.audio.presentation.ui.details.common
 
-import androidx.annotation.DrawableRes
-
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 
@@ -10,6 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Pause
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.SkipNext
+import androidx.compose.material.icons.rounded.SkipPrevious
 
 import androidx.compose.material3.Icon
 
@@ -18,18 +21,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 
 import androidx.media3.session.MediaController
 
-import com.kire.audio.R
 import com.kire.audio.device.audio.util.MediaCommands
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
-import com.kire.audio.presentation.util.bounceClick
+import com.kire.audio.presentation.util.modifier.bounceClick
 
 /**
  * Кнопки для управления воспроизведением: переход к следующему/предыдущему треку,
@@ -48,7 +50,7 @@ import com.kire.audio.presentation.util.bounceClick
  * @param playPauseIconSize размер иконок начала и остановки проигрывания
  * @param skipIconsSize размер иконок перехода
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun MediaControls(
@@ -57,19 +59,18 @@ fun MediaControls(
     modifier: Modifier = Modifier,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.SpaceEvenly,
     verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
-    @DrawableRes skipPreviousIcon: Int = R.drawable.skip_previous_button_bottom_sheet,
-    @DrawableRes playIcon: Int = R.drawable.play_button_bottom_sheet,
-    @DrawableRes pauseIcon: Int = R.drawable.pause_button_bottom_sheet,
-    @DrawableRes skipNextIcon: Int = R.drawable.skip_next_button_bottom_sheet,
+    skipPreviousIcon: ImageVector = Icons.Rounded.SkipPrevious,
+    playIcon: ImageVector = Icons.Rounded.PlayArrow,
+    pauseIcon: ImageVector = Icons.Rounded.Pause,
+    skipNextIcon: ImageVector = Icons.Rounded.SkipNext,
     iconsTint: Color = AudioExtendedTheme.extendedColors.button,
     playPauseIconSize: Dp = Dimens.playPauseIconSize,
     skipIconsSize: Dp = Dimens.skipIconsSize
 ) {
+
     Row(
         modifier = Modifier
-            .animateContentSize(
-                Animation.universalFiniteSpring()
-            )
+            .animateContentSize(Animation.universalFiniteSpring())
             .fillMaxWidth()
             .wrapContentHeight()
             .let { modifier },
@@ -77,7 +78,7 @@ fun MediaControls(
         verticalAlignment = verticalAlignment
     ) {
         Icon(
-            painter = painterResource(id = skipPreviousIcon),
+            imageVector = skipPreviousIcon,
             contentDescription = null,
             tint = iconsTint,
             modifier = Modifier
@@ -89,11 +90,9 @@ fun MediaControls(
 
         AnimatedContent(targetState = trackState.isPlaying, label = "") {
             Icon(
-                painter =
-                    if (it)
-                        painterResource(id = pauseIcon)
-                    else
-                        painterResource(id = playIcon),
+                imageVector =
+                    if (it) pauseIcon
+                    else playIcon,
                 contentDescription = null,
                 tint = iconsTint,
                 modifier = Modifier
@@ -112,7 +111,7 @@ fun MediaControls(
         }
 
         Icon(
-            painter = painterResource(id = skipNextIcon),
+            imageVector = skipNextIcon,
             contentDescription = null,
             tint = iconsTint,
             modifier = Modifier

@@ -1,23 +1,15 @@
 package com.kire.audio.presentation.ui.screen
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import com.kire.audio.presentation.viewmodel.TrackViewModel
 
-import androidx.compose.runtime.setValue
-
 import androidx.media3.session.MediaController
 import com.kire.audio.device.audio.media_controller.performPlayMedia
-
-import com.kire.audio.device.audio.util.PlayerState
-import com.kire.audio.device.audio.util.state
 
 import com.kire.audio.presentation.navigation.transitions.ListScreenTransitions
 import com.kire.audio.presentation.model.event.TrackUiEvent
@@ -32,6 +24,16 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
+/**
+ * Главный экран приложения. Отображает список всех треков, сохраненных на устройстве.
+ *
+ * @param trackViewModel VievModel, содержащая все необходимые для работы с треками поля и методы
+ * @param shiftBottomBar функция, опускающая PlayerBottomBar за границы экрана
+ * @param navigator для навигации между экранами
+ * @param mediaController для управления воспроизведением
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @RootNavGraph(start = true)
 @Destination(style = ListScreenTransitions::class)
 @Composable
@@ -42,40 +44,32 @@ fun ListScreen(
     mediaController: MediaController?
 ) {
 
-    var playerState: PlayerState? by remember {
-        mutableStateOf(mediaController?.state())
-    }
-
-    DisposableEffect(key1 = mediaController) {
-        mediaController?.run {
-            playerState = state()
-        }
-        onDispose {
-            playerState?.dispose()
-        }
-    }
-
+    /** Экземпляр TrackState. Содержит информацию о состоянии воспроизведения */
     val trackState by trackViewModel.trackState.collectAsStateWithLifecycle()
 
+    /** Список всех треков */
     val allTracks by trackViewModel.tracks.collectAsStateWithLifecycle()
 
+    /** Заранее обновляем список альбомов */
     LaunchedEffect(Unit) {
         trackViewModel.onEvent(TrackUiEvent.updateArtistWithTracks())
     }
 
+    /** Отрисовываем контент экрана */
     ListWithTopAndFab(
         listSize = allTracks.size,
         shiftBottomBar = shiftBottomBar,
         topBar = {
+
+            /** Шапка с названием экрана, поиском, сортировкой треков и возможностью перехода на экран альбомов*/
             TopBlock(
                 trackViewModel = trackViewModel,
                 mediaController = mediaController,
-                navigateToPlayerScreen = {
+                onSearchResulItemClick = {
                     navigator.navigate(PlayerScreenDestination)
                 },
                 onTitleClick = {
                     navigator.navigate(ListAlbumScreenDestination)
-                    trackViewModel.onEvent(TrackUiEvent.updateArtistWithTracks())
                 },
                 onAlbumSuggestionClick = { albumTitle ->
                     val album = trackViewModel.artistWithTracks.value[albumTitle]
@@ -87,7 +81,7 @@ fun ListScreen(
                                     currentList = album,
                                     currentTrackPlaying = try {
                                         album[0]
-                                    } catch (e: Exception) { null },
+                                    } catch (_: Exception) { null },
                                     currentTrackPlayingIndex = 0,
                                     isPlaying = true
                                 )
@@ -101,15 +95,16 @@ fun ListScreen(
                 }
             )
         }
-    ) { modifier, state ->
+    ) { modifier, listState ->
 
+        /** Список треков */
         LazyListMainAndAlbumPattern(
             trackState = trackViewModel.trackState,
             onEvent = trackViewModel::onEvent,
             list = allTracks,
             mediaController = mediaController,
-            state = state,
-            goToPlayerScreen = {
+            state = listState,
+            navigateToPlayerScreen = {
                 navigator.navigate(PlayerScreenDestination)
             },
             modifier = modifier
