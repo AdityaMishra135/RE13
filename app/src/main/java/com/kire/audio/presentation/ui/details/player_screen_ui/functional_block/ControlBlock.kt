@@ -32,13 +32,26 @@ import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.ui.details.common.MediaControls
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
+/**
+ * Кнопки переключения треков,
+ * постановки на паузу/воспроизведение,
+ * переключения режима воспроизведения и открытия панели любимых треков.
+ *
+ * @param modifierToExpandFavouritePanel модификатор для открытия панели любимых треков
+ * @param trackState состояние воспроизведения
+ * @param onEvent обработчик UI событий
+ * @param mediaController для управления воспроизведением
+ * @param saveRepeatMode действие для сохранения режима воспроизведения
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @Composable
 fun ControlBlock(
-    modifierToExpandPopUpBar: Modifier = Modifier,
     trackState: TrackState,
     onEvent: (TrackUiEvent) -> Unit,
     mediaController: MediaController?,
     saveRepeatMode: (Int) -> Unit,
+    modifierToExpandFavouritePanel: Modifier = Modifier,
 ) {
 
     Row(
@@ -49,6 +62,9 @@ fun ControlBlock(
         verticalAlignment = Alignment.CenterVertically
     ){
 
+        /** Кнопка для переключения режима воспроизведения:
+         * однократный повтор, двойной повтор, циклический повтор
+         * */
         Icon(
             when (trackState.trackRepeatMode) {
                 RepeatMode.REPEAT_ONCE -> Icons.Rounded.Repeat
@@ -81,6 +97,10 @@ fun ControlBlock(
            modifier = Modifier
                .weight(1f)
         ) {
+            /**
+             * Кнопки для управления воспроизведением:
+             * переход к следующему/ предыдущему треку, постановка на паузу и проигрывание
+             * */
             MediaControls(
                 trackState = trackState,
                 mediaController = mediaController,
@@ -94,10 +114,11 @@ fun ControlBlock(
             )
         }
 
+        /** Кнопка для открытия панели любимых треков */
         Icon(
             Icons.AutoMirrored.Rounded.PlaylistPlay,
             contentDescription = "Playlist",
-            modifier = modifierToExpandPopUpBar
+            modifier = modifierToExpandFavouritePanel
                 .size(Dimens.playerScreenRepeatAndPlaylistIconSize),
             tint = AudioExtendedTheme.extendedColors.playerScreenButton,
         )

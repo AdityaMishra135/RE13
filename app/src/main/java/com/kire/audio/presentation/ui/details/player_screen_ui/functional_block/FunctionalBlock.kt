@@ -16,13 +16,27 @@ import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.ui.details.common.SliderBlock
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
+/**
+ * Блок для управления воспроизведением.
+ * Состоит из слайдера, кнопок переключения треков,
+ * постановки на паузу/воспроизведение,
+ * переключения режима воспроизведения и открытия панели любимых треков.
+ *
+ * @param modifierToExpandFavouritePanel модификатор для открытия панели любимых треков
+ * @param trackState состояние воспроизведения
+ * @param onEvent обработчик UI событий
+ * @param saveRepeatMode lambda для сохранения режима воспроизведения
+ * @param mediaController для управления воспроизведением
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @Composable
 fun FunctionalBlock(
-    modifierToExpandPopUpBar: Modifier = Modifier,
     trackState: TrackState,
     onEvent: (TrackUiEvent) -> Unit,
     saveRepeatMode: (Int) -> Unit,
-    mediaController: MediaController?
+    mediaController: MediaController?,
+    modifierToExpandFavouritePanel: Modifier = Modifier,
 ){
 
     Column(
@@ -32,13 +46,15 @@ fun FunctionalBlock(
         verticalArrangement = Arrangement.spacedBy(Dimens.functionalBlockSpacedBy)
     ) {
 
+        /** Слайдер для перемотки трека */
         SliderBlock(
             isPlayerScreen = true,
             mediaController = mediaController
         )
 
+        /** Кнопки */
         ControlBlock(
-            modifierToExpandPopUpBar = modifierToExpandPopUpBar,
+            modifierToExpandFavouritePanel = modifierToExpandFavouritePanel,
             trackState = trackState,
             onEvent = onEvent,
             saveRepeatMode = saveRepeatMode,

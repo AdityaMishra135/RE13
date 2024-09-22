@@ -22,10 +22,19 @@ import com.kire.audio.presentation.util.modifier.bounceClick
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
+/**
+ * Кнопки вверху экрана плеера:
+ * сворачивание экрана и открытие меню дополнительной информации о треке
+ *
+ * @param navigateBack действие при нажатии на кнопку закрытия экрана
+ * @param modifierToExpandInfoPanel модификатор для открытия меню дополнительной информации о треке
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ * */
 @Composable
-fun Header(
+fun TopButtons(
     navigateBack: () -> Unit,
-    modifierToExpandBlurPanel: Modifier = Modifier
+    modifierToExpandInfoPanel: Modifier = Modifier
 ){
 
     Row(modifier = Modifier
@@ -35,7 +44,7 @@ fun Header(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
 
-
+        /** Кнопка закрытия экрана с плеером */
         Icon(
             Icons.Rounded.KeyboardArrowDown,
             contentDescription = "Close",
@@ -47,10 +56,11 @@ fun Header(
             tint = AudioExtendedTheme.extendedColors.playerScreenButton
         )
 
+        /** Кнопка открытия меню дополнительной информации о треке*/
         Icon(
             Icons.Rounded.MoreVert,
             contentDescription = "Info",
-            modifier = modifierToExpandBlurPanel
+            modifier = modifierToExpandInfoPanel
                 .size(Dimens.universalIconSize),
             tint = AudioExtendedTheme.extendedColors.playerScreenButton
         )

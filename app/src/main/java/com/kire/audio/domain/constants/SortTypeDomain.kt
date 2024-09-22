@@ -1,8 +1,8 @@
 package com.kire.audio.domain.constants
 
 enum class SortTypeDomain {
-    DATA_ASC_ORDER,
-    DATA_DESC_ORDER,
+    DATE_ASC_ORDER,
+    DATE_DESC_ORDER,
     TITLE_ASC_ORDER,
     TITLE_DESC_ORDER,
     ARTIST_ASC_ORDER,

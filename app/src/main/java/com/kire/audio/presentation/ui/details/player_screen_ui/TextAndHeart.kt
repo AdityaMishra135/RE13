@@ -33,6 +33,14 @@ import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * Название трека, имя исполнителя + кнопка для добавления в список избранных треков
+ *
+ * @param trackState состояние воспроизведения
+ * @param onEvent обработчик UI событий
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @Composable
 fun TextAndHeart(
     trackState: StateFlow<TrackState>,
@@ -40,6 +48,7 @@ fun TextAndHeart(
 ){
     val trackState by trackState.collectAsStateWithLifecycle()
 
+    /** Вид сердечка - иконки-кнопки для добавления трека в избранное */
     val heartIcon by remember {
         derivedStateOf {
             if (trackState.currentTrackPlaying?.isFavourite == true)
@@ -49,8 +58,11 @@ fun TextAndHeart(
         }
     }
 
+    /** Цвет сердечка в нажатом состоянии */
     val heartPressedColor = AudioExtendedTheme.extendedColors.heartPressed
+    /** Цвет сердечка в неактивном состоянии */
     val heartIconTintIdle = AudioExtendedTheme.extendedColors.playerScreenButton
+    /** Цвет сердечка в зависимости того, находится трек в избранном или нет */
     val heartIconTint by remember {
         derivedStateOf {
             if (trackState.currentTrackPlaying?.isFavourite == true)
@@ -67,6 +79,7 @@ fun TextAndHeart(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
+        /** Название трека и исполнитель */
         TwoTextsInColumn(
             modifier = Modifier
                 .weight(1f),
@@ -84,6 +97,7 @@ fun TextAndHeart(
             )
         )
 
+        /** Иконка-кнопка для добавления трека в избранное */
         Icon(
             imageVector = heartIcon,
             contentDescription = "Favourite Button",

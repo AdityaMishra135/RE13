@@ -136,7 +136,7 @@ fun AlbumInfoPanel(
                                         infoDialogAlbum -> newAlbum = newText
                                     }
                                 },
-                                changeOpenDialog = {isIt ->
+                                openImageChangingDialog = { isIt ->
                                     openDialog = isIt
                                 }
                             )
@@ -150,7 +150,7 @@ fun AlbumInfoPanel(
             DialogGalleryOrPhoto(
                 imageUri = firstTrackInAlbum.imageUri,
                 defaultImageUri = firstTrackInAlbum.defaultImageUri,
-                changeOpenDialog = {isIt ->
+                openPhotoChangingDialog = { isIt ->
                     openDialog = isIt
                 },
                 updateUri = { imageUri ->

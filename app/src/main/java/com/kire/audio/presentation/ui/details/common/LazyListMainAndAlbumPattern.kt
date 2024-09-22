@@ -49,9 +49,10 @@ fun LazyListMainAndAlbumPattern(
     navigateToPlayerScreen: () -> Unit = {},
     state: LazyListState = rememberLazyListState()
 ) {
-
+    /** Текущее состояние воспроизведения */
     val trackState by trackState.collectAsStateWithLifecycle()
 
+    /** Список треков */
     LazyColumn(
         modifier = modifier,
         state = state,
@@ -62,6 +63,9 @@ fun LazyListMainAndAlbumPattern(
 
         itemsIndexed(list, key = { _, track -> track.id }) { listIndex, track ->
 
+            /** Обертка для элемента списка.
+             * Раскрывается вокруг базового элемента,
+             * давая дополнительный функционал */
             ListItemWrapper(
                 mediaController = mediaController,
                 trackState = trackState,
@@ -78,11 +82,15 @@ fun LazyListMainAndAlbumPattern(
                 goToPlayerScreen = navigateToPlayerScreen
             ) { trackItemModifier, changeIsClicked ->
 
+                /** Базовый элемент списка */
                 ListItem(
                     modifier = trackItemModifier,
                     track = track,
                     onClick = {
+                        /** Регистрируем клик по всей плитке трека */
                         changeIsClicked()
+
+                        /** Обновляем информацию о текущем треке */
                         onEvent(
                             TrackUiEvent.updateTrackState(
                                 trackState.copy(
@@ -93,6 +101,11 @@ fun LazyListMainAndAlbumPattern(
                                 )
                             )
                         )
+
+                        /** Запускаем воспроизведение трека или ставим на паузу
+                         * в зависимости от того поменялся ли играющий трек или нет.
+                         * Клик по отличному от текущего треку всегда инициирует начало его проигрывания
+                         * */
                         mediaController?.apply {
                             if (trackState.isPlaying && trackState.currentTrackPlaying?.path == track.path)
                                 pause()

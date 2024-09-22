@@ -48,6 +48,16 @@ import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * Панель со списком избранных треков
+ *
+ * @param trackState состояние воспроизведения
+ * @param favouriteTracks список избранных треков
+ * @param onEvent обработчик UI событий
+ * @param mediaController для управления воспроизведением
+ *
+ * @return Михель Гонтарев (KiREHwYE)
+ */
 @Composable
 fun FavouritePanel(
     trackState: TrackState,
@@ -56,13 +66,12 @@ fun FavouritePanel(
     mediaController: MediaController?
 ) {
 
+    /** Текущее значение списка избранных треков */
     val favouriteTracks by favouriteTracks.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
-            .animateContentSize(
-                animationSpec = Animation.universalFiniteSpring()
-            )
+            .animateContentSize(animationSpec = Animation.universalFiniteSpring())
             .fillMaxWidth()
             .wrapContentHeight()
             .windowInsetsPadding(WindowInsets.displayCutout)
@@ -70,6 +79,7 @@ fun FavouritePanel(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        /** Заголовок панели */
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,6 +99,7 @@ fun FavouritePanel(
             Divider()
         }
 
+        /** Если избранных треков нет, отрисовываем соответствующую надпись */
         AnimatedVisibility(
             visible = favouriteTracks.isEmpty(),
             enter = scaleIn(animationSpec = Animation.universalFiniteSpring())
@@ -101,6 +112,7 @@ fun FavouritePanel(
                     .fillMaxSize(),
                 contentAlignment = Alignment.Center,
                 content = {
+                    /** Надпись, уведомляющая о том, что список избранных треков пуст */
                     RubikFontText(
                         text = LocalizationProvider.strings.nothingWasFound,
                         style = TextStyle(
@@ -113,6 +125,7 @@ fun FavouritePanel(
             )
         }
 
+        /** Список избранного */
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -128,38 +141,30 @@ fun FavouritePanel(
                 }
             ) { listIndex, track ->
 
+                /** Обертка для избранного трека */
                 TrackItemFavouriteWrapper(
                     modifier = Modifier.animateItem(
                         placementSpec = Animation.universalFiniteSpring()
                     ),
                     onHeartClick = {
-                        onEvent(
-                            TrackUiEvent.upsertTrack(
-                                track
-                                    .copy(isFavourite = !track.isFavourite)
-                                    .also { thisTrack ->
-                                        trackState.currentTrackPlaying?.let {
-                                            if (it.title == track.title && it.artist == track.artist && it.path == track.path)
-                                                onEvent(
-                                                    TrackUiEvent.updateTrackState(
-                                                        trackState.copy(
-                                                            currentTrackPlaying = thisTrack
-                                                        )
-                                                    )
-                                                )
-                                        }
-                                    }
-                            )
-                        )
+                        /** Добавляем в избранное или убираем оттуда */
+                        trackState.currentTrackPlaying?.let {
+                                onEvent(
+                                    TrackUiEvent.upsertAndUpdateCurrentTrack(
+                                        track.copy(isFavourite = !track.isFavourite)
+                                    )
+                                )
+                        }
                     },
                     trackItem = { modifier ->
-
+                        /** Базовый элемент списка для отображения некоторой сущности */
                         ListItem(
                             track = track,
                             modifier = modifier,
                             mainTextColor = Color.White,
                             satelliteTextColor = Color(0xFFEBEBEB),
                             onClick = {
+                                /** Обновляем информацию о текущем воспроизводимом треке */
                                 onEvent(
                                     TrackUiEvent.updateTrackState(
                                         trackState.copy(
@@ -169,6 +174,8 @@ fun FavouritePanel(
                                         )
                                     )
                                 )
+                                /** Обрабатываем разные ситуации,
+                                 * чтобы понять ставить на паузу/воспроизведение или воспроизводить иной трек */
                                 mediaController?.apply {
                                     if (trackState.isPlaying && trackState.currentTrackPlaying?.path == track.path)
                                         pause()

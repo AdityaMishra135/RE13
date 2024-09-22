@@ -24,22 +24,35 @@ import com.kire.audio.screen.functional.convertLongToTime
 
 import java.util.concurrent.TimeUnit
 
+/**
+ * Панель информации о треке
+ *
+ * @param trackState состояние воспроизведения
+ * @param onEvent обработчик UI событий
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ * */
 @Composable
 fun TrackInfoPanel(
     trackState: TrackState,
     onEvent: (TrackUiEvent) -> Unit
 ) {
 
-    var openDialog by remember {
+    /** Флаг открытия диалога для смены обложки трека */
+    var openPhotoChangingDialog by remember {
         mutableStateOf(false)
     }
 
     trackState.currentTrackPlaying.let { track ->
 
+        /** Общая продолжительность трека в минутах */
         val minutesAll = TimeUnit.MILLISECONDS.toMinutes(track?.duration ?: 0L)
+        /** Общая продолжительность трека в секундах */
         val secondsAll = TimeUnit.MILLISECONDS.toSeconds(track?.duration ?: 0L) % 60
 
         LocalizationProvider.strings.apply {
+
+            /** Предствим всю информацию о треке в виде пар название поля-значение. Например, Title - Some title*/
             val map = mapOf(
                 infoDialogTitle to track?.title,
                 infoDialogArtist to track?.artist,
@@ -52,6 +65,7 @@ fun TrackInfoPanel(
                 infoDialogPath to track?.path
             )
 
+            /** Список полей разрешенных для редактирования */
             val editableFields = arrayOf(
                 infoDialogTitle,
                 infoDialogArtist,
@@ -59,8 +73,10 @@ fun TrackInfoPanel(
                 infoDialogImageUri
             )
 
+            /** Флаг активности редактирования */
             var isEnabled by rememberSaveable { mutableStateOf(false) }
 
+            /* Текущие значения полей */
             var newTitle by rememberSaveable { mutableStateOf(track?.title) }
             var newArtist by rememberSaveable { mutableStateOf(track?.artist) }
             var newAlbum by rememberSaveable { mutableStateOf(track?.album) }
@@ -72,6 +88,9 @@ fun TrackInfoPanel(
                 PanelHeader(
                     isEnabled = isEnabled,
                     onClick = {
+                        /** Если кликнули на иконку сохранения,
+                         * то обновляем данные о треке,
+                         * если они реально изменились */
                         isEnabled = !isEnabled
                             .also {
                                 track?.apply clickApply@{
@@ -93,6 +112,7 @@ fun TrackInfoPanel(
                     }
                 )
 
+                /** Грид с парами название поля - значение. Например, Title - Some title */
                 LazyVerticalGrid(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -102,9 +122,11 @@ fun TrackInfoPanel(
 
                     for(element in map){
                         item {
+                            /** Заголовок поля */
                             GridElementTitle(title = element.key)
                         }
                         item {
+                            /** Информация о треке, соответствующая данному заголовку */
                             GridElementInfo(
                                 text = element.value ?: nothingWasFound,
                                 isEnabled = isEnabled,
@@ -117,8 +139,8 @@ fun TrackInfoPanel(
                                         infoDialogAlbum -> newAlbum = newText
                                     }
                                 },
-                                changeOpenDialog = {isIt ->
-                                    openDialog = isIt
+                                openImageChangingDialog = { isIt ->
+                                    openPhotoChangingDialog = isIt
                                 }
                             )
                         }
@@ -128,13 +150,14 @@ fun TrackInfoPanel(
         }
     }
 
+    /** Диалог для смены обложки трека */
     trackState.currentTrackPlaying?.apply {
-        if (openDialog) {
+        if (openPhotoChangingDialog) {
             DialogGalleryOrPhoto(
                 imageUri = imageUri,
                 defaultImageUri = defaultImageUri,
-                changeOpenDialog = {isIt ->
-                    openDialog = isIt
+                openPhotoChangingDialog = { isIt ->
+                    openPhotoChangingDialog = isIt
                 },
                 updateUri = { imageUri ->
                     onEvent(TrackUiEvent

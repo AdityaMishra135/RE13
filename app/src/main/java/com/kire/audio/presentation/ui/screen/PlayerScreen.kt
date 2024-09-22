@@ -21,12 +21,16 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.LaunchedEffect
 
 import androidx.media3.session.MediaController
+import com.kire.audio.presentation.constants.LyricsRequestMode
+import com.kire.audio.presentation.model.ILyricsRequestState
+import com.kire.audio.presentation.model.event.TrackUiEvent
 
 import com.kire.audio.presentation.navigation.transitions.PlayerScreenTransitions
 import com.kire.audio.presentation.ui.details.player_screen_ui.Background
-import com.kire.audio.presentation.ui.details.player_screen_ui.Header
+import com.kire.audio.presentation.ui.details.player_screen_ui.TopButtons
 import com.kire.audio.presentation.ui.details.player_screen_ui.TextAndHeart
 import com.kire.audio.presentation.ui.details.player_screen_ui.functional_block.FunctionalBlock
 import com.kire.audio.presentation.ui.details.player_screen_ui.TrackCover
@@ -39,6 +43,17 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
 import com.ramcosta.composedestinations.annotation.Destination
 
+/**
+ * Экран для управления воспроизведением, добавления в избранное,
+ * возможности посмотреть текст песни, вытянув его с Genius.
+ * Также предоставляет функциональность для редактирования информации о треке
+ *
+ * @param trackViewModel ViewModel содержит все необходимые поля и методы для взаимодействия с треками
+ * @param mediaController контроллер для управления воспроизведением
+ * @param navigateBack метод для закрытия экрана
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @Destination(style = PlayerScreenTransitions::class)
 @Composable
 fun PlayerScreen(
@@ -46,28 +61,73 @@ fun PlayerScreen(
     mediaController: MediaController?,
     navigateBack: () -> Unit
 ){
-
+    /** Текущее состояние воспроизведения*/
     val trackState by trackViewModel.trackState.collectAsStateWithLifecycle()
 
+    /** Длительность трека.
+     * Берется не из mediaController, так как в нем она
+     * периодически не соответствует действительности */
     var duration: Float by remember { mutableFloatStateOf(0f) }
 
+    /** Обновляем duration на основе информации о длительности зашитой в самом треке */
     trackState.currentTrackPlaying?.let {
         duration = it.duration.toFloat()
     } ?: 0f
 
+    /** Жест назад для закрытия данного экрана
+     * и навигации на предыдущий экран */
     BackHandler {
         navigateBack()
         return@BackHandler
     }
 
+    /** Запускает процесс "вытягивания" текста песни, если его еще нет */
+    LaunchedEffect(trackState.currentTrackPlaying?.path) {
+        trackState.currentTrackPlaying?.let { track ->
+
+            if (track.lyrics !is ILyricsRequestState.Success || track.lyrics.lyrics.isEmpty()) {
+
+                /** Меняем статус получения текста на "в состоянии запроса" */
+                trackViewModel.onEvent(
+                    TrackUiEvent.updateTrackState(
+                        trackState.copy(
+                            currentTrackPlaying = track.copy(
+                                lyrics = ILyricsRequestState.OnRequest
+                            )
+                        )
+                    )
+                )
+
+                /** Получает текст и приписывает его в базе данных к данному треку.
+                 * Обновляет информацию о треке в текущем состоянии воспроизведения */
+                trackViewModel.onEvent(
+                    TrackUiEvent.upsertAndUpdateCurrentTrack(
+                        track.copy(
+                            lyrics = trackViewModel.getTrackLyricsFromGenius(
+                                LyricsRequestMode.AUTOMATIC,
+                                track.title,
+                                track.artist,
+                                ""
+                            )
+                        )
+                    )
+                )
+            }
+        }
+    }
+
+    /** Блюрит весь контент и отрисовывает поверх панель либо с информацией о треке,
+     * либо со списком любимых треков, либо с текстом песни */
     BlurPanel(
         onTopOfBlurredPanel1 = {
+            /** Панель с информацией о треке */
             TrackInfoPanel(
                 trackState = trackState,
                 onEvent = trackViewModel::onEvent
             )
         },
         onTopOfBlurredPanel2 = {
+            /** Панель любимых треков */
             FavouritePanel(
                 favouriteTracks = trackViewModel.favouriteTracks,
                 trackState = trackState,
@@ -76,6 +136,7 @@ fun PlayerScreen(
             )
         },
         onTopOfBlurredPanel3 = {
+            /** Панель с текстом песни */
             LyricsPanel(
                 trackState = trackViewModel.trackState,
                 lyricsState = trackViewModel.lyricsState,
@@ -85,6 +146,7 @@ fun PlayerScreen(
         }
     ) { modifierToExpandPopUpBar1, modifierToExpandPopUpBar2, modifierToExpandPopUpBar3 ->
 
+        /** Задний фон в виде растянутой и заблюренной обложки трека */
         Background(imageUri = trackState.currentTrackPlaying?.imageUri)
 
         Column(
@@ -101,16 +163,15 @@ fun PlayerScreen(
             verticalArrangement = Arrangement.SpaceAround
         ) {
 
-            Header(
+            /** Кнопки вверху экрана: для его сворачивания и для открытия панели с информацией о треке */
+            TopButtons(
                 navigateBack = navigateBack,
-                modifierToExpandBlurPanel = modifierToExpandPopUpBar1
+                modifierToExpandInfoPanel = modifierToExpandPopUpBar1
             )
 
+            /** Обложка трека в виде большой картинки по центру экрана */
             TrackCover(
                 trackState = trackState,
-                lyricsState = trackViewModel.lyricsState,
-                getTrackLyricsFromGenius = trackViewModel::getTrackLyricsFromGenius,
-                onEvent = trackViewModel::onEvent,
                 modifierToExpandPopUpBar = modifierToExpandPopUpBar3
             )
 
@@ -122,13 +183,17 @@ fun PlayerScreen(
                 verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy)
             ) {
 
+                /** Название трека, исполнитель
+                 * и кнопка для добавления в избранное */
                 TextAndHeart(
                     trackState = trackViewModel.trackState,
                     onEvent = trackViewModel::onEvent
                 )
 
+                /** Функциональная панель для управления воспроизведением
+                 * + кнопка для открытия списка любимых композиций */
                 FunctionalBlock(
-                    modifierToExpandPopUpBar = modifierToExpandPopUpBar2,
+                    modifierToExpandFavouritePanel = modifierToExpandPopUpBar2,
                     trackState = trackState,
                     onEvent = trackViewModel::onEvent,
                     saveRepeatMode = trackViewModel::saveRepeatMode,

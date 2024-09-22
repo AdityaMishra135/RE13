@@ -57,7 +57,7 @@ import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
  * @param showBottomBar поднимает PlayerBottomBar при скрытии ListItemWrapper из поля зрения
  * @param onImageClick определяет действие при нажатии на обложку альбома
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun ListItemAlbumWrapper(
@@ -80,8 +80,8 @@ fun ListItemAlbumWrapper(
     }
 
     /** Определяет какой альбом сейчас играет, то есть должен отрисовывать обертку вокруг себя */
-    LaunchedEffect(trackState.currentTrackPlaying) {
-        isClicked = (tracks.contains(trackState.currentTrackPlaying))
+    LaunchedEffect(trackState.currentList) {
+        isClicked = (trackState.currentList == tracks)
             .also { if (it) showBottomBar(false) }
     }
 
@@ -110,7 +110,9 @@ fun ListItemAlbumWrapper(
                 satelliteText = firstTrackInAlbum.artist,
                 leadingImageUri = firstTrackInAlbum.imageUri,
                 onClick = {
+                    /** Разворачиваем/сворачиваем обертку при клике */
                     isClicked = !isClicked
+                    /** Обновляем состояние играющего на данный мемент трека */
                     onEvent(
                         TrackUiEvent.updateTrackState(
                             trackState.copy(
@@ -121,8 +123,10 @@ fun ListItemAlbumWrapper(
                             )
                         )
                     )
+                    /** Начинаем воспроизведение или ставим на паузу */
                     mediaController?.performPlayMedia(firstTrackInAlbum)
-                })
+                }
+            )
         else
             /** Обертка */
             Column(
@@ -151,6 +155,7 @@ fun ListItemAlbumWrapper(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
 
+                    /** Обложка трека */
                     AsyncImageWithLoading(
                         model = firstTrackInAlbum.imageUri,
                         modifier = Modifier
@@ -169,12 +174,14 @@ fun ListItemAlbumWrapper(
                             }
                     )
 
+                    /** Кнопки управления воспроизведением + название играющего трека */
                     AlbumMediaBar(
                         trackState = trackState,
                         mediaController = mediaController
                     )
                 }
 
+                /** Список с треками из альбома для быстрого доступа к ним без перехода на AlbumScreen */
                 AlbumFastAccessBar(
                     trackState = trackState,
                     mediaController = mediaController,

@@ -27,6 +27,12 @@ import androidx.compose.ui.unit.sp
 import com.kire.audio.presentation.ui.details.common.RubikFontText
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 
+/** Представляет заголовок для поля с некоторой информацией о треке
+ *
+ * @param title название поля
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ * */
 @Composable
 fun GridElementTitle(
     title: String
@@ -42,6 +48,18 @@ fun GridElementTitle(
     )
 }
 
+/**
+ * Представляет поле с информацией о треке
+ *
+ * @param text текст поля
+ * @param isEnabled флаг активности процесса редактирования
+ * @param isEditable флаг доступности поля для редактирования
+ * @param isImageURI флаг того, что поле является путем к обложке трека
+ * @param updateText функция обновления текста
+ * @param openImageChangingDialog функция открытия окошка для смены обложки трека
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @Composable
 fun GridElementInfo(
     text: String,
@@ -49,10 +67,15 @@ fun GridElementInfo(
     isEditable: Boolean = false,
     isImageURI: Boolean = false,
     updateText: ((String) -> Unit)? = null,
-    changeOpenDialog: ((Boolean) -> Unit)? = null
+    openImageChangingDialog: ((Boolean) -> Unit)? = null
 ){
+    /** Текст, вводимый пользователем внутри поля */
     var newText by rememberSaveable { mutableStateOf(text) }
 
+    /**
+     * Поле для ввода текста.
+     * Активно, если isEditable == true и isEnabled == true
+     * */
     BasicTextField(
         modifier = Modifier
             .background(
@@ -62,8 +85,8 @@ fun GridElementInfo(
             .fillMaxWidth(0.5f)
             .pointerInput(isEnabled && isEditable && isImageURI) {
                 detectTapGestures {
-                    if (isEnabled && isEditable && isImageURI && changeOpenDialog != null)
-                        changeOpenDialog(true)
+                    if (isEnabled && isEditable && isImageURI && openImageChangingDialog != null)
+                        openImageChangingDialog(true)
                 }
             },
         value = newText,

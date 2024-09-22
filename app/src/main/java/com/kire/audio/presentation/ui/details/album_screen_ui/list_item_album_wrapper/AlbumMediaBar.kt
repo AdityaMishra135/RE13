@@ -37,7 +37,7 @@ import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
  * @param состояние воспроизведения
  * @param mediaController для управления воспроизведением
  *
- * @author @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun RowScope.AlbumMediaBar(

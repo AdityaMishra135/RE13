@@ -21,7 +21,7 @@ import com.kire.audio.R
  * @param contentDescription описание изображения
  * @param colorFilter цветовой фильтр
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun AsyncImageWithLoading(

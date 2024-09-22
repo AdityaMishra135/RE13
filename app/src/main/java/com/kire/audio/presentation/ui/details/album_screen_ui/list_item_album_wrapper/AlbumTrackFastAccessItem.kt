@@ -29,7 +29,8 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
  * Плитка, представляющая некоторый трек из альбома его названием
  *
  * @param trackTitle название трека
- * @param animatedColor анимированный фон плитки
+ * @param animatedBackgroundColor анимированный фон плитки
+ * @param animatedTextColor цвет текста
  * @param onClick действие при нажатии на весь компонент
  *
  * @author Michael Gontarev (KiREHwYE)
@@ -37,10 +38,12 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
 @Composable
 fun AlbumTrackFastAccessItem(
     trackTitle: String,
-    animatedColor: Color,
+    animatedBackgroundColor: Color,
+    animatedTextColor: Color,
     onClick: () -> Unit
 ) {
 
+    /** Поток взаимодействий */
     val interactionSource = remember {
         MutableInteractionSource()
     }
@@ -56,13 +59,13 @@ fun AlbumTrackFastAccessItem(
             )
             .drawBehind {
                 drawRoundRect(
-                    color = animatedColor,
+                    color = animatedBackgroundColor,
                     cornerRadius = CornerRadius(
                         x = Dimens.universalRoundedCorner.value,
                         y = Dimens.universalRoundedCorner.value
                     )
                 )
-                drawRect(animatedColor)
+                drawRect(animatedBackgroundColor)
             }
             .clickable(
                 indication = null,
@@ -77,7 +80,7 @@ fun AlbumTrackFastAccessItem(
                 fontWeight = FontWeight.Medium,
                 fontSize = 15.sp,
                 lineHeight = 15.sp,
-                color = AudioExtendedTheme.extendedColors.primaryText
+                color = animatedTextColor
             )
         )
     }

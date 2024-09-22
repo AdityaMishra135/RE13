@@ -20,6 +20,15 @@ import androidx.compose.ui.graphics.Color
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.util.modifier.bounceClick
 
+/** Обертка для элемента списка, представляющего трек,
+ * добавляющая ему сердечко - кнопку для того, чтобы убрать трек из избранного
+ *
+ * @param trackItem элемент списка, представляющий трек
+ * @param modifier модификатор
+ * @param onHeartClick действие, которое происходит при нажатии на сердечко
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ * */
 @Composable
 fun TrackItemFavouriteWrapper(
     trackItem: @Composable (Modifier) -> Unit,
@@ -33,12 +42,14 @@ fun TrackItemFavouriteWrapper(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        /** Базовое элемент списка, представляющий трек */
         trackItem(
             Modifier
                 .weight(1f)
                 .padding(end = Dimens.universalPad)
         )
 
+        /** Сердечко */
         Icon(
             Icons.Rounded.Favorite,
             contentDescription = "Favourite",

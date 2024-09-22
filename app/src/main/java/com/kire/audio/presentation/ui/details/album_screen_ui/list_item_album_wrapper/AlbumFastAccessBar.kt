@@ -33,7 +33,7 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
  * @param mediaController для управления воспроизведением
  * @param onEvent обработчик UI событий
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun AlbumFastAccessBar(
@@ -57,10 +57,19 @@ fun AlbumFastAccessBar(
         itemsIndexed(trackState.currentList, key = {_, track -> track.id}) { listIndex, track ->
 
             /** Анимирует цвет плитки с названием трека в зависимости от того он ли сейчас играет или нет */
-            val animatedColor by animateColorAsState(
+            val animatedBackgroundColor by animateColorAsState(
                 targetValue = if (trackState.currentTrackPlaying?.id == track.id)
                     AudioExtendedTheme.extendedColors.orangeAccent
                 else Color.White
+            )
+
+            /** Анимирует цвет текста названия трека в зависимости от того он ли сейчас играет или нет */
+            val animatedTextColor by animateColorAsState(
+                targetValue =
+                    if (trackState.currentTrackPlaying?.id == track.id)
+                        Color.White
+                    else
+                        Color.Black
             )
 
             /** Пролистывает до текущего выбранного трека, если он оказывается за пределами поля зрения */
@@ -69,10 +78,13 @@ fun AlbumFastAccessBar(
                     listState.animateScrollToItem(index = listIndex)
             }
 
+            /** Плитка, представляющая некоторый трек из альбома его названием */
             AlbumTrackFastAccessItem(
                 trackTitle = track.title,
-                animatedColor = animatedColor,
+                animatedBackgroundColor = animatedBackgroundColor,
+                animatedTextColor = animatedTextColor,
                 onClick = {
+                    /** Обновляем играющий трек */
                     onEvent(
                         TrackUiEvent.updateTrackState(
                             trackState.copy(
@@ -82,6 +94,7 @@ fun AlbumFastAccessBar(
                             )
                         )
                     )
+                    /** Начинаем воспроизведение или ставим на паузу*/
                     mediaController?.apply {
                         if (trackState.isPlaying && trackState.currentTrackPlaying?.path == track.path)
                             pause()

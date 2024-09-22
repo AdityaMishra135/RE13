@@ -20,8 +20,8 @@ class GetSortedTracksUseCase @Inject constructor(
         preferencesDataStoreRepository.readSortOption(PreferencesDataStoreConstants.SORT_OPTION_KEY)
             .flatMapLatest { sortType ->
                 when(sortType) {
-                    SortTypeDomain.DATA_ASC_ORDER -> trackRepository.getTracksOrderedByDateAddedASC()
-                    SortTypeDomain.DATA_DESC_ORDER -> trackRepository.getTracksOrderedByDateAddedDESC()
+                    SortTypeDomain.DATE_ASC_ORDER -> trackRepository.getTracksOrderedByDateAddedASC()
+                    SortTypeDomain.DATE_DESC_ORDER -> trackRepository.getTracksOrderedByDateAddedDESC()
                     SortTypeDomain.TITLE_ASC_ORDER -> trackRepository.getTracksOrderedByTitleASC()
                     SortTypeDomain.TITLE_DESC_ORDER -> trackRepository.getTracksOrderedByTitleDESC()
                     SortTypeDomain.ARTIST_ASC_ORDER -> trackRepository.getTracksOrderedByArtistASC()

@@ -31,7 +31,6 @@ import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.util.modifier.animatePlacement
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -57,39 +56,27 @@ fun LyricsPanel(
 
         val lyricsRequest: (lyricsRequestMode: LyricsRequestMode) -> Unit = {
 
-            coroutineScope.launch(Dispatchers.IO) {
-                trackState.currentTrackPlaying?.copy(lyrics = ILyricsRequestState.OnRequest)
-                        .also { track ->
-                            onEvent(
-                                TrackUiEvent.updateTrackState(
-                                    trackState.copy(
-                                        currentTrackPlaying = track
-                                    )
-                                )
-                            )
-                        }?.let { track ->
-                            onEvent(TrackUiEvent.upsertTrack(track))
-                        }
+            onEvent(
+                TrackUiEvent.upsertAndUpdateCurrentTrack(
+                    trackState.currentTrackPlaying!!.copy(
+                        lyrics = ILyricsRequestState.OnRequest
+                    )
+                )
+            )
 
-                trackState.currentTrackPlaying?.copy(
-                        lyrics =
-                            getTrackLyricsFromGenius(
+            coroutineScope.launch {
+                onEvent(
+                    TrackUiEvent.upsertAndUpdateCurrentTrack(
+                        trackState.currentTrackPlaying!!.copy(
+                            lyrics = getTrackLyricsFromGenius(
                                 lyricsRequestMode,
                                 trackState.currentTrackPlaying?.title,
                                 trackState.currentTrackPlaying?.artist,
                                 userInput
                             )
-                    ).also { track ->
-                        onEvent(
-                            TrackUiEvent.updateTrackState(
-                                trackState.copy(
-                                    currentTrackPlaying = track
-                                )
-                            )
                         )
-                    }?.let { track ->
-                        onEvent(TrackUiEvent.upsertTrack(track))
-                    }
+                    )
+                )
             }
         }
 

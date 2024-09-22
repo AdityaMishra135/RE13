@@ -1,7 +1,6 @@
 package com.kire.audio.presentation.ui.details.list_screen_ui.top_block.action_bar.dropdown_menu
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,6 +28,17 @@ import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * Меню для сортировки списка треков
+ *
+ * @param isExpanded флаг открытия меню
+ * @param onDismiss действие при закрытии меню
+ * @param sortType тип сортировки
+ * @param saveSortOption сохранение типа сортировки
+ * @param updateSortOption обновление типа сортировки
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @Composable
 fun DropDownMenu(
     isExpanded: () -> Boolean,
@@ -37,10 +47,13 @@ fun DropDownMenu(
     saveSortOption: (SortType) -> Unit,
     updateSortOption: (SortOption) -> Unit
 ){
+    /** Получаем актуальный тип сортировки */
     val sortOption by sortType.collectAsStateWithLifecycle()
 
+    /** Флаг возрастания или убывания сортировки */
     var isSortOptionAsc by remember { mutableIntStateOf(1) }
 
+    /** Функция для обновления типа сортировки */
     val sortOptionFunc: (String, SortType, SortType)->Unit = { text, sortTypeASC, sortTypeDESC ->
 
         isSortOptionAsc =
@@ -58,54 +71,49 @@ fun DropDownMenu(
         )
     }
 
+    /** Делаем меню закругленные углы */
     MaterialTheme(
         shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(Dimens.universalRoundedCorner))
     ) {
+        /** Само меню сортировки*/
         DropdownMenu(
             expanded = isExpanded(),
             onDismissRequest = { onDismiss() },
-            offset = DpOffset(x = 0.dp, y = 16.dp),
+            offset = DpOffset(x = 0.dp, y = Dimens.universalPad),
             modifier = Modifier
                 .wrapContentSize()
                 .background(AudioExtendedTheme.extendedColors.controlElementsBackground)
-                .padding(
-                    PaddingValues(
-                        start = 20.dp,
-                        end = 20.dp,
-                        top = 6.dp,
-                        bottom = 6.dp
-                    )
-                )
+                .padding(Dimens.universalPad)
         ) {
 
             CustomDropDownMenuItem(
                 sortOption = sortOption,
-                sortTypeASC = SortType.DATA_ASC_ORDER,
-                sortTypeDESC = SortType.DATA_DESC_ORDER,
-                text = LocalizationProvider.strings.dropdownDate,
-                sortOptionFunc
+                sortTypeASC = SortType.DATE_ASC_ORDER,
+                sortTypeDESC = SortType.DATE_DESC_ORDER,
+                title = LocalizationProvider.strings.dropdownDate,
+                sortOptionFunc = sortOptionFunc
             )
             CustomDropDownMenuItem(
                 sortOption = sortOption,
                 sortTypeASC = SortType.TITLE_ASC_ORDER,
                 sortTypeDESC = SortType.TITLE_DESC_ORDER,
-                text = LocalizationProvider.strings.dropdownTitle,
-                sortOptionFunc
+                title = LocalizationProvider.strings.dropdownTitle,
+                sortOptionFunc = sortOptionFunc
             )
             CustomDropDownMenuItem(
                 sortOption = sortOption,
                 sortTypeASC = SortType.ARTIST_ASC_ORDER,
                 sortTypeDESC = SortType.ARTIST_DESC_ORDER,
-                text = LocalizationProvider.strings.dropdownArtist,
-                sortOptionFunc
+                title = LocalizationProvider.strings.dropdownArtist,
+                sortOptionFunc = sortOptionFunc
             )
 
             CustomDropDownMenuItem(
                 sortOption = sortOption,
                 sortTypeASC = SortType.DURATION_ASC_ORDER,
                 sortTypeDESC = SortType.DURATION_DESC_ORDER,
-                text = LocalizationProvider.strings.dropdownDuration,
-                sortOptionFunc
+                title = LocalizationProvider.strings.dropdownDuration,
+                sortOptionFunc = sortOptionFunc
             )
         }
     }

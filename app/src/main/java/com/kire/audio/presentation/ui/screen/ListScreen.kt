@@ -74,6 +74,8 @@ fun ListScreen(
                 onAlbumSuggestionClick = { albumTitle ->
                     val album = trackViewModel.artistWithTracks.value[albumTitle]
 
+                    /** Получаем список треков из альбома с названием albumTitle и обновляем TrackState.
+                     * После чего открываем экран альбома */
                     album?.let {
                         trackViewModel.onEvent(
                             TrackUiEvent.updateTrackState(

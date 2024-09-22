@@ -1,6 +1,5 @@
 package com.kire.audio.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
@@ -38,7 +37,7 @@ class TrackViewModel @Inject constructor(
     /*
     * Tracks-providing params and funcs
     * */
-    private val _sortType = MutableStateFlow(SortType.DATA_DESC_ORDER)
+    private val _sortType = MutableStateFlow(SortType.DATE_DESC_ORDER)
     val sortType : StateFlow<SortType>
         get() = _sortType.asStateFlow()
 
@@ -129,7 +128,6 @@ class TrackViewModel @Inject constructor(
     fun onEvent(event: TrackUiEvent) {
         when(event) {
             is TrackUiEvent.updateTrackState -> {
-                Log.d("MINE", "${event.trackState}")
                 _trackState.update { _ ->
                     event.trackState
                 }

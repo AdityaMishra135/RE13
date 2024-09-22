@@ -48,7 +48,7 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
  * @param goToPlayerScreen навигация на PlayerScreen
  * @param listItem сам ListItem
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun ListItemWrapper(

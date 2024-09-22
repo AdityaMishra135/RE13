@@ -61,9 +61,7 @@ fun ActionPanel(
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(spacedBy)
     ) {
-        AnimatedVisibility(
-            visible = !isSearchWidened,
-        ) {
+        AnimatedVisibility(visible = !isSearchWidened,) {
             /** Меню сортировки + обновление списка треков */
             SortAndRefreshPanel(
                 refreshAction = trackViewModel::updateTrackDataBase,
@@ -75,7 +73,7 @@ fun ActionPanel(
                         saveSortOption = trackViewModel::saveSortOption,
                         updateSortOption = { sortOption ->
                             trackViewModel.onEvent(TrackUiEvent.updateSortOption(sortOption))
-                        },
+                        }
                     )
                 }
             )

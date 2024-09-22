@@ -1,11 +1,13 @@
 package com.kire.audio.presentation.ui.details.common
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -71,27 +73,31 @@ fun SliderBlock(
         mutableFloatStateOf(mediaController?.currentPosition?.toFloat() ?: 0f)
     }
 
-    // Поток взаимодействий
+    /** Поток взаимодействий */
     val interactionSource = remember {
         MutableInteractionSource()
     }
 
-    val isPressed by interactionSource.collectIsFocusedAsState()
+    val isFocused by interactionSource.collectIsFocusedAsState()
 
+    /** Текущая позиция слайдера в минутах */
     val minutesCur = TimeUnit.MILLISECONDS.toMinutes(mediaController?.currentPosition ?: 0L)
+    /** Текущая позиция слайдера в секундах */
     val secondsCur = TimeUnit.MILLISECONDS.toSeconds(mediaController?.currentPosition ?: 0L) % 60
+    /** Длительность трека в минутах */
     val minutesAll = TimeUnit.MILLISECONDS.toMinutes(mediaController?.duration ?: 0L)
+    /** Длительность трека в секундах */
     val secondsAll = TimeUnit.MILLISECONDS.toSeconds(mediaController?.duration ?: 0L) % 60
 
     /** Запуск корутины для обновления позиции слайдера */
-    LaunchedEffect(Unit) {
+    LaunchedEffect(key1 = Unit) {
         while(true) {
             sliderPosition = mediaController?.currentPosition?.toFloat() ?: 0f
             delay(1.seconds / 70)
         }
     }
 
-    // Колонка со слайдером и информацией о текущей позиции и длительности трека
+    /** Колонка со слайдером и информацией о текущей позиции и длительности трека */
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -99,14 +105,14 @@ fun SliderBlock(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        // Слайдер
+        /** Слайдер */
         Slider(
             modifier = Modifier
                 .fillMaxWidth(),
             value = sliderPosition,
             onValueChange = {
                 sliderPosition = it
-                if (!isPressed) {
+                if (!isFocused) {
                     mediaController?.seekTo(sliderPosition.toLong())
                     mediaController?.play()
                 }
@@ -126,7 +132,7 @@ fun SliderBlock(
                             modifier = Modifier
                                 .wrapContentSize()
                         ) {
-                            // Текущая позиция
+                            /** Текущая позиция слайдера */
                             RubikFontText(
                                 text = "$minutesCur:$secondsCur",
                                 style = TextStyle(
@@ -139,10 +145,10 @@ fun SliderBlock(
                     },
                     interactionSource = interactionSource
                 ) {
-                    /** Форма для thumb */
+                    /** Форма для ползунка */
                     val circleShape = CircleShape
 
-                    // Thumb
+                    /** Ползунок */
                     Spacer(
                         modifier = Modifier
                             .size(Dimens.sliderThumbSize)
@@ -168,7 +174,7 @@ fun SliderBlock(
             }
         )
 
-        // Содержит текущую позицию и длительность трека
+        /** Содержит текущую позицию и длительность трека */
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
@@ -176,7 +182,7 @@ fun SliderBlock(
                 .wrapContentHeight()
         ) {
 
-            // Текущая позиция
+            /** Текущая позиция */
             RubikFontText(
                 text = "$minutesCur:$secondsCur",
                 style = TextStyle(
@@ -186,7 +192,7 @@ fun SliderBlock(
                 )
             )
 
-            // Длительность трека
+            /** Длительность трека */
             RubikFontText(
                 text = "${if (minutesAll >= 0) minutesAll else 0}:${if (secondsAll >= 0) secondsAll else 0}",
                 style = TextStyle(

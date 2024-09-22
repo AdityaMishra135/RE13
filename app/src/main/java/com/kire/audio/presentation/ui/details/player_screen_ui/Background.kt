@@ -23,7 +23,7 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
  *
  * @param imageUri изображение для отрисовки
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun Background(

@@ -86,7 +86,7 @@ fun LyricsHeader(
                                     clearUserInput()
                                 }
                         )
-                    else if (lyricsRequestMode != LyricsRequestMode.SELECTOR_IS_VISIBLE
+                    else if (lyricsRequestMode != LyricsRequestMode.SELECTOR_IS_VISIBLE && trackState.currentTrackPlaying?.lyrics !is ILyricsRequestState.Success
                         || trackState.currentTrackPlaying?.lyrics is ILyricsRequestState.Unsuccessful) {
 
                         Icon(
