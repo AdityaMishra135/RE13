@@ -1,5 +1,6 @@
 package com.kire.audio.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
@@ -7,12 +8,12 @@ import com.kire.audio.domain.use_case.util.ITrackUseCases
 import com.kire.audio.presentation.mapper.toPresentation
 import com.kire.audio.presentation.constants.SortType
 import com.kire.audio.presentation.mapper.toDomain
-import com.kire.audio.presentation.model.ILyricsRequestState
 import com.kire.audio.presentation.model.state.LyricsState
 import com.kire.audio.presentation.model.state.SearchState
 import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.constants.LyricsRequestMode
+import com.kire.audio.presentation.model.ILyricsRequestState
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.util.search.onSearchRequestChange
 
@@ -56,18 +57,38 @@ class TrackViewModel @Inject constructor(
     private val _trackState: MutableStateFlow<TrackState> = MutableStateFlow(TrackState())
     val trackState: StateFlow<TrackState> = _trackState.asStateFlow()
 
-    suspend fun getTrackLyricsFromGenius(
+    fun getTrackLyricsFromGeniusAndUpdateTrack(
+        track: Track,
         mode: LyricsRequestMode,
         title: String?,
         artist: String?,
         userInput: String?,
-    ): ILyricsRequestState =
-        trackUseCases.getTrackLyricsFromGeniusUseCase(
-            mode = mode.toDomain(),
-            title,
-            artist,
-            userInput
-        ).toPresentation()
+    ) {
+        onEvent(
+            TrackUiEvent.updateTrackState(
+                _trackState.value.copy(
+                    currentTrackPlaying = track.copy(
+                        lyrics = ILyricsRequestState.OnRequest
+                    )
+                )
+            )
+        )
+
+        viewModelScope.launch {
+            trackUseCases.getTrackLyricsFromGeniusUseCase(
+                mode = mode.toDomain(),
+                title = title,
+                artist = artist,
+                userInput = userInput
+            ).toPresentation().also { lyrics ->
+                onEvent(
+                    TrackUiEvent.upsertAndUpdateCurrentTrack(
+                        track = track.copy(lyrics = lyrics)
+                    )
+                )
+            }
+        }
+    }
 
     /*
     LyricsUiState params and funcs
@@ -128,6 +149,7 @@ class TrackViewModel @Inject constructor(
     fun onEvent(event: TrackUiEvent) {
         when(event) {
             is TrackUiEvent.updateTrackState -> {
+                Log.d("MINE", "UPSERTING")
                 _trackState.update { _ ->
                     event.trackState
                 }
@@ -161,6 +183,7 @@ class TrackViewModel @Inject constructor(
             }
 
             is TrackUiEvent.upsertAndUpdateCurrentTrack -> {
+                Log.d("MINE", "UPSERTING")
                 onEvent(TrackUiEvent.upsertTrack(event.track
                     .also {
                         _trackState.update { currentState ->
@@ -172,6 +195,16 @@ class TrackViewModel @Inject constructor(
                             )
                         }
                     })
+                )
+            }
+
+            is TrackUiEvent.getTrackLyricsFromGeniusAndUpdateTrack -> {
+                getTrackLyricsFromGeniusAndUpdateTrack(
+                    track = event.track,
+                    mode = event.mode,
+                    title = event.title,
+                    artist = event.artist,
+                    userInput = event.userInput
                 )
             }
         }

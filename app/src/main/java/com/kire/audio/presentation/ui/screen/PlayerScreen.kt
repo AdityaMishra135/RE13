@@ -86,30 +86,12 @@ fun PlayerScreen(
         trackState.currentTrackPlaying?.let { track ->
 
             if (track.lyrics !is ILyricsRequestState.Success || track.lyrics.lyrics.isEmpty()) {
-
-                /** Меняем статус получения текста на "в состоянии запроса" */
                 trackViewModel.onEvent(
-                    TrackUiEvent.updateTrackState(
-                        trackState.copy(
-                            currentTrackPlaying = track.copy(
-                                lyrics = ILyricsRequestState.OnRequest
-                            )
-                        )
-                    )
-                )
-
-                /** Получает текст и приписывает его в базе данных к данному треку.
-                 * Обновляет информацию о треке в текущем состоянии воспроизведения */
-                trackViewModel.onEvent(
-                    TrackUiEvent.upsertAndUpdateCurrentTrack(
-                        track.copy(
-                            lyrics = trackViewModel.getTrackLyricsFromGenius(
-                                LyricsRequestMode.AUTOMATIC,
-                                track.title,
-                                track.artist,
-                                ""
-                            )
-                        )
+                    TrackUiEvent.getTrackLyricsFromGeniusAndUpdateTrack(
+                        track = track,
+                        mode = LyricsRequestMode.AUTOMATIC,
+                        title = track.title,
+                        artist = track.artist
                     )
                 )
             }
@@ -138,10 +120,9 @@ fun PlayerScreen(
         onTopOfBlurredPanel3 = {
             /** Панель с текстом песни */
             LyricsPanel(
-                trackState = trackViewModel.trackState,
-                lyricsState = trackViewModel.lyricsState,
-                onEvent = trackViewModel::onEvent,
-                getTrackLyricsFromGenius = trackViewModel::getTrackLyricsFromGenius
+                trackStateFlow = trackViewModel.trackState,
+                lyricsStateFlow = trackViewModel.lyricsState,
+                onEvent = trackViewModel::onEvent
             )
         }
     ) { modifierToExpandPopUpBar1, modifierToExpandPopUpBar2, modifierToExpandPopUpBar3 ->

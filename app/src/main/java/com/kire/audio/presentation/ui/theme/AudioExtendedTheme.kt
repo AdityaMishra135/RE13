@@ -116,12 +116,12 @@ fun AudioExtendedTheme(
 ) {
     val extendedColors = if (darkTheme) extendedDarkColors else extendedLightColors
 
-    CompositionLocalProvider(LocalAudioExtendedType provides extendedType) {
-        CompositionLocalProvider(LocalAudioExtendedColors provides extendedColors) {
-            CompositionLocalProvider(LocalAudioExtendedFonts provides extendedFonts) {
-                AudioTheme(content = content)
-            }
-        }
+    CompositionLocalProvider(
+        LocalAudioExtendedType provides extendedType,
+        LocalAudioExtendedColors provides extendedColors,
+        LocalAudioExtendedFonts provides extendedFonts
+    ) {
+        AudioTheme(content = content)
     }
 }
 

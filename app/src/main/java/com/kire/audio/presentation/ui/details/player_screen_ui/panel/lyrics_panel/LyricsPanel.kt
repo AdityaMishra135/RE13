@@ -14,7 +14,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.Alignment
@@ -29,139 +28,155 @@ import com.kire.audio.presentation.constants.LyricsRequestMode
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
+import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 import com.kire.audio.presentation.util.modifier.animatePlacement
+import com.kire.audio.presentation.util.rememberDerivedStateOf
 
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
+/**
+ * Панель с текстом песни, который вытягивается с Genius.
+ * Предоставляет возможность автоматического вытягивания,
+ * вытягивания по ссылке и по имени исполнителя и названию
+ * трека
+ *
+ * @param trackStateFlow текущее состояние воспроизведения
+ * @param lyricsStateFlow текущее состояние поиска текста песни
+ * @param onEvent обработчик UI событий
+ * @param modifier модификатор
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @Composable
 fun LyricsPanel(
-    trackState: StateFlow<TrackState>,
-    lyricsState: StateFlow<LyricsState>,
+    trackStateFlow: StateFlow<TrackState>,
+    lyricsStateFlow: StateFlow<LyricsState>,
     onEvent: (TrackUiEvent) -> Unit,
-    getTrackLyricsFromGenius: suspend (LyricsRequestMode, String?, String?, String?) -> ILyricsRequestState,
     modifier: Modifier = Modifier
 ) {
 
-    val trackState by trackState.collectAsStateWithLifecycle()
-    val lyricsState by lyricsState.collectAsStateWithLifecycle()
+    val trackState by trackStateFlow.collectAsStateWithLifecycle()
+    val lyricsState by lyricsStateFlow.collectAsStateWithLifecycle()
 
-    val coroutineScope = rememberCoroutineScope()
+    var isClearNeeded by remember {
+        mutableStateOf(false)
+    }
 
-    lyricsState.apply {
+    val lyrics by rememberDerivedStateOf {
 
-        var isClearNeeded by remember {
-            mutableStateOf(false)
+        LocalizationProvider.strings.run {
+
+            when(trackState.currentTrackPlaying?.lyrics) {
+                is ILyricsRequestState.Success ->
+                    (trackState.currentTrackPlaying?.lyrics as ILyricsRequestState.Success).lyrics
+                        .ifEmpty { lyricsDialogUnsuccessfulMessage }
+                is ILyricsRequestState.Unsuccessful -> lyricsDialogUnsuccessfulMessage
+                is ILyricsRequestState.OnRequest -> lyricsDialogWaitingMessage
+                null -> lyricsDialogUnsuccessfulMessage
+            }
         }
+    }
 
-        val lyricsRequest: (lyricsRequestMode: LyricsRequestMode) -> Unit = {
-
+    val lyricsRequestWithUpdatingTrack: (lyricsRequestMode: LyricsRequestMode) -> Unit = { lyricsRequestMode ->
+        trackState.currentTrackPlaying?.let { track ->
             onEvent(
-                TrackUiEvent.upsertAndUpdateCurrentTrack(
-                    trackState.currentTrackPlaying!!.copy(
-                        lyrics = ILyricsRequestState.OnRequest
-                    )
+                TrackUiEvent.getTrackLyricsFromGeniusAndUpdateTrack(
+                    track = track,
+                    mode = lyricsRequestMode,
+                    title = track.title,
+                    artist = track.artist,
+                    userInput = lyricsState.userInput
+                )
+            )
+        }
+    }
+
+    LaunchedEffect(key1 = lyricsState.isEditModeEnabled, key2 = lyricsState.lyricsRequestMode) {
+        if (!lyricsState.isEditModeEnabled)
+            onEvent(
+                TrackUiEvent.updateLyricsState(
+                    lyricsState.copy(userInput = "")
                 )
             )
 
-            coroutineScope.launch {
-                onEvent(
-                    TrackUiEvent.upsertAndUpdateCurrentTrack(
-                        trackState.currentTrackPlaying!!.copy(
-                            lyrics = getTrackLyricsFromGenius(
-                                lyricsRequestMode,
-                                trackState.currentTrackPlaying?.title,
-                                trackState.currentTrackPlaying?.artist,
-                                userInput
+        if (lyricsState.lyricsRequestMode == LyricsRequestMode.AUTOMATIC)
+            onEvent(
+                TrackUiEvent.updateLyricsState(
+                    lyricsState.copy(isEditModeEnabled = false)
+                )
+            )
+    }
+
+    val showLyricsEditOptions by rememberDerivedStateOf {
+        lyricsState.isEditModeEnabled && lyricsState.lyricsRequestMode == LyricsRequestMode.SELECTOR_IS_VISIBLE
+    }
+    val showLyricsPickedEditOption by rememberDerivedStateOf {
+        lyricsState.isEditModeEnabled && lyricsState.lyricsRequestMode != LyricsRequestMode.AUTOMATIC
+    }
+    val showLyricsResult by rememberDerivedStateOf {
+        !lyricsState.isEditModeEnabled && lyricsState.lyricsRequestMode != LyricsRequestMode.SELECTOR_IS_VISIBLE
+    }
+
+    LazyColumn(
+        modifier = modifier
+            .animatePlacement()
+            .animateContentSize(animationSpec = Animation.universalFiniteSpring())
+            .wrapContentSize()
+            .padding(horizontal = Dimens.universalPad),
+        contentPadding = PaddingValues(bottom = Dimens.universalPad),
+        verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        item {
+            LyricsHeader(
+                onEvent = onEvent,
+                trackState = trackStateFlow,
+                clearUserInput = {
+                    isClearNeeded = true
+                },
+                lyricsRequest = lyricsRequestWithUpdatingTrack,
+                lyricsState = lyricsStateFlow,
+            )
+        }
+        item {
+            AnimatedContent(targetState = showLyricsEditOptions) {
+                if (it)
+                    LyricsEditOptions(
+                        lyricsRequest = {
+                            lyricsRequestWithUpdatingTrack(LyricsRequestMode.AUTOMATIC)
+                        },
+                        updateLyricsRequestMode = {
+                            onEvent(
+                                TrackUiEvent.updateLyricsState(
+                                    lyricsState.copy(lyricsRequestMode = it)
+                                )
                             )
-                        )
+                        }
                     )
-                )
-            }
-        }
-
-        LaunchedEffect(key1 = isEditModeEnabled) {
-            if (!isEditModeEnabled)
-                onEvent(
-                    TrackUiEvent.updateLyricsState(
-                        this@apply.copy(userInput = "")
-                    )
-                )
-        }
-
-        LaunchedEffect(key1 = lyricsRequestMode) {
-            if (lyricsRequestMode == LyricsRequestMode.AUTOMATIC)
-                onEvent(
-                    TrackUiEvent.updateLyricsState(
-                        this@apply.copy(isEditModeEnabled = false)
-                    )
-                )
-        }
-
-        LazyColumn(
-            modifier = modifier
-                .animatePlacement()
-                .animateContentSize(
-                    animationSpec = Animation.universalFiniteSpring()
-                )
-                .wrapContentSize()
-                .padding(horizontal = Dimens.universalPad),
-            contentPadding = PaddingValues(bottom = Dimens.universalPad),
-            verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            item {
-                LyricsHeader(
-                    onEvent = onEvent,
-                    trackState = trackState,
-                    clearUserInput = {
-                        isClearNeeded = true
-                    },
-                    lyricsRequest = lyricsRequest,
-                    lyricsState = lyricsState,
-                )
-            }
-            item {
-                AnimatedContent(targetState = isEditModeEnabled && lyricsRequestMode == LyricsRequestMode.SELECTOR_IS_VISIBLE) {
-                    if (it)
-                        LyricsEditOptions(
-                            lyricsRequest = {
-                                lyricsRequest(LyricsRequestMode.AUTOMATIC)
-                            },
-                            updateLyricsRequestMode = {
-                                onEvent(
-                                    TrackUiEvent.updateLyricsState(
-                                        lyricsState.copy(lyricsRequestMode = it)
-                                    )
+                else if (showLyricsPickedEditOption)
+                    LyricsPickedEditOption(
+                        isClearNeeded = isClearNeeded,
+                        lyricsRequestMode = lyricsState.lyricsRequestMode,
+                        lyrics = trackState.currentTrackPlaying?.lyrics
+                            ?: ILyricsRequestState.OnRequest,
+                        updateUserInput = {
+                            onEvent(
+                                TrackUiEvent.updateLyricsState(
+                                    lyricsState.copy(userInput = it)
                                 )
-                            }
-                        )
-                    else if (isEditModeEnabled && lyricsRequestMode != LyricsRequestMode.AUTOMATIC)
-                        LyricsPickedEditOption(
-                            isClearNeeded = isClearNeeded,
-                            lyricsRequestMode = lyricsRequestMode,
-                            lyrics = trackState.currentTrackPlaying?.lyrics ?: ILyricsRequestState.OnRequest,
-                            updateUserInput = {
-                                onEvent(
-                                    TrackUiEvent.updateLyricsState(
-                                        lyricsState.copy(userInput = it)
-                                    )
-                                )
-                            },
-                            changeIsClearNeeded = {
-                                isClearNeeded  = true
-                            }
-                        )
+                            )
+                        },
+                        changeIsClearNeeded = {
+                            isClearNeeded  = true
+                        }
+                    )
 
-                }
             }
-            item {
-                AnimatedContent(targetState = !isEditModeEnabled && lyricsRequestMode != LyricsRequestMode.SELECTOR_IS_VISIBLE) {
-                    if (it)
-                        LyricsResult(
-                            lyrics = trackState.currentTrackPlaying?.lyrics ?: ILyricsRequestState.OnRequest,
-                        )
-                }
+        }
+        item {
+            AnimatedContent(targetState = showLyricsResult) {
+                if (it)
+                    LyricsResult(lyrics = lyrics)
             }
         }
     }
