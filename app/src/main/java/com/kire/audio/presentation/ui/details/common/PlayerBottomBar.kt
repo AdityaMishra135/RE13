@@ -61,17 +61,15 @@ import kotlin.math.roundToInt
  *
  * @param trackState состояние воспроизведения
  * @param mediaController для управления воспроизведением
- * @param changeTrackUiState действие при изменении trackState
  * @param navHostController контроллер навигации
  * @param onDragDown действие при свайпе вниз
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun PlayerBottomBar(
     trackState: StateFlow<TrackState>,
     mediaController: MediaController?,
-    changeTrackUiState: (TrackState) -> Unit,
     navHostController: NavHostController,
     onDragDown: () -> Unit,
 ) {
@@ -84,7 +82,8 @@ fun PlayerBottomBar(
     val currentDestination: Destination = navHostController.appCurrentDestinationAsState().value
         ?: NavGraphs.root.startAppDestination
 
-    var size by remember {
+    /** Высота PlayerBottomBar + отступ от низа экрана */
+    var height by remember {
         mutableStateOf(0)
     }
 
@@ -92,22 +91,21 @@ fun PlayerBottomBar(
         visible = PlayerStateParams.isPlayerBottomBarShown &&
                 currentDestination != PlayerScreenDestination && currentDestination != AlbumScreenDestination,
         enter = slideInVertically(
-            initialOffsetY = { size },
+            initialOffsetY = { height },
             animationSpec = tween(durationMillis = 450, easing = LinearOutSlowInEasing)
         ) + fadeIn(animationSpec = tween(durationMillis = 100)),
         exit = slideOutVertically(
-            targetOffsetY = { size },
+            targetOffsetY = { height },
             animationSpec = tween(durationMillis = 450, easing = LinearOutSlowInEasing)
         ) + fadeOut(animationSpec = tween(durationMillis = 100))
     ) {
 
-        // Картинка, колонка с текстом и кнопки для управления воспроизведением
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .onGloballyPositioned {
-                    size = it.size.height + Dimens.universalPad.value.roundToInt()
+                    height = it.size.height + Dimens.universalPad.value.roundToInt()
                 }
                 .shadow(
                     elevation = Dimens.universalShadowElevation,
@@ -130,6 +128,7 @@ fun PlayerBottomBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
+            /** Обложка трека, его название и исполнитель */
             ListItem(
                 track = trackState.currentTrackPlaying!!,
                 modifier = Modifier.weight(1f),
@@ -139,6 +138,7 @@ fun PlayerBottomBar(
                 }
             )
 
+            /** Кнопки для управления воспроизведением */
             MediaControls(
                 trackState = trackState,
                 mediaController = mediaController,

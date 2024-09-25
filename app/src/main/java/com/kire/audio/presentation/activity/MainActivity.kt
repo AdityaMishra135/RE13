@@ -159,11 +159,6 @@ class MainActivity : ComponentActivity() {
                                     PlayerBottomBar(
                                         trackState = trackViewModel.trackState,
                                         mediaController = mediaController,
-                                        changeTrackUiState = {
-                                            trackViewModel.onEvent(
-                                                TrackUiEvent.updateTrackState(it)
-                                            )
-                                        },
                                         navHostController = navHostController,
                                         onDragDown = shiftPlayerBottomBarDown
                                     )
