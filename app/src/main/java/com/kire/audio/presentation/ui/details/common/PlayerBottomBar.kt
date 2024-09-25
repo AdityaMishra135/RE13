@@ -37,8 +37,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.session.MediaController
 
 import androidx.navigation.NavHostController
-import com.kire.audio.presentation.model.PlayerStateParams
 
+import com.kire.audio.presentation.model.PlayerStateParams
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.screen.NavGraphs
 import com.kire.audio.presentation.ui.screen.appCurrentDestinationAsState
