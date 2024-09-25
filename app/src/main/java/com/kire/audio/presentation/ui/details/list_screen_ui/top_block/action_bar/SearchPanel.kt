@@ -52,6 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.session.MediaController
 
 import com.kire.audio.device.audio.media_controller.performPlayMedia
+import com.kire.audio.presentation.model.PlayerStateParams
 import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.util.modifier.bounceClick
 import com.kire.audio.presentation.model.state.SearchState
@@ -244,13 +245,13 @@ fun SearchPanel(
                         mainText = track.title,
                         satelliteText = track.artist,
                         onSuggestionClick = { _ ->
+                            PlayerStateParams.isPlaying = true
                             onEvent(
                                 TrackUiEvent.updateTrackState(
                                     trackState.copy(
                                         currentList = searchResult,
                                         currentTrackPlaying = track,
-                                        currentTrackPlayingIndex = 0,
-                                        isPlaying = true
+                                        currentTrackPlayingIndex = 0
                                     )
                                 )
                             )

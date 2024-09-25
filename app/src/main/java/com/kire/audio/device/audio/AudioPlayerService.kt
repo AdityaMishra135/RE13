@@ -65,7 +65,7 @@ class AudioPlayerService: MediaSessionService() {
             when (ke?.keyCode) {
 
                 KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
-                    MediaCommands.isPlayRequired.value = !MediaCommands.isPlayRequired.value
+                    MediaCommands.isPlayRequired = !MediaCommands.isPlayRequired
                         .also {
                             if (!it)
                                 session.player.pause()
@@ -76,20 +76,20 @@ class AudioPlayerService: MediaSessionService() {
 
                 KeyEvent.KEYCODE_MEDIA_PLAY -> {
                     session.player.play()
-                    MediaCommands.isPlayRequired.value = true
+                    MediaCommands.isPlayRequired = true
                 }
 
                 KeyEvent.KEYCODE_MEDIA_PAUSE -> {
                     session.player.pause()
-                    MediaCommands.isPlayRequired.value = false
+                    MediaCommands.isPlayRequired = false
                 }
 
                 KeyEvent.KEYCODE_MEDIA_NEXT -> {
-                    MediaCommands.isNextTrackRequired.value = !MediaCommands.isNextTrackRequired.value
+                    MediaCommands.isNextTrackRequired = !MediaCommands.isNextTrackRequired
                 }
 
                 KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
-                    MediaCommands.isPreviousTrackRequired.value = !MediaCommands.isPreviousTrackRequired.value
+                    MediaCommands.isPreviousTrackRequired = !MediaCommands.isPreviousTrackRequired
                 }
             }
 
@@ -130,16 +130,16 @@ class AudioPlayerService: MediaSessionService() {
         ): ListenableFuture<SessionResult> {
             /* Handling custom command buttons from player notification. */
             when(customCommand.customAction){
-                NotificationPlayerCustomCommandButton.PREVIOUS.customAction -> MediaCommands.isPreviousTrackRequired.value = !MediaCommands.isNextTrackRequired.value
+                NotificationPlayerCustomCommandButton.PREVIOUS.customAction -> MediaCommands.isPreviousTrackRequired = !MediaCommands.isNextTrackRequired
                 NotificationPlayerCustomCommandButton.PLAY.customAction -> {
                     session.player.play()
-                    MediaCommands.isPlayRequired.value = true
+                    MediaCommands.isPlayRequired = true
                 }
                 NotificationPlayerCustomCommandButton.PAUSE.customAction -> {
                     session.player.pause()
-                    MediaCommands.isPlayRequired.value = false
+                    MediaCommands.isPlayRequired = false
                 }
-                NotificationPlayerCustomCommandButton.NEXT.customAction -> MediaCommands.isNextTrackRequired.value = !MediaCommands.isNextTrackRequired.value
+                NotificationPlayerCustomCommandButton.NEXT.customAction -> MediaCommands.isNextTrackRequired = !MediaCommands.isNextTrackRequired
             }
 
             return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
@@ -169,22 +169,22 @@ class AudioPlayerService: MediaSessionService() {
 
             override fun play() {
                 super.play()
-                MediaCommands.isPlayRequired.value = true
+                MediaCommands.isPlayRequired = true
             }
 
             override fun pause() {
                 super.pause()
-                MediaCommands.isPlayRequired.value = false
+                MediaCommands.isPlayRequired = false
             }
 
             override fun stop() {
                 super.stop()
-                MediaCommands.isPlayRequired.value = false
+                MediaCommands.isPlayRequired = false
             }
 
             override fun setPlayWhenReady(playWhenReady: Boolean) {
                 super.setPlayWhenReady(playWhenReady)
-                MediaCommands.isPlayRequired.value = true
+                MediaCommands.isPlayRequired = true
             }
         }
 

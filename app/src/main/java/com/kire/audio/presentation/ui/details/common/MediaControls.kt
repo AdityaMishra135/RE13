@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.media3.session.MediaController
 
 import com.kire.audio.device.audio.util.MediaCommands
+import com.kire.audio.presentation.model.PlayerStateParams
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.animation.Animation
@@ -84,11 +85,11 @@ fun MediaControls(
             modifier = Modifier
                 .size(skipIconsSize)
                 .bounceClick {
-                    MediaCommands.isPreviousTrackRequired.value = true
+                    MediaCommands.isPreviousTrackRequired = true
                 }
         )
 
-        AnimatedContent(targetState = trackState.isPlaying, label = "") {
+        AnimatedContent(targetState = PlayerStateParams.isPlaying, label = "") {
             Icon(
                 imageVector =
                     if (it) pauseIcon
@@ -99,7 +100,7 @@ fun MediaControls(
                     .size(playPauseIconSize)
                     .bounceClick {
                         mediaController?.apply {
-                            if (trackState.isPlaying)
+                            if (PlayerStateParams.isPlaying)
                                 pause()
                             else {
                                 prepare()
@@ -117,7 +118,7 @@ fun MediaControls(
             modifier = Modifier
                 .size(skipIconsSize)
                 .bounceClick {
-                    MediaCommands.isNextTrackRequired.value = true
+                    MediaCommands.isNextTrackRequired = true
                 }
         )
     }

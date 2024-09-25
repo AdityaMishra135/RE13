@@ -59,7 +59,7 @@ import kotlin.math.roundToInt
  * @param floatingButton плавающая кнопка
  * @param content основной контент
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun ListWithTopAndFab(

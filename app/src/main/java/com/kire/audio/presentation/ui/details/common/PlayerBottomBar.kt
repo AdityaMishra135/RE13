@@ -37,6 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.session.MediaController
 
 import androidx.navigation.NavHostController
+import com.kire.audio.presentation.model.PlayerStateParams
 
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.screen.NavGraphs
@@ -88,7 +89,7 @@ fun PlayerBottomBar(
     }
 
     AnimatedVisibility(
-        visible = trackState.isPlayerBottomCardShown &&
+        visible = PlayerStateParams.isPlayerBottomBarShown &&
                 currentDestination != PlayerScreenDestination && currentDestination != AlbumScreenDestination,
         enter = slideInVertically(
             initialOffsetY = { size },
@@ -134,7 +135,7 @@ fun PlayerBottomBar(
                 modifier = Modifier.weight(1f),
                 onClick = {
                     navHostController.navigate(PlayerScreenDestination)
-                    changeTrackUiState(trackState.copy(isPlayerBottomCardShown = false))
+                    PlayerStateParams.isPlayerBottomBarShown = false
                 }
             )
 

@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.media3.session.MediaController
 
 import com.kire.audio.device.audio.media_controller.performPlayMedia
+import com.kire.audio.presentation.model.PlayerStateParams
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
@@ -84,11 +85,11 @@ fun AlbumFastAccessBar(
                 animatedBackgroundColor = animatedBackgroundColor,
                 animatedTextColor = animatedTextColor,
                 onClick = {
+                    PlayerStateParams.isPlaying = if (track.path == trackState.currentTrackPlaying?.path) !PlayerStateParams.isPlaying else true
                     /** Обновляем играющий трек */
                     onEvent(
                         TrackUiEvent.updateTrackState(
                             trackState.copy(
-                                isPlaying = if (track.path == trackState.currentTrackPlaying?.path) !trackState.isPlaying else true,
                                 currentTrackPlaying = track,
                                 currentTrackPlayingIndex = listIndex,
                             )
@@ -96,9 +97,9 @@ fun AlbumFastAccessBar(
                     )
                     /** Начинаем воспроизведение или ставим на паузу*/
                     mediaController?.apply {
-                        if (trackState.isPlaying && trackState.currentTrackPlaying?.path == track.path)
+                        if (PlayerStateParams.isPlaying && trackState.currentTrackPlaying?.path == track.path)
                             pause()
-                        else if (!trackState.isPlaying && trackState.currentTrackPlaying?.path == track.path) {
+                        else if (!PlayerStateParams.isPlaying && trackState.currentTrackPlaying?.path == track.path) {
                             prepare()
                             play()
 

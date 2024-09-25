@@ -3,7 +3,7 @@ package com.kire.audio.presentation.mapper
 import android.net.Uri
 
 import com.kire.audio.domain.model.TrackDomain
-import com.kire.audio.presentation.model.ILyricsRequestState
+import com.kire.audio.presentation.model.state.ILyricsRequestState
 import com.kire.audio.presentation.model.Track
 
 fun TrackDomain.toPresentation() = Track(

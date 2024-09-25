@@ -31,7 +31,7 @@ fun MediaController.performPlayMedia(media: Track) {
         if (isPlaying)
             stop()
 
-        if (MediaCommands.isRepeatRequired.value)
+        if (MediaCommands.isRepeatRequired)
             seekTo(0L)
         else
             setMediaItem(mediaItem)
@@ -39,6 +39,6 @@ fun MediaController.performPlayMedia(media: Track) {
         prepare()
         play()
 
-        MediaCommands.isPlayRequired.value = true
+        MediaCommands.isPlayRequired = true
     }
 }

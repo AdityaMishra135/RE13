@@ -167,27 +167,18 @@ fun AlbumInfoPanel(
                                 TrackUiEvent.upsertTrack(
                                     track.copy(imageUri = imageUri)
                                         .also {
-                                            onEvent(TrackUiEvent.updateTrackState(
-                                                trackState.copy(
-                                                    currentList = currentList
-                                                        .map { listTrack -> if (it.id == listTrack.id) it else listTrack }
+                                            onEvent(
+                                                TrackUiEvent.updateTrackState(
+                                                    trackState.copy(
+                                                        currentList = currentList
+                                                            .map { listTrack -> if (it.id == listTrack.id) it else listTrack }
+                                                    )
                                                 )
-                                            )
                                             )
                                         }
                                 )
                             )
                         }
-//                                TrackUiEvent.upsertTrack(
-//                                    track.copy(imageUri = imageUri)
-//                                        .also {
-//                                            if (trackState.currentTrackPlaying?.id == track.id)
-//                                                onEvent(
-//                                                    TrackUiEvent.updateTrackState(trackState.copy(currentTrackPlaying = it))
-//                                                )
-//                                        }
-//                                )
-//                            )
                     }
                     onEvent(TrackUiEvent.updateArtistWithTracks())
                 },

@@ -1,4 +1,4 @@
-package com.kire.audio.presentation.model
+package com.kire.audio.presentation.model.state
 
 sealed interface ILyricsRequestState {
     data class Success(val lyrics: String): ILyricsRequestState

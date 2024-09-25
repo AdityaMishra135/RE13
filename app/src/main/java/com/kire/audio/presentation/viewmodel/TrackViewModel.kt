@@ -1,6 +1,5 @@
 package com.kire.audio.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
@@ -13,7 +12,7 @@ import com.kire.audio.presentation.model.state.SearchState
 import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.constants.LyricsRequestMode
-import com.kire.audio.presentation.model.ILyricsRequestState
+import com.kire.audio.presentation.model.state.ILyricsRequestState
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.util.search.onSearchRequestChange
 
@@ -149,7 +148,6 @@ class TrackViewModel @Inject constructor(
     fun onEvent(event: TrackUiEvent) {
         when(event) {
             is TrackUiEvent.updateTrackState -> {
-                Log.d("MINE", "UPSERTING")
                 _trackState.update { _ ->
                     event.trackState
                 }
@@ -183,18 +181,18 @@ class TrackViewModel @Inject constructor(
             }
 
             is TrackUiEvent.upsertAndUpdateCurrentTrack -> {
-                Log.d("MINE", "UPSERTING")
-                onEvent(TrackUiEvent.upsertTrack(event.track
-                    .also {
-                        _trackState.update { currentState ->
-                            currentState.copy(
-                                currentTrackPlaying = it,
-                                currentList = currentState.currentList.map {
-                                    if (it.id == event.track.id) event.track else it
-                                }
-                            )
-                        }
-                    })
+                onEvent(
+                    TrackUiEvent.upsertTrack(event.track
+                        .also { newTrack ->
+                            _trackState.update { currentState ->
+                                currentState.copy(
+                                    currentTrackPlaying = newTrack,
+                                    currentList = currentState.currentList.map { listTrack ->
+                                        if (listTrack.id == newTrack.id) event.track else listTrack
+                                    }
+                                )
+                            }
+                        })
                 )
             }
 

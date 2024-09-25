@@ -2,7 +2,6 @@ package com.kire.audio.presentation.ui.details.player_screen_ui.panel.lyrics_pan
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -34,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import com.kire.audio.presentation.util.modifier.bounceClick
-import com.kire.audio.presentation.model.ILyricsRequestState
+import com.kire.audio.presentation.model.state.ILyricsRequestState
 import com.kire.audio.presentation.model.state.LyricsState
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme

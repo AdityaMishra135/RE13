@@ -1,6 +1,7 @@
 package com.kire.audio.presentation.model
 
 import android.net.Uri
+import com.kire.audio.presentation.model.state.ILyricsRequestState
 
 data class Track(
     val title: String = "",

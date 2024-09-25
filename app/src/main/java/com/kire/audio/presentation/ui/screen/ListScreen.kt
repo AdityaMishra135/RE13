@@ -10,6 +10,7 @@ import com.kire.audio.presentation.viewmodel.TrackViewModel
 
 import androidx.media3.session.MediaController
 import com.kire.audio.device.audio.media_controller.performPlayMedia
+import com.kire.audio.presentation.model.PlayerStateParams
 
 import com.kire.audio.presentation.navigation.transitions.ListScreenTransitions
 import com.kire.audio.presentation.model.event.TrackUiEvent
@@ -28,7 +29,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
  * Главный экран приложения. Отображает список всех треков, сохраненных на устройстве.
  *
  * @param trackViewModel VievModel, содержащая все необходимые для работы с треками поля и методы
- * @param shiftBottomBar функция, опускающая PlayerBottomBar за границы экрана
+ * @param shiftPlayerBottomBar функция, опускающая PlayerBottomBar за границы экрана
  * @param navigator для навигации между экранами
  * @param mediaController для управления воспроизведением
  *
@@ -39,7 +40,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Composable
 fun ListScreen(
     trackViewModel: TrackViewModel,
-    shiftBottomBar: () -> Unit,
+    shiftPlayerBottomBar: () -> Unit,
     navigator: DestinationsNavigator,
     mediaController: MediaController?
 ) {
@@ -58,7 +59,7 @@ fun ListScreen(
     /** Отрисовываем контент экрана */
     ListWithTopAndFab(
         listSize = allTracks.size,
-        shiftBottomBar = shiftBottomBar,
+        shiftBottomBar = shiftPlayerBottomBar,
         topBar = {
 
             /** Шапка с названием экрана, поиском, сортировкой треков и возможностью перехода на экран альбомов*/
@@ -77,6 +78,7 @@ fun ListScreen(
                     /** Получаем список треков из альбома с названием albumTitle и обновляем TrackState.
                      * После чего открываем экран альбома */
                     album?.let {
+                        PlayerStateParams.isPlaying = true
                         trackViewModel.onEvent(
                             TrackUiEvent.updateTrackState(
                                 trackState.copy(
@@ -84,8 +86,7 @@ fun ListScreen(
                                     currentTrackPlaying = try {
                                         album[0]
                                     } catch (_: Exception) { null },
-                                    currentTrackPlayingIndex = 0,
-                                    isPlaying = true
+                                    currentTrackPlayingIndex = 0
                                 )
                             )
                         )
@@ -101,7 +102,7 @@ fun ListScreen(
 
         /** Список треков */
         LazyListMainAndAlbumPattern(
-            trackState = trackViewModel.trackState,
+            trackStateFlow = trackViewModel.trackState,
             onEvent = trackViewModel::onEvent,
             list = allTracks,
             mediaController = mediaController,

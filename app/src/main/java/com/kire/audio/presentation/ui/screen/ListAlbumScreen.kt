@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.media3.session.MediaController
+import com.kire.audio.presentation.model.PlayerStateParams
 import com.kire.audio.presentation.model.event.TrackUiEvent
 
 import com.kire.audio.presentation.navigation.transitions.ListAlbumScreenTransitions
@@ -46,7 +47,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Composable
 fun ListAlbumScreen(
     trackViewModel: TrackViewModel,
-    shiftBottomBar: () -> Unit,
+    shiftPlayerBottomBar: () -> Unit,
     mediaController: MediaController?,
     navigator: DestinationsNavigator
 ){
@@ -66,7 +67,7 @@ fun ListAlbumScreen(
 
     ListWithTopAndFab(
         listSize = albums.size,
-        shiftBottomBar = shiftBottomBar,
+        shiftBottomBar = shiftPlayerBottomBar,
         topBar = {
             Box(
                 modifier = Modifier
@@ -104,11 +105,7 @@ fun ListAlbumScreen(
                     mediaController = mediaController,
                     onImageClick = {
                         navigator.navigate(AlbumScreenDestination)
-                        trackViewModel.onEvent(
-                            TrackUiEvent.updateTrackState(
-                                trackState = trackState.copy(isPlayerBottomCardShown = false)
-                            )
-                        )
+                        PlayerStateParams.isPlayerBottomBarShown = false
                     }
                 )
             }

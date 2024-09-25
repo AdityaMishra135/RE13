@@ -1,5 +1,6 @@
 package com.kire.audio.presentation.ui.details.list_screen_ui
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -26,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.media3.session.MediaController
 
@@ -36,6 +38,7 @@ import com.kire.audio.presentation.ui.details.common.MediaControls
 import com.kire.audio.presentation.ui.details.common.SliderBlock
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Обертка для ListItem, раскрывает панель с дополнительным функционалом вокруг ListItem
@@ -52,8 +55,8 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
  */
 @Composable
 fun ListItemWrapper(
-    track: Track,
-    trackState: TrackState,
+    id: String,
+    trackState: StateFlow<TrackState>,
     mediaController: MediaController?,
     modifier: Modifier = Modifier,
     showBottomBar: (Boolean) -> Unit = {},
@@ -61,18 +64,23 @@ fun ListItemWrapper(
     listItem: @Composable (Modifier, () -> Unit) -> Unit,
 ) {
 
+    val trackState by trackState.collectAsStateWithLifecycle()
+
     /** Флаг клика на ListItem */
     var isClicked by rememberSaveable {
         mutableStateOf(false)
     }
 
-    /** Определяет какой трек сейчас играет, то есть должен отрисовывать обертку вокруг себя */
-    LaunchedEffect(trackState.currentTrackPlaying) {
-        isClicked = (trackState.currentTrackPlaying?.id == track.id)
+    /** Определяет какой трек сейчас играет,
+     * то есть должен отрисовывать обертку вокруг себя.
+     * Опускает PlayerBottomBar, если обертка в пределах экрана.
+     * */
+    LaunchedEffect(trackState.currentTrackPlaying?.id) {
+        isClicked = (trackState.currentTrackPlaying?.id == id)
             .also { if (it) showBottomBar(false) }
     }
 
-    /** При исчезновении из поля зрения / закрытия ListItemWrapper скрывает BottomBar */
+     /** При исчезновении из поля зрения / закрытия ListItemWrapper скрывает PlayerBottomBar */
     DisposableEffect(Unit) {
         onDispose {
             if (isClicked)

@@ -250,7 +250,7 @@ fun AlbumScreen(
                 }
 
                 LazyListMainAndAlbumPattern(
-                    trackState = trackViewModel.trackState,
+                    trackStateFlow = trackViewModel.trackState,
                     onEvent = trackViewModel::onEvent,
                     list = trackState.currentList,
                     mediaController = mediaController,

@@ -1,11 +1,13 @@
 package com.kire.audio.device.audio.util
 
-import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
 object MediaCommands {
-    val isPlayRequired = MutableStateFlow(true)
-    val isNextTrackRequired = MutableStateFlow(false)
-    val isPreviousTrackRequired = MutableStateFlow(false)
-    val isRepeatRequired = MutableStateFlow(false)
-    val isTrackRepeated = MutableStateFlow(false)
+    var isPlayRequired by mutableStateOf(true)
+    var isNextTrackRequired by mutableStateOf(false)
+    var isPreviousTrackRequired by mutableStateOf(false)
+    var isRepeatRequired by mutableStateOf(false)
+    var isTrackRepeated by mutableStateOf(false)
 }

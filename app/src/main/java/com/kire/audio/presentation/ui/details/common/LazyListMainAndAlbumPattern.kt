@@ -18,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.session.MediaController
 
 import com.kire.audio.device.audio.media_controller.performPlayMedia
+import com.kire.audio.presentation.model.PlayerStateParams
 import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.model.state.TrackState
@@ -29,7 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 /**
  * Список для отображения треков
  *
- * @param trackState текущее состояние воспроизведения
+ * @param trackStateFlow текущее состояние воспроизведения
  * @param onEvent обработчик событий
  * @param list список треков
  * @param mediaController для управления воспроизведением
@@ -41,7 +42,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 @Composable
 fun LazyListMainAndAlbumPattern(
-    trackState: StateFlow<TrackState>,
+    trackStateFlow: StateFlow<TrackState>,
     mediaController: MediaController?,
     modifier: Modifier = Modifier,
     onEvent: (TrackUiEvent) -> Unit = {},
@@ -50,7 +51,7 @@ fun LazyListMainAndAlbumPattern(
     state: LazyListState = rememberLazyListState()
 ) {
     /** Текущее состояние воспроизведения */
-    val trackState by trackState.collectAsStateWithLifecycle()
+    val trackState by trackStateFlow.collectAsStateWithLifecycle()
 
     /** Список треков */
     LazyColumn(
@@ -68,14 +69,10 @@ fun LazyListMainAndAlbumPattern(
              * давая дополнительный функционал */
             ListItemWrapper(
                 mediaController = mediaController,
-                trackState = trackState,
-                track = track,
+                trackState = trackStateFlow,
+                id = track.id,
                 showBottomBar = { isShown ->
-                    onEvent(
-                        TrackUiEvent.updateTrackState(
-                            trackState.copy(isPlayerBottomCardShown = isShown)
-                        )
-                    )
+                    PlayerStateParams.isPlayerBottomBarShown = isShown
                 },
                 modifier = Modifier
                     .animateItem(),
@@ -89,12 +86,11 @@ fun LazyListMainAndAlbumPattern(
                     onClick = {
                         /** Регистрируем клик по всей плитке трека */
                         changeIsClicked()
-
+                        PlayerStateParams.isPlaying = if (track.path == trackState.currentTrackPlaying?.path) !PlayerStateParams.isPlaying else true
                         /** Обновляем информацию о текущем треке */
                         onEvent(
                             TrackUiEvent.updateTrackState(
                                 trackState.copy(
-                                    isPlaying = if (track.path == trackState.currentTrackPlaying?.path) !trackState.isPlaying else true,
                                     currentTrackPlaying = track,
                                     currentList = list,
                                     currentTrackPlayingIndex = listIndex
@@ -107,9 +103,9 @@ fun LazyListMainAndAlbumPattern(
                          * Клик по отличному от текущего треку всегда инициирует начало его проигрывания
                          * */
                         mediaController?.apply {
-                            if (trackState.isPlaying && trackState.currentTrackPlaying?.path == track.path)
+                            if (PlayerStateParams.isPlaying && trackState.currentTrackPlaying?.path == track.path)
                                 pause()
-                            else if (!trackState.isPlaying && trackState.currentTrackPlaying?.path == track.path) {
+                            else if (!PlayerStateParams.isPlaying && trackState.currentTrackPlaying?.path == track.path) {
                                 prepare()
                                 play()
 

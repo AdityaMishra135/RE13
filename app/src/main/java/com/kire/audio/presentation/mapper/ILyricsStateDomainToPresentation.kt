@@ -1,7 +1,7 @@
 package com.kire.audio.presentation.mapper
 
 import com.kire.audio.domain.model.ILyricsRequestStateDomain
-import com.kire.audio.presentation.model.ILyricsRequestState
+import com.kire.audio.presentation.model.state.ILyricsRequestState
 
 fun ILyricsRequestStateDomain.toPresentation() =
     when(this) {

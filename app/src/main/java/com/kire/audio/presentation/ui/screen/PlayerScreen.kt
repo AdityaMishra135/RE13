@@ -1,5 +1,6 @@
 package com.kire.audio.presentation.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,7 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 
 import androidx.media3.session.MediaController
 import com.kire.audio.presentation.constants.LyricsRequestMode
-import com.kire.audio.presentation.model.ILyricsRequestState
+import com.kire.audio.presentation.model.state.ILyricsRequestState
 import com.kire.audio.presentation.model.event.TrackUiEvent
 
 import com.kire.audio.presentation.navigation.transitions.PlayerScreenTransitions
@@ -86,6 +87,7 @@ fun PlayerScreen(
         trackState.currentTrackPlaying?.let { track ->
 
             if (track.lyrics !is ILyricsRequestState.Success || track.lyrics.lyrics.isEmpty()) {
+                Log.d("MINE", "PlayerScreen: ${track.lyrics}")
                 trackViewModel.onEvent(
                     TrackUiEvent.getTrackLyricsFromGeniusAndUpdateTrack(
                         track = track,

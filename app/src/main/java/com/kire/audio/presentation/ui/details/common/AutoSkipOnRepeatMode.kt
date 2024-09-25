@@ -53,7 +53,7 @@ fun AutoSkipOnRepeatMode(
         secondsAll = TimeUnit.MILLISECONDS.toSeconds(trackState.currentTrackPlaying?.duration ?: 0L) % 60
 
         // Определяет был ли уже осуществлен повтор трека
-        MediaCommands.isTrackRepeated.value = false
+        MediaCommands.isTrackRepeated = false
 
         // Вычисляется текущая позиция слайдера и если она равна длительности трека,
         // осуществляется переход к следующему треку или повтор текущего в зависимости от trackRepeatMode
@@ -66,17 +66,17 @@ fun AutoSkipOnRepeatMode(
             ) {
                 when (trackState.trackRepeatMode) {
                     RepeatMode.REPEAT_ONCE ->
-                        MediaCommands.isNextTrackRequired.value = true
+                        MediaCommands.isNextTrackRequired = true
 
                     RepeatMode.REPEAT_TWICE -> {
-                        if (!MediaCommands.isTrackRepeated.value) {
-                            MediaCommands.isTrackRepeated.value = true
-                            MediaCommands.isRepeatRequired.value = true
+                        if (!MediaCommands.isTrackRepeated) {
+                            MediaCommands.isTrackRepeated = true
+                            MediaCommands.isRepeatRequired = true
                         } else
-                            MediaCommands.isNextTrackRequired.value = true
+                            MediaCommands.isNextTrackRequired = true
                     }
                     RepeatMode.REPEAT_CYCLED ->
-                        MediaCommands.isRepeatRequired.value = true
+                        MediaCommands.isRepeatRequired = true
                 }
             }
 

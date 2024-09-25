@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.session.MediaController
 
 import com.kire.audio.device.audio.media_controller.performPlayMedia
+import com.kire.audio.presentation.model.PlayerStateParams
 import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.model.state.TrackState
@@ -112,14 +113,14 @@ fun ListItemAlbumWrapper(
                 onClick = {
                     /** Разворачиваем/сворачиваем обертку при клике */
                     isClicked = !isClicked
+                    PlayerStateParams.isPlaying = true
                     /** Обновляем состояние играющего на данный мемент трека */
                     onEvent(
                         TrackUiEvent.updateTrackState(
                             trackState.copy(
                                 currentList = tracks,
                                 currentTrackPlaying = firstTrackInAlbum,
-                                currentTrackPlayingIndex = 0,
-                                isPlaying = true
+                                currentTrackPlayingIndex = 0
                             )
                         )
                     )

@@ -1,6 +1,5 @@
 package com.kire.audio.presentation.ui.details.player_screen_ui.panel.lyrics_panel
 
-import android.util.Log
 import androidx.compose.animation.animateContentSize
 
 import androidx.compose.foundation.layout.Box
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Text
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,9 +23,6 @@ import com.kire.audio.presentation.util.modifier.animatePlacement
 fun LyricsResult(
     lyrics: String
 ) {
-    LaunchedEffect(key1 = lyrics) {
-        Log.d("Lyrics", "Lyrics: $lyrics")
-    }
 
     Box(
         modifier = Modifier

@@ -7,10 +7,8 @@ import com.kire.audio.presentation.model.Track
 
 @Immutable
 data class TrackState(
-    val isPlaying: Boolean = false,
     val currentTrackPlaying: Track? = null,
     val currentTrackPlayingIndex: Int? = null,
     val trackRepeatMode: RepeatMode = RepeatMode.REPEAT_ONCE,
-    val currentList: List<Track> = emptyList(),
-    val isPlayerBottomCardShown: Boolean = false
+    val currentList: List<Track> = emptyList()
 )

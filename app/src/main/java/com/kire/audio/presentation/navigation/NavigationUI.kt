@@ -24,7 +24,7 @@ import com.ramcosta.composedestinations.spec.NavHostEngine
 @Composable
 fun NavigationUI(
     trackViewModel: TrackViewModel,
-    shiftBottomBar: () -> Unit,
+    shiftPlayerBottomBar: () -> Unit,
     mediaController: MediaController?,
     navHostController: NavHostController,
     navHostEngine: NavHostEngine
@@ -39,7 +39,7 @@ fun NavigationUI(
             ListScreen(
                 trackViewModel = trackViewModel,
                 navigator = destinationsNavigator,
-                shiftBottomBar = shiftBottomBar,
+                shiftPlayerBottomBar = shiftPlayerBottomBar,
                 mediaController = mediaController
             )
         }
@@ -58,7 +58,7 @@ fun NavigationUI(
         composable(ListAlbumScreenDestination) {
             ListAlbumScreen(
                 trackViewModel = trackViewModel,
-                shiftBottomBar = shiftBottomBar,
+                shiftPlayerBottomBar = shiftPlayerBottomBar,
                 mediaController = mediaController,
                 navigator = destinationsNavigator
             )

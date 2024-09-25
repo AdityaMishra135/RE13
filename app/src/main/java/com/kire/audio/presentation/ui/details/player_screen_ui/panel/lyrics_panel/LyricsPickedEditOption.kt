@@ -23,7 +23,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-import com.kire.audio.presentation.model.ILyricsRequestState
+import com.kire.audio.presentation.model.state.ILyricsRequestState
 import com.kire.audio.presentation.constants.LyricsRequestMode
 import com.kire.audio.presentation.ui.details.common.RubikFontText
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider

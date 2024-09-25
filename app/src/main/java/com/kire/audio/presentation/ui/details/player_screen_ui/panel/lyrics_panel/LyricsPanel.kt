@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-import com.kire.audio.presentation.model.ILyricsRequestState
+import com.kire.audio.presentation.model.state.ILyricsRequestState
 import com.kire.audio.presentation.model.state.LyricsState
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.constants.LyricsRequestMode

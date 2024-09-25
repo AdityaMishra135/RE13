@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.session.MediaController
 
 import com.kire.audio.device.audio.media_controller.performPlayMedia
+import com.kire.audio.presentation.model.PlayerStateParams
 
 import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.state.TrackState
@@ -164,11 +165,11 @@ fun FavouritePanel(
                             mainTextColor = Color.White,
                             satelliteTextColor = Color(0xFFEBEBEB),
                             onClick = {
+                                PlayerStateParams.isPlaying = if (track.path == trackState.currentTrackPlaying?.path) !PlayerStateParams.isPlaying else true
                                 /** Обновляем информацию о текущем воспроизводимом треке */
                                 onEvent(
                                     TrackUiEvent.updateTrackState(
                                         trackState.copy(
-                                            isPlaying = if (track.path == trackState.currentTrackPlaying?.path) !trackState.isPlaying else true,
                                             currentTrackPlaying = track,
                                             currentTrackPlayingIndex = listIndex
                                         )
@@ -177,9 +178,9 @@ fun FavouritePanel(
                                 /** Обрабатываем разные ситуации,
                                  * чтобы понять ставить на паузу/воспроизведение или воспроизводить иной трек */
                                 mediaController?.apply {
-                                    if (trackState.isPlaying && trackState.currentTrackPlaying?.path == track.path)
+                                    if (PlayerStateParams.isPlaying && trackState.currentTrackPlaying?.path == track.path)
                                         pause()
-                                    else if (!trackState.isPlaying && trackState.currentTrackPlaying?.path == track.path) {
+                                    else if (!PlayerStateParams.isPlaying && trackState.currentTrackPlaying?.path == track.path) {
                                         prepare()
                                         play()
 

@@ -26,7 +26,7 @@ import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
  * @param satelliteTextStyle стиль доп. текста
  * @param modifier модификатор
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun TwoTextsInColumn(
@@ -37,7 +37,7 @@ fun TwoTextsInColumn(
     modifier: Modifier = Modifier
 ) {
 
-    // Колонка с текстами
+    /** Колонка с текстами */
     Column(
         modifier = modifier
             .wrapContentHeight(),
@@ -45,7 +45,7 @@ fun TwoTextsInColumn(
         verticalArrangement = Arrangement.spacedBy(Dimens.columnUniversalTextSpacedBy)
     ) {
 
-        // Основной текст
+        /** Основной текст */
         AnimatedContent(targetState = mainText, label = "") {
             RubikFontText(
                 text = it ?: LocalizationProvider.strings.nothingWasFound,
@@ -53,7 +53,7 @@ fun TwoTextsInColumn(
             )
         }
 
-        // Дополнительный текст
+        /** Дополнительный текст */
         AnimatedContent(targetState = satelliteText, label = "") {
             RubikFontText(
                 text = it ?: LocalizationProvider.strings.nothingWasFound,
