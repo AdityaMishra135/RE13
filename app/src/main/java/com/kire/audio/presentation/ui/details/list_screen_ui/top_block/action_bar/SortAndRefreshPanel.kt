@@ -43,7 +43,10 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
 fun SortAndRefreshPanel(
     refreshAction: () -> Unit,
     modifier: Modifier = Modifier,
-    dropDownMenu: @Composable (isExpanded: () -> Boolean, onDismiss: () -> Unit) -> Unit = { _, _ -> }
+    dropDownMenu: @Composable (
+        isExpanded: () -> Boolean,
+        onDismiss: () -> Unit
+    ) -> Unit = { _, _ -> }
 ){
 
     /** Флаг открытия меню сортировки */
@@ -57,7 +60,7 @@ fun SortAndRefreshPanel(
         Row(
             modifier = Modifier
                 .wrapContentSize()
-                .clip(RoundedCornerShape(Dimens.universalRoundedCorner))
+                .clip(RoundedCornerShape(Dimens.universalRoundedCorners))
                 .background(color = AudioExtendedTheme.extendedColors.controlElementsBackground)
                 .padding(Dimens.universalPad),
             verticalAlignment = Alignment.CenterVertically,

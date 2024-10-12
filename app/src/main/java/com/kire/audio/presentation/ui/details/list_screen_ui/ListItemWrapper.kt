@@ -1,11 +1,9 @@
 package com.kire.audio.presentation.ui.details.list_screen_ui
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,25 +23,29 @@ import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.media3.session.MediaController
 
-import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.details.common.Divider
 import com.kire.audio.presentation.ui.details.common.MediaControls
-import com.kire.audio.presentation.ui.details.common.SliderBlock
+import com.kire.audio.presentation.ui.details.common.slider.SliderWithDurationAndCurrentPosition
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
+import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
+import com.kire.audio.presentation.util.modifier.dynamicPadding
 import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Обертка для ListItem, раскрывает панель с дополнительным функционалом вокруг ListItem
  *
- * @param track трек, который соответствует данному ListItem в списке
+ * @param id id трека, соответствующего данному элементу списка
  * @param trackState состояние воспроизведения
  * @param mediaController для управления воспроизведением
  * @param modifier модификатор
@@ -57,13 +59,13 @@ import kotlinx.coroutines.flow.StateFlow
 fun ListItemWrapper(
     id: String,
     trackState: StateFlow<TrackState>,
-    mediaController: MediaController?,
     modifier: Modifier = Modifier,
+    mediaController: MediaController? = null,
     showBottomBar: (Boolean) -> Unit = {},
     goToPlayerScreen: () -> Unit = {},
     listItem: @Composable (Modifier, () -> Unit) -> Unit,
 ) {
-
+    /** Текущее состояние воспроизведения */
     val trackState by trackState.collectAsStateWithLifecycle()
 
     /** Флаг клика на ListItem */
@@ -88,27 +90,29 @@ fun ListItemWrapper(
         }
     }
 
-    /** Степень прозрачности фона */
-    val backgroundAlpha by animateFloatAsState(targetValue = if (isClicked) 1f else 0f)
-
     /** Отступ от границы обертки внутреннего контента*/
-    val padFromBorders by animateDpAsState(targetValue = if (isClicked) Dimens.universalPad else 0.dp)
+    val padFromBorders by animateDpAsState(
+        targetValue = if (isClicked) Dimens.universalPad else 0.dp,
+        animationSpec = Animation.universalFiniteSpring()
+    )
+
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isClicked) AudioExtendedTheme.extendedColors.controlElementsBackground else Color.Transparent,
+        animationSpec = Animation.universalFiniteSpring()
+    )
 
     Column(
         modifier = modifier
             .wrapContentSize()
-            .background(
-                color = AudioExtendedTheme.extendedColors.controlElementsBackground.copy(alpha = backgroundAlpha),
-                shape = RoundedCornerShape(Dimens.universalRoundedCorner)
-            )
-            .padding(padFromBorders)
+            .clip(RoundedCornerShape(Dimens.universalRoundedCorners))
+            .drawBehind { drawRoundRect(color = backgroundColor) }
+            .dynamicPadding { padFromBorders }
     ) {
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
             /** Базовый компонент, представляющий отдельный трек его обложкой, названием и иссполнителем */
             listItem(
@@ -120,10 +124,9 @@ fun ListItemWrapper(
             /** Кнопки управления воспроизведением */
             AnimatedVisibility(visible = isClicked) {
                 MediaControls(
-                    trackState = trackState,
                     mediaController = mediaController,
                     modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy)
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy)
                 )
             }
         }
@@ -134,7 +137,7 @@ fun ListItemWrapper(
                 verticalArrangement = Arrangement.spacedBy(Dimens.sliderAndDividerSpacedBy)
             ) {
                 /** Слайдер для перемотки трека */
-                SliderBlock(mediaController = mediaController)
+                SliderWithDurationAndCurrentPosition(mediaController = mediaController)
 
                 /** Служит как кнопка для открытия экрана плеера */
                 Divider(

@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
+
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import com.kire.audio.presentation.util.modifier.bounceClick
@@ -31,6 +32,8 @@ import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.details.common.TwoTextsInColumn
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
+import com.kire.audio.presentation.util.rememberDerivedStateOf
+
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -63,26 +66,23 @@ fun TextAndHeart(
     /** Цвет сердечка в неактивном состоянии */
     val heartIconTintIdle = AudioExtendedTheme.extendedColors.playerScreenButton
     /** Цвет сердечка в зависимости того, находится трек в избранном или нет */
-    val heartIconTint by remember {
-        derivedStateOf {
-            if (trackState.currentTrackPlaying?.isFavourite == true)
-                heartPressedColor
-            else
-                heartIconTintIdle
-        }
+    val heartIconTint by rememberDerivedStateOf {
+        if (trackState.currentTrackPlaying?.isFavourite == true)
+            heartPressedColor
+        else
+            heartIconTintIdle
     }
 
     Row(modifier = Modifier
-        .fillMaxWidth()
-        .wrapContentHeight(),
+            .fillMaxWidth()
+            .wrapContentHeight(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
 
         /** Название трека и исполнитель */
         TwoTextsInColumn(
-            modifier = Modifier
-                .weight(1f),
+            modifier = Modifier.weight(1f),
             mainText = trackState.currentTrackPlaying?.title,
             satelliteText = trackState.currentTrackPlaying?.artist,
             mainTextStyle = TextStyle(

@@ -21,10 +21,14 @@ data class AudioExtendedColors(
     val textDayNightTheSame: Color = Color.Unspecified,
     val buttonDayNightTheSame: Color = Color.Unspecified,
     val inactiveTrack: Color = Color.Unspecified,
+    val inactiveTrackPlayerScreen: Color = Color.Unspecified,
     val activeTrack: Color = Color.Unspecified,
     val thumb: Color = Color.Unspecified,
+    val thumbPlayerScreen: Color = Color.Unspecified,
     val thumbBorder: Color = Color.Unspecified,
     val sliderDurationAndDivider: Color = Color.Unspecified,
     val albumSuggestionItemText: Color = Color.Unspecified,
-    val heartPressed: Color = Color.Unspecified
+    val heartPressed: Color = Color.Unspecified,
+    val favouritePanelMainTextColor: Color = Color.White,
+    val favouritePanelSatelliteTextColor: Color = Color(0xFFEBEBEB)
 )

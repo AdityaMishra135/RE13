@@ -14,12 +14,13 @@ import com.kire.audio.presentation.model.PlayerStateParams
 
 import com.kire.audio.presentation.navigation.transitions.ListScreenTransitions
 import com.kire.audio.presentation.model.event.TrackUiEvent
-import com.kire.audio.presentation.ui.details.common.LazyListMainAndAlbumPattern
+import com.kire.audio.presentation.ui.details.common.LazyListPattern
 import com.kire.audio.presentation.ui.details.common.ListWithTopAndFab
 import com.kire.audio.presentation.ui.details.list_screen_ui.top_block.TopBlock
 import com.kire.audio.presentation.ui.screen.destinations.AlbumScreenDestination
 import com.kire.audio.presentation.ui.screen.destinations.ListAlbumScreenDestination
 import com.kire.audio.presentation.ui.screen.destinations.PlayerScreenDestination
+import com.kire.audio.presentation.util.rememberDerivedStateOf
 
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
@@ -39,15 +40,13 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Destination(style = ListScreenTransitions::class)
 @Composable
 fun ListScreen(
-    trackViewModel: TrackViewModel,
-    shiftPlayerBottomBar: () -> Unit,
     navigator: DestinationsNavigator,
-    mediaController: MediaController?
+    trackViewModel: TrackViewModel,
+    shiftPlayerBottomBar: () -> Unit = {},
+    mediaController: MediaController? = null
 ) {
-
     /** Экземпляр TrackState. Содержит информацию о состоянии воспроизведения */
     val trackState by trackViewModel.trackState.collectAsStateWithLifecycle()
-
     /** Список всех треков */
     val allTracks by trackViewModel.tracks.collectAsStateWithLifecycle()
 
@@ -56,12 +55,40 @@ fun ListScreen(
         trackViewModel.onEvent(TrackUiEvent.updateArtistWithTracks())
     }
 
+    val contentIsEmpty by rememberDerivedStateOf {
+        { allTracks.isEmpty() }
+    }
+
+    val onAlbumSuggestionClick by rememberDerivedStateOf {
+        { albumTitle: String ->
+            val album = trackViewModel.artistWithTracks.value[albumTitle]
+
+            album?.let {
+                PlayerStateParams.isPlaying = true
+                trackViewModel.onEvent(
+                    TrackUiEvent.updateTrackState(
+                        trackState.copy(
+                            currentList = album,
+                            currentTrackPlaying = try {
+                                album[0]
+                            } catch (_: Exception) { null },
+                            currentTrackPlayingIndex = 0
+                        )
+                    )
+                )
+                navigator.navigate(AlbumScreenDestination)
+                try {
+                    mediaController?.performPlayMedia(album[0])
+                } catch (_: Exception) { }
+            } ?: Unit
+        }
+    }
+
     /** Отрисовываем контент экрана */
     ListWithTopAndFab(
-        listSize = allTracks.size,
+        contentIsEmpty = contentIsEmpty,
         shiftBottomBar = shiftPlayerBottomBar,
         topBar = {
-
             /** Шапка с названием экрана, поиском, сортировкой треков и возможностью перехода на экран альбомов*/
             TopBlock(
                 trackViewModel = trackViewModel,
@@ -72,39 +99,16 @@ fun ListScreen(
                 onTitleClick = {
                     navigator.navigate(ListAlbumScreenDestination)
                 },
-                onAlbumSuggestionClick = { albumTitle ->
-                    val album = trackViewModel.artistWithTracks.value[albumTitle]
-
-                    /** Получаем список треков из альбома с названием albumTitle и обновляем TrackState.
-                     * После чего открываем экран альбома */
-                    album?.let {
-                        PlayerStateParams.isPlaying = true
-                        trackViewModel.onEvent(
-                            TrackUiEvent.updateTrackState(
-                                trackState.copy(
-                                    currentList = album,
-                                    currentTrackPlaying = try {
-                                        album[0]
-                                    } catch (_: Exception) { null },
-                                    currentTrackPlayingIndex = 0
-                                )
-                            )
-                        )
-                        navigator.navigate(AlbumScreenDestination)
-                        try {
-                            mediaController?.performPlayMedia(album[0])
-                        } catch (_: Exception) { }
-                    }
-                }
+                onAlbumSuggestionClick = onAlbumSuggestionClick
             )
         }
     ) { modifier, listState ->
 
         /** Список треков */
-        LazyListMainAndAlbumPattern(
+        LazyListPattern(
             trackStateFlow = trackViewModel.trackState,
             onEvent = trackViewModel::onEvent,
-            list = allTracks,
+            list = { allTracks },
             mediaController = mediaController,
             state = listState,
             navigateToPlayerScreen = {

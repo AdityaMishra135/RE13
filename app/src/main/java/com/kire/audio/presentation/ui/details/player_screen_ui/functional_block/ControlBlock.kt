@@ -1,5 +1,6 @@
 package com.kire.audio.presentation.ui.details.player_screen_ui.functional_block
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -18,9 +19,12 @@ import androidx.compose.material.icons.rounded.RepeatOne
 import androidx.compose.material3.Icon
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.media3.session.MediaController
 
@@ -31,28 +35,40 @@ import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.ui.details.common.MediaControls
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
+import com.kire.audio.presentation.util.rememberDerivedStateOf
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Кнопки переключения треков,
  * постановки на паузу/воспроизведение,
  * переключения режима воспроизведения и открытия панели любимых треков.
  *
- * @param modifierToExpandFavouritePanel модификатор для открытия панели любимых треков
  * @param trackState состояние воспроизведения
  * @param onEvent обработчик UI событий
  * @param mediaController для управления воспроизведением
  * @param saveRepeatMode действие для сохранения режима воспроизведения
+ * @param expandPanelByNumber действие для открытия панели любимых треков
  *
  * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun ControlBlock(
-    trackState: TrackState,
-    onEvent: (TrackUiEvent) -> Unit,
-    mediaController: MediaController?,
-    saveRepeatMode: (Int) -> Unit,
-    modifierToExpandFavouritePanel: Modifier = Modifier,
+    trackState: StateFlow<TrackState>,
+    onEvent: (TrackUiEvent) -> Unit = {},
+    mediaController: MediaController? = null,
+    saveRepeatMode: (Int) -> Unit = {},
+    expandPanelByNumber: () -> Unit = {}
 ) {
+
+    val trackState by trackState.collectAsStateWithLifecycle()
+
+    val repeatModeIcon by rememberDerivedStateOf {
+        when (trackState.trackRepeatMode) {
+            RepeatMode.REPEAT_ONCE -> Icons.Rounded.Repeat
+            RepeatMode.REPEAT_TWICE -> Icons.Rounded.RepeatOne
+            RepeatMode.REPEAT_CYCLED -> Icons.Rounded.RepeatOn
+        }
+    }
 
     Row(
         modifier = Modifier
@@ -66,11 +82,7 @@ fun ControlBlock(
          * однократный повтор, двойной повтор, циклический повтор
          * */
         Icon(
-            when (trackState.trackRepeatMode) {
-                RepeatMode.REPEAT_ONCE -> Icons.Rounded.Repeat
-                RepeatMode.REPEAT_TWICE -> Icons.Rounded.RepeatOne
-                RepeatMode.REPEAT_CYCLED -> Icons.Rounded.RepeatOn
-            },
+            imageVector = repeatModeIcon,
             contentDescription = "RepeatMode",
             tint = AudioExtendedTheme.extendedColors.playerScreenButton,
             modifier = Modifier
@@ -102,7 +114,6 @@ fun ControlBlock(
              * переход к следующему/ предыдущему треку, постановка на паузу и проигрывание
              * */
             MediaControls(
-                trackState = trackState,
                 mediaController = mediaController,
                 modifier = Modifier.align(Alignment.Center),
                 playIcon = Icons.Rounded.PlayCircle,
@@ -110,16 +121,21 @@ fun ControlBlock(
                 skipIconsSize = Dimens.playerScreenSkipIconsSize,
                 iconsTint = AudioExtendedTheme.extendedColors.playerScreenButton,
                 playPauseIconSize = Dimens.playerScreenPlayPauseIconSize,
-                horizontalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy)
+                horizontalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy)
             )
         }
 
         /** Кнопка для открытия панели любимых треков */
         Icon(
-            Icons.AutoMirrored.Rounded.PlaylistPlay,
+            imageVector = Icons.AutoMirrored.Rounded.PlaylistPlay,
             contentDescription = "Playlist",
-            modifier = modifierToExpandFavouritePanel
-                .size(Dimens.playerScreenRepeatAndPlaylistIconSize),
+            modifier = Modifier
+                .size(Dimens.playerScreenRepeatAndPlaylistIconSize)
+                .pointerInput(Unit) {
+                    detectTapGestures {
+                        expandPanelByNumber()
+                    }
+                },
             tint = AudioExtendedTheme.extendedColors.playerScreenButton,
         )
     }

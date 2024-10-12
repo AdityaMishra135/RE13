@@ -147,11 +147,11 @@ fun DialogGalleryOrPhoto(
                 .wrapContentSize()
                 .background(
                     color = AudioExtendedTheme.extendedColors.controlElementsBackground,
-                    shape = RoundedCornerShape(Dimens.universalRoundedCorner)
+                    shape = RoundedCornerShape(Dimens.universalRoundedCorners)
                 )
                 .padding(Dimens.universalPad),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy)
+            horizontalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy)
         ) {
 
             /** Создание фото с нуля */

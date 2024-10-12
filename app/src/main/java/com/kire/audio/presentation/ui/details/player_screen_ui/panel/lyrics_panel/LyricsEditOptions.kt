@@ -33,10 +33,19 @@ import com.kire.audio.presentation.constants.LyricsRequestMode
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 
+/**
+ * Меню редактирования текста песни
+ *
+ * @param updateLyricsRequestMode Изменяет режим редактирования
+ * @param lyricsRequestWithUpdatingTrack Запускает процесс поиска текста песни
+ * @param modifier Модификатор
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @Composable
 fun LyricsEditOptions(
     updateLyricsRequestMode: (LyricsRequestMode) -> Unit,
-    lyricsRequest: () -> Unit,
+    lyricsRequestWithUpdatingTrack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -51,10 +60,11 @@ fun LyricsEditOptions(
             modifier = Modifier
                 .wrapContentHeight()
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy),
+            verticalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy),
             horizontalAlignment = Alignment.Start
         ){
 
+            /** Поиск по ссылке */
             EditOption(
                 leadingIcon = Icons.Rounded.Link,
                 text = LocalizationProvider.strings.byGeniusLinkModeText,
@@ -63,6 +73,8 @@ fun LyricsEditOptions(
                 }
             )
 
+            /** Поиск по имени исполнителя и названию трека,
+             * введенным пользователем */
             EditOption(
                 leadingIcon = Icons.Rounded.Lyrics,
                 text = LocalizationProvider.strings.byArtistAndTitleModeText,
@@ -71,6 +83,7 @@ fun LyricsEditOptions(
                 }
             )
 
+            /** Редактирование текущего текста */
             EditOption(
                 leadingIcon = Icons.Rounded.EditNote,
                 text = LocalizationProvider.strings.editModeText,
@@ -79,18 +92,28 @@ fun LyricsEditOptions(
                 }
             )
 
+            /** Поиск в автоматическом режиме */
             EditOption(
                 leadingIcon = Icons.Rounded.AutoAwesome,
                 text = LocalizationProvider.strings.automaticModeText,
                 onClick = {
                     updateLyricsRequestMode(LyricsRequestMode.AUTOMATIC)
-                    lyricsRequest()
+                    lyricsRequestWithUpdatingTrack()
                 }
             )
         }
     }
 }
 
+/**
+ * Вариант редактирования текста песни
+ *
+ * @param leadingIcon Иконка
+ * @param text Название варианта
+ * @param onClick Действие при нажатии
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @Composable
 private fun EditOption(
     leadingIcon: ImageVector,
@@ -102,10 +125,8 @@ private fun EditOption(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .bounceClick {
-                onClick()
-            },
-        horizontalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy),
+            .bounceClick { onClick() },
+        horizontalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy),
         verticalAlignment = Alignment.CenterVertically
     ) {
 

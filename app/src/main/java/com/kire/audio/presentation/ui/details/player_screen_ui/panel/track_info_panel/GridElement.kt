@@ -24,10 +24,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-import com.kire.audio.presentation.ui.details.common.RubikFontText
+import com.kire.audio.presentation.ui.details.common.RubikFontBasicText
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 
-/** Представляет заголовок для поля с некоторой информацией о треке
+/** Представляет заголовок для поля
+ * с некоторой информацией о треке
  *
  * @param title название поля
  *
@@ -37,7 +38,7 @@ import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 fun GridElementTitle(
     title: String
 ){
-    RubikFontText(
+    RubikFontBasicText(
         text = title,
         style = TextStyle(
             color = Color.White,
@@ -63,7 +64,7 @@ fun GridElementTitle(
 @Composable
 fun GridElementInfo(
     text: String,
-    isEnabled: Boolean = false,
+    isEnabled: () -> Boolean = { false },
     isEditable: Boolean = false,
     isImageURI: Boolean = false,
     updateText: ((String) -> Unit)? = null,
@@ -83,9 +84,9 @@ fun GridElementInfo(
                 shape = MaterialTheme.shapes.small,
             )
             .fillMaxWidth(0.5f)
-            .pointerInput(isEnabled && isEditable && isImageURI) {
+            .pointerInput(isEnabled() && isEditable && isImageURI) {
                 detectTapGestures {
-                    if (isEnabled && isEditable && isImageURI && openImageChangingDialog != null)
+                    if (isEnabled() && isEditable && isImageURI && openImageChangingDialog != null)
                         openImageChangingDialog(true)
                 }
             },
@@ -96,10 +97,10 @@ fun GridElementInfo(
                     updateText(it)
             }
         },
-        enabled = isEnabled && isEditable && !isImageURI,
+        enabled = isEnabled() && isEditable && !isImageURI,
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = LocalTextStyle.current.copy(
-            color = if (isEnabled && isEditable) AudioExtendedTheme.extendedColors.roseAccent else Color.White,
+            color = if (isEnabled() && isEditable) AudioExtendedTheme.extendedColors.roseAccent else Color.White,
             fontSize = 15.sp,
             fontWeight = FontWeight.Light,
             lineHeight = 15.sp,

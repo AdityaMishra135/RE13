@@ -1,5 +1,6 @@
 package com.kire.audio.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 
@@ -56,13 +57,13 @@ class TrackViewModel @Inject constructor(
     private val _trackState: MutableStateFlow<TrackState> = MutableStateFlow(TrackState())
     val trackState: StateFlow<TrackState> = _trackState.asStateFlow()
 
-    fun getTrackLyricsFromGeniusAndUpdateTrack(
+    suspend fun getTrackLyricsFromGeniusAndUpdateTrack(
         track: Track,
         mode: LyricsRequestMode,
-        title: String?,
-        artist: String?,
-        userInput: String?,
-    ) {
+        title: String? = "",
+        artist: String? = "",
+        userInput: String? = ""
+    ): ILyricsRequestState {
         onEvent(
             TrackUiEvent.updateTrackState(
                 _trackState.value.copy(
@@ -73,20 +74,12 @@ class TrackViewModel @Inject constructor(
             )
         )
 
-        viewModelScope.launch {
-            trackUseCases.getTrackLyricsFromGeniusUseCase(
-                mode = mode.toDomain(),
-                title = title,
-                artist = artist,
-                userInput = userInput
-            ).toPresentation().also { lyrics ->
-                onEvent(
-                    TrackUiEvent.upsertAndUpdateCurrentTrack(
-                        track = track.copy(lyrics = lyrics)
-                    )
-                )
-            }
-        }
+        return trackUseCases.getTrackLyricsFromGeniusUseCase(
+            mode = mode.toDomain(),
+            title = title,
+            artist = artist,
+            userInput = userInput
+        ).toPresentation()
     }
 
     /*
@@ -148,6 +141,7 @@ class TrackViewModel @Inject constructor(
     fun onEvent(event: TrackUiEvent) {
         when(event) {
             is TrackUiEvent.updateTrackState -> {
+                Log.d("MINE","QWEGQW")
                 _trackState.update { _ ->
                     event.trackState
                 }
@@ -176,8 +170,8 @@ class TrackViewModel @Inject constructor(
                 }
             }
 
-            is TrackUiEvent.updateSortOption -> {
-                _sortType.value = event.sortOption.sortType
+            is TrackUiEvent.updateSortOptionAndSave -> {
+                _sortType.value = event.sortOption.sortType.also { saveSortOption(it) }
             }
 
             is TrackUiEvent.upsertAndUpdateCurrentTrack -> {
@@ -196,15 +190,9 @@ class TrackViewModel @Inject constructor(
                 )
             }
 
-            is TrackUiEvent.getTrackLyricsFromGeniusAndUpdateTrack -> {
-                getTrackLyricsFromGeniusAndUpdateTrack(
-                    track = event.track,
-                    mode = event.mode,
-                    title = event.title,
-                    artist = event.artist,
-                    userInput = event.userInput
-                )
-            }
+            is TrackUiEvent.updateTrackDataBase -> updateTrackDataBase()
+
+//            is TrackUiEvent.saveSortOption -> saveSortOption(event.sortType.also {  })
         }
     }
 

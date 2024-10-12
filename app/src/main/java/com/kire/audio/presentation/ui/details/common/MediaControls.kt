@@ -28,7 +28,6 @@ import androidx.media3.session.MediaController
 
 import com.kire.audio.device.audio.util.MediaCommands
 import com.kire.audio.presentation.model.PlayerStateParams
-import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
@@ -38,7 +37,6 @@ import com.kire.audio.presentation.util.modifier.bounceClick
  * Кнопки для управления воспроизведением: переход к следующему/предыдущему треку,
  * постановка на паузу и проигрывание
  *
- * @param trackState состояние воспроизведения
  * @param mediaController для управления воспроизведением
  * @param modifier модификатор
  * @param horizontalArrangement распределение по ширине
@@ -55,9 +53,8 @@ import com.kire.audio.presentation.util.modifier.bounceClick
  */
 @Composable
 fun MediaControls(
-    trackState: TrackState,
-    mediaController: MediaController?,
     modifier: Modifier = Modifier,
+    mediaController: MediaController? = null,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.SpaceEvenly,
     verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
     skipPreviousIcon: ImageVector = Icons.Rounded.SkipPrevious,
@@ -78,6 +75,7 @@ fun MediaControls(
         horizontalArrangement = horizontalArrangement,
         verticalAlignment = verticalAlignment
     ) {
+        /** Иконка для перехода к предыдущему треку */
         Icon(
             imageVector = skipPreviousIcon,
             contentDescription = null,
@@ -89,7 +87,8 @@ fun MediaControls(
                 }
         )
 
-        AnimatedContent(targetState = PlayerStateParams.isPlaying, label = "") {
+        /** Иконка начала воспроизвеления и постановки на паузу */
+        AnimatedContent(targetState = PlayerStateParams.isPlaying) {
             Icon(
                 imageVector =
                     if (it) pauseIcon
@@ -111,6 +110,7 @@ fun MediaControls(
             )
         }
 
+        /** Иконка для перехода к следующему треку */
         Icon(
             imageVector = skipNextIcon,
             contentDescription = null,

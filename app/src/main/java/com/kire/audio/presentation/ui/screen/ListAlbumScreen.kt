@@ -15,9 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 
 import androidx.compose.ui.Modifier
@@ -26,7 +24,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.media3.session.MediaController
 import com.kire.audio.presentation.model.PlayerStateParams
-import com.kire.audio.presentation.model.event.TrackUiEvent
 
 import com.kire.audio.presentation.navigation.transitions.ListAlbumScreenTransitions
 
@@ -37,6 +34,7 @@ import com.kire.audio.presentation.ui.screen.destinations.AlbumScreenDestination
 import com.kire.audio.presentation.ui.screen.destinations.ListScreenDestination
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
+import com.kire.audio.presentation.util.rememberDerivedStateOf
 
 import com.kire.audio.presentation.viewmodel.TrackViewModel
 
@@ -48,16 +46,16 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 fun ListAlbumScreen(
     trackViewModel: TrackViewModel,
     shiftPlayerBottomBar: () -> Unit,
-    mediaController: MediaController?,
+    mediaController: MediaController? = null,
     navigator: DestinationsNavigator
 ){
-    val trackState by trackViewModel.trackState.collectAsStateWithLifecycle()
-
     val albumsWithTracks by trackViewModel.artistWithTracks.collectAsStateWithLifecycle()
-    val albums by remember {
-        derivedStateOf {
-            albumsWithTracks.keys.toList()
-        }
+    val albums by rememberDerivedStateOf {
+        albumsWithTracks.keys.toList()
+    }
+
+    val contentIsEmpty by rememberDerivedStateOf {
+        { albums.isEmpty() }
     }
 
     BackHandler {
@@ -66,7 +64,7 @@ fun ListAlbumScreen(
     }
 
     ListWithTopAndFab(
-        listSize = albums.size,
+        contentIsEmpty = contentIsEmpty,
         shiftBottomBar = shiftPlayerBottomBar,
         topBar = {
             Box(
@@ -80,7 +78,7 @@ fun ListAlbumScreen(
             ) {
                 ScreenHeader(
                     screenTitle = LocalizationProvider.strings.albumScreenHeader,
-                    isClicked = false,
+                    isClicked = { false },
                     onTitleClick = {
                         navigator.popBackStack(ListScreenDestination, inclusive = false)
                     }
@@ -92,15 +90,20 @@ fun ListAlbumScreen(
         LazyColumn(
             state = state,
             modifier = modifier,
-            contentPadding = PaddingValues(bottom = Dimens.columnUniversalVerticalContentPad),
-            verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy)
+            contentPadding = PaddingValues(bottom = Dimens.universalColumnVerticalContentPad),
+            verticalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy)
         ) {
 
             itemsIndexed(albums, key = {_, title -> title}) { _, album ->
+
+                val tracks by rememberDerivedStateOf {
+                    albumsWithTracks[album] ?: emptyList()
+                }
+
                 ListItemAlbumWrapper(
-                    modifier = Modifier.animateItem(),
-                    trackState = trackState,
-                    tracks = albumsWithTracks[album] ?: emptyList(),
+                    modifier = Modifier,
+                    trackStateFlow = trackViewModel.trackState,
+                    tracks = tracks,
                     onEvent = trackViewModel::onEvent,
                     mediaController = mediaController,
                     onImageClick = {

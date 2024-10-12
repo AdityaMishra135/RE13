@@ -21,7 +21,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-import com.kire.audio.presentation.ui.details.common.RubikFontText
+import com.kire.audio.presentation.ui.details.common.RubikFontBasicText
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
@@ -33,13 +33,13 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
  * @param animatedTextColor цвет текста
  * @param onClick действие при нажатии на весь компонент
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun AlbumTrackFastAccessItem(
     trackTitle: String,
-    animatedBackgroundColor: Color,
-    animatedTextColor: Color,
+    animatedBackgroundColor: () -> Color,
+    animatedTextColor: () -> Color,
     onClick: () -> Unit
 ) {
 
@@ -51,21 +51,21 @@ fun AlbumTrackFastAccessItem(
     Box(
         modifier = Modifier
             .wrapContentSize()
-            .clip(RoundedCornerShape(Dimens.universalRoundedCorner))
+            .clip(RoundedCornerShape(Dimens.universalRoundedCorners))
             .shadow(
                 elevation = Dimens.universalShadowElevation,
                 spotColor = AudioExtendedTheme.extendedColors.shadow,
-                shape = RoundedCornerShape(Dimens.universalRoundedCorner)
+                shape = RoundedCornerShape(Dimens.universalRoundedCorners)
             )
             .drawBehind {
                 drawRoundRect(
-                    color = animatedBackgroundColor,
+                    color = animatedBackgroundColor(),
                     cornerRadius = CornerRadius(
-                        x = Dimens.universalRoundedCorner.value,
-                        y = Dimens.universalRoundedCorner.value
+                        x = Dimens.universalRoundedCorners.value,
+                        y = Dimens.universalRoundedCorners.value
                     )
                 )
-                drawRect(animatedBackgroundColor)
+                drawRect(animatedBackgroundColor())
             }
             .clickable(
                 indication = null,
@@ -74,13 +74,13 @@ fun AlbumTrackFastAccessItem(
             .padding(Dimens.universalPad),
         contentAlignment = Alignment.Center
     ) {
-        RubikFontText(
+        RubikFontBasicText(
             text = trackTitle,
             style = TextStyle(
                 fontWeight = FontWeight.Medium,
                 fontSize = 15.sp,
                 lineHeight = 15.sp,
-                color = animatedTextColor
+                color = animatedTextColor()
             )
         )
     }

@@ -25,7 +25,7 @@ import com.ramcosta.composedestinations.spec.NavHostEngine
 fun NavigationUI(
     trackViewModel: TrackViewModel,
     shiftPlayerBottomBar: () -> Unit,
-    mediaController: MediaController?,
+    mediaController: MediaController? = null,
     navHostController: NavHostController,
     navHostEngine: NavHostEngine
 ){

@@ -33,7 +33,7 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
  * @param modifier модификатор
  * @param onClick действие при клике на элемент
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun ListItem(
@@ -43,8 +43,8 @@ fun ListItem(
     modifier: Modifier = Modifier,
     mainTextColor: Color = AudioExtendedTheme.extendedColors.primaryText,
     satelliteTextColor: Color = AudioExtendedTheme.extendedColors.secondaryText,
-    onClick: () -> Unit = {},
-){
+    onClick: () -> Unit = {}
+) {
 
     val interactionSource = remember {
         MutableInteractionSource()
@@ -64,12 +64,11 @@ fun ListItem(
     ){
 
         AsyncImageWithLoading(
-            model = leadingImageUri,
+            imageUri = leadingImageUri,
             modifier = Modifier
                 .size(Dimens.listItemImageSize)
                 .clip(CircleShape)
         )
-
 
         TwoTextsInColumn(
             modifier = Modifier
@@ -105,6 +104,7 @@ fun ListItem(
     satelliteTextColor: Color = AudioExtendedTheme.extendedColors.secondaryText,
     onClick: () -> Unit = {}
 ){
+
     ListItem(
         mainText = track.title,
         satelliteText = track.artist,

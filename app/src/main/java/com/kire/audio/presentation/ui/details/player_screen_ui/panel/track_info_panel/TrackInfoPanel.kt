@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.model.state.TrackState
@@ -21,22 +22,24 @@ import com.kire.audio.presentation.ui.details.player_screen_ui.panel.DialogGalle
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 import com.kire.audio.screen.functional.convertLongToTime
+import kotlinx.coroutines.flow.StateFlow
 
 import java.util.concurrent.TimeUnit
 
 /**
  * Панель информации о треке
  *
- * @param trackState состояние воспроизведения
+ * @param trackStateFlow состояние воспроизведения
  * @param onEvent обработчик UI событий
  *
  * @author Михаил Гонтарев (KiREHwYE)
  * */
 @Composable
 fun TrackInfoPanel(
-    trackState: TrackState,
-    onEvent: (TrackUiEvent) -> Unit
+    trackStateFlow: StateFlow<TrackState>,
+    onEvent: (TrackUiEvent) -> Unit = {}
 ) {
+    val trackState by trackStateFlow.collectAsStateWithLifecycle()
 
     /** Флаг открытия диалога для смены обложки трека */
     var openPhotoChangingDialog by remember {
@@ -86,7 +89,7 @@ fun TrackInfoPanel(
                 verticalArrangement = Arrangement.spacedBy(Dimens.dialogsHeaderBottomSpacer)
             ){
                 PanelHeader(
-                    isEnabled = isEnabled,
+                    isEnabled = { isEnabled },
                     onClick = {
                         /** Если кликнули на иконку сохранения,
                          * то обновляем данные о треке,
@@ -129,7 +132,7 @@ fun TrackInfoPanel(
                             /** Информация о треке, соответствующая данному заголовку */
                             GridElementInfo(
                                 text = element.value ?: nothingWasFound,
-                                isEnabled = isEnabled,
+                                isEnabled = { isEnabled },
                                 isImageURI = element.key == LocalizationProvider.strings.infoDialogImageUri,
                                 isEditable = element.key in editableFields,
                                 updateText = { newText ->

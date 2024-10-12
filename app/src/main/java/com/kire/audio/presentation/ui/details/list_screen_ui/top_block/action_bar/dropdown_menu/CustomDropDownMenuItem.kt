@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.sp
 
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.constants.SortType
-import com.kire.audio.presentation.ui.details.common.RubikFontText
+import com.kire.audio.presentation.ui.details.common.RubikFontBasicText
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.util.modifier.bounceClick
 
@@ -58,7 +58,7 @@ fun CustomDropDownMenuItem(
     ) {
 
         /** Название типа сортировки */
-        RubikFontText(
+        RubikFontBasicText(
             text = title,
             style = TextStyle(
                 fontSize = 19.sp,

@@ -23,6 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kire.audio.presentation.model.SortOption
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.constants.SortType
+import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 
@@ -34,8 +35,7 @@ import kotlinx.coroutines.flow.StateFlow
  * @param isExpanded флаг открытия меню
  * @param onDismiss действие при закрытии меню
  * @param sortType тип сортировки
- * @param saveSortOption сохранение типа сортировки
- * @param updateSortOption обновление типа сортировки
+ * @param onEvent обработчик UI событий
  *
  * @author Михаил Гонтарев (KiREHwYE)
  */
@@ -44,8 +44,7 @@ fun DropDownMenu(
     isExpanded: () -> Boolean,
     onDismiss: () -> Unit,
     sortType: StateFlow<SortType>,
-    saveSortOption: (SortType) -> Unit,
-    updateSortOption: (SortOption) -> Unit
+    onEvent: (TrackUiEvent) -> Unit
 ){
     /** Получаем актуальный тип сортировки */
     val sortOption by sortType.collectAsStateWithLifecycle()
@@ -61,19 +60,19 @@ fun DropDownMenu(
                 isSortOptionAsc
             } else (isSortOptionAsc + 1) % 2
 
-        updateSortOption(
-            if (isSortOptionAsc == 0) {
-                SortOption(sortTypeASC
-                    .also { saveSortOption(it) })
-            } else
-                SortOption(sortTypeDESC
-                    .also {saveSortOption(it) })
+        onEvent(
+            TrackUiEvent.updateSortOptionAndSave(
+                if (isSortOptionAsc == 0)
+                    SortOption(sortTypeASC )
+                else
+                    SortOption(sortTypeDESC)
+            )
         )
     }
 
     /** Делаем меню закругленные углы */
     MaterialTheme(
-        shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(Dimens.universalRoundedCorner))
+        shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(Dimens.universalRoundedCorners))
     ) {
         /** Само меню сортировки*/
         DropdownMenu(

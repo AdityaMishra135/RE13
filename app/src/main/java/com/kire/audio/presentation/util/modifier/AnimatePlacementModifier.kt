@@ -42,7 +42,7 @@ fun Modifier.animatePlacement(): Modifier = composed {
     }
     this
         .onPlaced {
-            // Вычисляет позицию в родительском компоненте
+            /** Вычисляет позицию в родительском компоненте */
             targetOffset = it
                 .positionInParent()
                 .round()

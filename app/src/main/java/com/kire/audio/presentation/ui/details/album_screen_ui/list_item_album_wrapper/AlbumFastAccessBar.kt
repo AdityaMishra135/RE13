@@ -12,10 +12,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.media3.session.MediaController
 
@@ -24,13 +27,16 @@ import com.kire.audio.presentation.model.PlayerStateParams
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
+import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
+import com.kire.audio.presentation.util.rememberDerivedStateOf
 
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Список с треками из альбома для быстрого доступа к ним без перехода на AlbumScreen
  *
- * @param trackState состояние воспроизведения
+ * @param trackStateFlow состояние воспроизведения
  * @param mediaController для управления воспроизведением
  * @param onEvent обработчик UI событий
  *
@@ -38,10 +44,12 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
  */
 @Composable
 fun AlbumFastAccessBar(
-    trackState: TrackState,
-    mediaController: MediaController?,
-    onEvent: (TrackUiEvent) -> Unit
+    trackStateFlow: StateFlow<TrackState>,
+    mediaController: MediaController? = null,
+    onEvent: (TrackUiEvent) -> Unit = {}
 ) {
+
+    val trackState by trackStateFlow.collectAsStateWithLifecycle()
 
     /** Состояние LazyRow */
     val listState = rememberLazyListState()
@@ -53,39 +61,34 @@ fun AlbumFastAccessBar(
             .wrapContentHeight(),
         contentPadding = PaddingValues(horizontal = Dimens.universalPad),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy)
+        horizontalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy)
     ) {
         itemsIndexed(trackState.currentList, key = {_, track -> track.id}) { listIndex, track ->
 
+            val isItCurrentTrackNow by rememberDerivedStateOf {
+                trackState.currentTrackPlaying?.id == track.id
+            }
+
             /** Анимирует цвет плитки с названием трека в зависимости от того он ли сейчас играет или нет */
             val animatedBackgroundColor by animateColorAsState(
-                targetValue = if (trackState.currentTrackPlaying?.id == track.id)
-                    AudioExtendedTheme.extendedColors.orangeAccent
-                else Color.White
+                targetValue = if (isItCurrentTrackNow) AudioExtendedTheme.extendedColors.orangeAccent
+                    else Color.White,
+                animationSpec = Animation.universalFiniteSpring()
             )
 
             /** Анимирует цвет текста названия трека в зависимости от того он ли сейчас играет или нет */
             val animatedTextColor by animateColorAsState(
-                targetValue =
-                    if (trackState.currentTrackPlaying?.id == track.id)
-                        Color.White
-                    else
-                        Color.Black
+                targetValue = if (isItCurrentTrackNow) Color.White
+                    else Color.Black,
+                animationSpec = Animation.universalFiniteSpring()
             )
 
-            /** Пролистывает до текущего выбранного трека, если он оказывается за пределами поля зрения */
-            LaunchedEffect(trackState.currentTrackPlaying?.id == track.id) {
-                if (trackState.currentTrackPlaying?.id == track.id)
-                    listState.animateScrollToItem(index = listIndex)
-            }
-
-            /** Плитка, представляющая некоторый трек из альбома его названием */
-            AlbumTrackFastAccessItem(
-                trackTitle = track.title,
-                animatedBackgroundColor = animatedBackgroundColor,
-                animatedTextColor = animatedTextColor,
-                onClick = {
-                    PlayerStateParams.isPlaying = if (track.path == trackState.currentTrackPlaying?.path) !PlayerStateParams.isPlaying else true
+            val onClickStable = remember {
+                {
+                    PlayerStateParams.isPlaying =
+                        if (track.path == trackState.currentTrackPlaying?.path)
+                            !PlayerStateParams.isPlaying
+                        else true
                     /** Обновляем играющий трек */
                     onEvent(
                         TrackUiEvent.updateTrackState(
@@ -106,7 +109,22 @@ fun AlbumFastAccessBar(
                         } else
                             performPlayMedia(track)
                     }
+                    Unit
                 }
+            }
+
+            /** Пролистывает до текущего выбранного трека, если он оказывается за пределами поля зрения */
+            LaunchedEffect(isItCurrentTrackNow) {
+                if (isItCurrentTrackNow)
+                    listState.animateScrollToItem(index = listIndex)
+            }
+
+            /** Плитка, представляющая некоторый трек из альбома его названием */
+            AlbumTrackFastAccessItem(
+                trackTitle = track.title,
+                animatedBackgroundColor = { animatedBackgroundColor },
+                animatedTextColor = { animatedTextColor },
+                onClick = onClickStable
             )
         }
     }

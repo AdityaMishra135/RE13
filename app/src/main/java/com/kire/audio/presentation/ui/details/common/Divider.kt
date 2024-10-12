@@ -14,6 +14,14 @@ import androidx.compose.ui.graphics.Color
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 
+/**
+ * Разделитель на 1/4 доступной ширины с закругленными углами
+ *
+ * @param modifier модификатор
+ * @param color цвет разделителя
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ * */
 @Composable
 fun Divider(
     modifier: Modifier = Modifier,
@@ -22,7 +30,7 @@ fun Divider(
     HorizontalDivider(
         modifier = modifier
             .fillMaxWidth(0.25f)
-            .clip(RoundedCornerShape(Dimens.universalRoundedCorner)),
+            .clip(RoundedCornerShape(Dimens.universalRoundedCorners)),
         thickness = Dimens.horizontalDividerThickness,
         color = color
     )

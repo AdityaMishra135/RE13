@@ -29,9 +29,17 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 import com.kire.audio.presentation.util.modifier.bounceClick
 
+/**
+ * Заголовок с кнопкой редактирования/сохранения панелей, отрисовываемых поверх экрана
+ *
+ * @param isEnabled флаг активности режима редактирования
+ * @param onClick действие при клике на кнопку редактирования/сохранения
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ * */
 @Composable
 fun PanelHeader(
-    isEnabled: Boolean,
+    isEnabled: () -> Boolean,
     onClick: () -> Unit
 ) {
     Column(
@@ -45,7 +53,8 @@ fun PanelHeader(
             modifier = Modifier
                 .fillMaxWidth()
         ){
-            RubikFontText(
+            /** Заголовок */
+            RubikFontBasicText(
                 text = LocalizationProvider.strings.infoDialogHeader,
                 style = TextStyle(
                     fontWeight = FontWeight.SemiBold,
@@ -56,8 +65,9 @@ fun PanelHeader(
                     .align(Alignment.Center)
             )
 
+            /** Кнопка редактирования/сохранения */
             Icon(
-                imageVector = if (!isEnabled) Icons.Rounded.Edit else Icons.Rounded.Save,
+                imageVector = if (!isEnabled()) Icons.Rounded.Edit else Icons.Rounded.Save,
                 contentDescription = "",
                 tint = AudioExtendedTheme.extendedColors.roseAccent,
                 modifier = Modifier
@@ -69,6 +79,7 @@ fun PanelHeader(
             )
         }
 
+        /** Декоративный разделитель */
         Divider()
     }
 }

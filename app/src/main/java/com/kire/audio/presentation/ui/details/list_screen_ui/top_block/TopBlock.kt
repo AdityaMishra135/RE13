@@ -3,10 +3,9 @@ package com.kire.audio.presentation.ui.details.list_screen_ui.top_block
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateDpAsState
+
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -27,9 +26,8 @@ import androidx.compose.material.icons.rounded.ArrowForwardIos
 import androidx.compose.material3.Icon
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -39,9 +37,9 @@ import androidx.compose.ui.Alignment
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -55,8 +53,8 @@ import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
-import com.kire.audio.presentation.util.modifier.animatePlacement
-
+import com.kire.audio.presentation.util.modifier.dynamicPadding
+import com.kire.audio.presentation.util.rememberDerivedStateOf
 import com.kire.audio.presentation.viewmodel.TrackViewModel
 
 /**
@@ -74,20 +72,26 @@ import com.kire.audio.presentation.viewmodel.TrackViewModel
 @Composable
 fun TopBlock(
     trackViewModel: TrackViewModel,
-    mediaController: MediaController?,
-    onSearchResulItemClick: () -> Unit,
-    onAlbumSuggestionClick: (String) -> Unit,
-    onTitleClick: () -> Unit
+    mediaController: MediaController? = null,
+    onSearchResulItemClick: () -> Unit = {},
+    onAlbumSuggestionClick: (String) -> Unit = {},
+    onTitleClick: () -> Unit = {}
 ){
 
     /** Словарь с ключами - названиями альбомов, значениями - списками треков */
     val albumsWithTracks by trackViewModel.artistWithTracks.collectAsStateWithLifecycle()
     /** Список названий альбомов */
-    val albums = albumsWithTracks.keys.toList()
-
+    val albums by rememberDerivedStateOf {
+        albumsWithTracks.keys.toList()
+    }
     /** Флаг, определяющий, было ли нажатие на название экрана */
     var isClicked by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    LaunchedEffect(key1 = isClicked) {
+        if (isClicked)
+            trackViewModel.onEvent(TrackUiEvent.updateArtistWithTracks())
     }
 
     /** Отступ от выреза в экране */
@@ -95,51 +99,47 @@ fun TopBlock(
         WindowInsets.displayCutout.asPaddingValues().calculateTopPadding().toPx().toDp()
     }
 
-    /** Отступ от названия экрана до верха дисплея */
-    val topPadding by animateDpAsState(targetValue = if (isClicked) displayCutoutPadDp else Dimens.screenTitleTopPad,
-        animationSpec = Animation.universalSpring())
-
-    /** Прозрачность фона */
-    val backgroundAlpha by animateFloatAsState(targetValue = if (isClicked) 1f else 0f)
-
-    /** Высота ActionBar */
-    var actionBarHeight by rememberSaveable { mutableIntStateOf(0) }
-
-    /** Цвет кнопки перехода на экран альбомов */
-    val animatedColor by animateColorAsState(
-        targetValue =
-            if (isClicked && !isSystemInDarkTheme())
-                Color.White
-            else
-                AudioExtendedTheme.extendedColors.button,
-        label = "color"
+    val topPadding by animateDpAsState(
+        targetValue = if (isClicked) displayCutoutPadDp else Dimens.screenTitleTopPad,
+        animationSpec = Animation.universalFiniteSpring()
+    )
+    val backgroundColor by animateColorAsState(
+        targetValue = if (!isClicked) AudioExtendedTheme.extendedColors.background
+            else AudioExtendedTheme.extendedColors.roseAccent,
+        animationSpec = Animation.universalFiniteSpring()
+    )
+    val iconTint by animateColorAsState(
+        targetValue = if (isClicked && !isSystemInDarkTheme()) Color.White
+            else AudioExtendedTheme.extendedColors.button,
+        animationSpec = Animation.universalFiniteSpring()
     )
 
-    /** Alignment для Header, который меняется при нажатии на название экрана */
-    val alignment by remember {
-        derivedStateOf {
-            if (isClicked) Alignment.Center else Alignment.BottomStart
-        }
+    val alignment by rememberDerivedStateOf {
+        if (isClicked) Alignment.Center else Alignment.BottomStart
     }
 
-    /** Определяет закруглённые углы компонента */
-    val roundedCorners = RoundedCornerShape(
-        bottomStart = Dimens.universalRoundedCorner,
-        bottomEnd = Dimens.universalRoundedCorner
-    )
+    val screenTitle by rememberDerivedStateOf {
+        if (!isClicked)
+            LocalizationProvider.strings.listScreenHeader
+        else
+            LocalizationProvider.strings.albumScreenHeader
+    }
 
     Column(
         modifier = Modifier
             .animateContentSize(animationSpec = Animation.universalFiniteSpring())
             .wrapContentHeight()
             .fillMaxWidth()
-            .clip(roundedCorners)
-            .background(
-                color = if (!isClicked) AudioExtendedTheme.extendedColors.background else AudioExtendedTheme.extendedColors.roseAccent.copy(alpha = backgroundAlpha),
-                shape = roundedCorners
+            .clip(
+                RoundedCornerShape(
+                    bottomStart = Dimens.universalRoundedCorners,
+                    bottomEnd = Dimens.universalRoundedCorners
+                )
             )
-            .padding(top = topPadding, bottom = Dimens.universalPad),
-        verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy),
+            .drawBehind { drawRect(color = backgroundColor) }
+            .dynamicPadding(top = { topPadding })
+            .padding(bottom = Dimens.universalPad),
+        verticalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy),
         horizontalAlignment = Alignment.Start
     ) {
 
@@ -150,18 +150,12 @@ fun TopBlock(
         ) {
             /** Название экрана с возможностью перехода на экран альбомов */
             ScreenHeader(
-                screenTitle =
-                    if (!isClicked)
-                        LocalizationProvider.strings.listScreenHeader
-                    else
-                        LocalizationProvider.strings.albumScreenHeader,
-                isClicked = isClicked,
+                screenTitle = screenTitle,
+                isClicked = { isClicked },
                 onTitleClick = {
-                    trackViewModel.onEvent(TrackUiEvent.updateArtistWithTracks())
                     isClicked = !isClicked
                 },
                 modifier = Modifier
-                    .animatePlacement()
                     .align(alignment)
             )
 
@@ -174,7 +168,7 @@ fun TopBlock(
                 Icon(
                     imageVector = Icons.Rounded.ArrowForwardIos,
                     contentDescription = null,
-                    tint = animatedColor,
+                    tint = iconTint,
                     modifier = Modifier
                         .size(Dimens.universalIconSize)
                         .pointerInput(Unit) {
@@ -186,31 +180,36 @@ fun TopBlock(
             }
         }
 
+        val getImageUri = remember(albumsWithTracks) {
+            { albumTitle: String -> albumsWithTracks[albumTitle]?.get(0)?.imageUri }
+        }
+        val getAlbumArtist = remember(albumsWithTracks) {
+            { albumTitle: String ->
+                albumsWithTracks[albumTitle]?.get(0)?.artist
+                    ?: LocalizationProvider.strings.unknownArtist
+            }
+        }
+
         /** Отображает список альбомов для быстрого доступа или
          * панель с поиском и сортировкой в зависимости от значения isClicked
          * */
         AnimatedContent(targetState = isClicked, label = "") { clicked ->
             if (clicked)
                 AlbumSuggestionPanel(
-                    albums = albums,
+                    albums = { albums },
                     onAlbumSuggestionClick = onAlbumSuggestionClick,
-                    getImageUri = { albumTitle ->
-                        albumsWithTracks[albumTitle]?.get(0)?.imageUri
-                    },
-                    getAlbumArtist = { albumTitle ->
-                        albumsWithTracks[albumTitle]?.get(0)?.artist
-                            ?: LocalizationProvider.strings.unknownArtist
-                    }
+                    getImageUri = getImageUri,
+                    getAlbumArtist = getAlbumArtist
                 )
             else
                 ActionPanel(
-                    trackViewModel = trackViewModel,
+                    onEvent = trackViewModel::onEvent,
+                    searchResult = trackViewModel.searchResult,
+                    trackState = trackViewModel.trackState,
+                    searchState = trackViewModel.searchState,
+                    sortType = trackViewModel.sortType,
                     mediaController = mediaController,
-                    navigateToPlayerScreen = onSearchResulItemClick,
-                    modifier = Modifier
-                        .onGloballyPositioned {
-                            actionBarHeight = it.size.height
-                        }
+                    navigateToPlayerScreen = onSearchResulItemClick
                 )
         }
     }

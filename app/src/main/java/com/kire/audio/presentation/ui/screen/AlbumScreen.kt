@@ -1,8 +1,10 @@
 package com.kire.audio.presentation.ui.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -52,17 +54,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.session.MediaController
 
 import com.kire.audio.presentation.navigation.transitions.AlbumScreenTransitions
-import com.kire.audio.presentation.ui.details.album_screen_ui.dialog_album_info.AlbumInfoPanel
+import com.kire.audio.presentation.ui.details.album_screen_ui.AlbumInfoPanel
 import com.kire.audio.presentation.ui.details.common.AsyncImageWithLoading
 import com.kire.audio.presentation.ui.details.common.BlurPanel
-import com.kire.audio.presentation.ui.details.common.LazyListMainAndAlbumPattern
-import com.kire.audio.presentation.ui.details.common.RubikFontText
+import com.kire.audio.presentation.ui.details.common.LazyListPattern
+import com.kire.audio.presentation.ui.details.common.PanelNumber
+import com.kire.audio.presentation.ui.details.common.RubikFontBasicText
 import com.kire.audio.presentation.ui.screen.destinations.ListAlbumScreenDestination
 import com.kire.audio.presentation.ui.screen.destinations.PlayerScreenDestination
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 import com.kire.audio.presentation.util.modifier.bounceClick
+import com.kire.audio.presentation.util.modifier.dynamicPadding
 import com.kire.audio.presentation.viewmodel.TrackViewModel
 
 import com.ramcosta.composedestinations.annotation.Destination
@@ -75,9 +79,14 @@ import kotlin.math.roundToInt
 @Composable
 fun AlbumScreen(
     trackViewModel: TrackViewModel,
-    mediaController: MediaController?,
+    mediaController: MediaController? = null,
     navigator: DestinationsNavigator
 ) {
+
+    BackHandler {
+        navigator.popBackStack()
+        return@BackHandler
+    }
 
     val trackState by trackViewModel.trackState.collectAsStateWithLifecycle()
 
@@ -133,13 +142,13 @@ fun AlbumScreen(
     }
 
     BlurPanel(
-        onTopOfBlurredPanel = {
+        onTopOfBlurPanel1 = {
             AlbumInfoPanel(
-                trackState = trackState,
+                trackState = trackViewModel.trackState,
                 onEvent = trackViewModel::onEvent
             )
         }
-    ) { modifierToExpandBlurPanel ->
+    ) { expandPanelByNumber ->
 
         Box(
             modifier = Modifier
@@ -158,14 +167,14 @@ fun AlbumScreen(
         ) {
 
             AsyncImageWithLoading(
-                model =  trackState.currentList[0].imageUri,
+                imageUri = trackState.currentList[0].imageUri,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f / 1f)
                     .clip(
                         RoundedCornerShape(
-                            bottomStart = Dimens.universalRoundedCorner,
-                            bottomEnd = Dimens.universalRoundedCorner
+                            bottomStart = Dimens.universalRoundedCorners,
+                            bottomEnd = Dimens.universalRoundedCorners
                         )
                     )
                     .onGloballyPositioned {
@@ -176,7 +185,7 @@ fun AlbumScreen(
 
             Column(
                 modifier = Modifier
-                    .padding(top = spaceHeight.value.dp)
+                    .dynamicPadding(top = { spaceHeight.value.dp })
                     .fillMaxSize()
             ) {
                 Row(
@@ -185,7 +194,7 @@ fun AlbumScreen(
                         .wrapContentHeight()
                         .pointerInput(Unit) {
                             detectDragGestures(
-                                onDrag = { change, dragAmount ->
+                                onDrag = { _, dragAmount ->
                                     val deltaY = dragAmount.y
 
                                     val newTopBarOffset =
@@ -206,7 +215,7 @@ fun AlbumScreen(
                             )
                         }
                         .padding(Dimens.universalPad)
-                        .padding(top = displayCutoutPad),
+                        .dynamicPadding(top = { displayCutoutPad }),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -226,7 +235,7 @@ fun AlbumScreen(
                     )
 
 
-                    RubikFontText(
+                    RubikFontBasicText(
                         text = trackState.currentList[0].album
                             ?: LocalizationProvider.strings.nothingWasFound,
                         style = TextStyle(
@@ -244,25 +253,30 @@ fun AlbumScreen(
                         imageVector = Icons.Rounded.Info,
                         contentDescription = null,
                         tint = if (!isSystemInDarkTheme()) Color.White else AudioExtendedTheme.extendedColors.button,
-                        modifier = modifierToExpandBlurPanel
+                        modifier = Modifier
                             .size(Dimens.albumScreenIconSize)
+                            .pointerInput(Unit) {
+                                detectTapGestures {
+                                    expandPanelByNumber(PanelNumber.FIRST)
+                                }
+                            }
                     )
                 }
 
-                LazyListMainAndAlbumPattern(
+                LazyListPattern(
                     trackStateFlow = trackViewModel.trackState,
                     onEvent = trackViewModel::onEvent,
-                    list = trackState.currentList,
                     mediaController = mediaController,
                     navigateToPlayerScreen = {
                         navigator.navigate(PlayerScreenDestination)
                     },
+                    list = { trackState.currentList },
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(
                             RoundedCornerShape(
-                                topStart = Dimens.universalRoundedCorner,
-                                topEnd = Dimens.universalRoundedCorner
+                                topStart = Dimens.universalRoundedCorners,
+                                topEnd = Dimens.universalRoundedCorners
                             )
                         )
                         .background(AudioExtendedTheme.extendedColors.background)

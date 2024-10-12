@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 
@@ -44,10 +44,10 @@ fun NestedContainer(
     val localDensity = LocalDensity.current
 
     /** Высота плавающей кнопки в пикселях */
-    val bottomBarHeightPx = remember { mutableStateOf(0f) }
+    val bottomBarHeightPx = remember { mutableFloatStateOf(0f) }
 
     /** Свдиг нижнего бара по высоте */
-    val bottomBarOffsetHeightPx = remember { mutableStateOf(0f) }
+    val bottomBarOffsetHeightPx = remember { mutableFloatStateOf(0f) }
 
     /** Отступ нижней системной панели навигации */
     val bottomInsetPaddingPx = with(localDensity) {
@@ -60,10 +60,10 @@ fun NestedContainer(
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 val delta = available.y
 
-                val newBottomBarOffset = bottomBarOffsetHeightPx.value + delta
-                bottomBarOffsetHeightPx.value =
+                val newBottomBarOffset = bottomBarOffsetHeightPx.floatValue + delta
+                bottomBarOffsetHeightPx.floatValue =
                     newBottomBarOffset.coerceIn(
-                        minimumValue = -bottomBarHeightPx.value - bottomInsetPaddingPx,
+                        minimumValue = -bottomBarHeightPx.floatValue - bottomInsetPaddingPx,
                         maximumValue = 0f
                     )
 
@@ -82,12 +82,12 @@ fun NestedContainer(
      * */
     fun shiftPlayerBottomBarDown() {
         coroutineScope.launch {
-            while (-bottomBarOffsetHeightPx.value < bottomBarHeightPx.value) {
-                val newTopBarOffset = (bottomBarOffsetHeightPx.value - 5).coerceIn(
-                    minimumValue = -bottomBarHeightPx.value,
+            while (-bottomBarOffsetHeightPx.floatValue < bottomBarHeightPx.floatValue) {
+                val newTopBarOffset = (bottomBarOffsetHeightPx.floatValue - 5).coerceIn(
+                    minimumValue = -bottomBarHeightPx.floatValue,
                     maximumValue = 0f
                 )
-                bottomBarOffsetHeightPx.value = newTopBarOffset
+                bottomBarOffsetHeightPx.floatValue = newTopBarOffset
                 delay(1)
             }
         }
@@ -100,8 +100,8 @@ fun NestedContainer(
      * */
     fun shiftPlayerBottomBarUp() {
         coroutineScope.launch {
-            while (bottomBarOffsetHeightPx.value < 0) {
-                bottomBarOffsetHeightPx.value += 5
+            while (bottomBarOffsetHeightPx.floatValue < 0) {
+                bottomBarOffsetHeightPx.floatValue += 5
                 delay(1)
             }
         }
@@ -112,19 +112,19 @@ fun NestedContainer(
         nestedScrollConnection,
         Modifier
             .onGloballyPositioned {
-                bottomBarHeightPx.value =
+                bottomBarHeightPx.floatValue =
                     it.size.height.toFloat() + with(localDensity) { 2 * Dimens.universalPad.toPx() }
             }
             .offset {
                 IntOffset(
                     x = 0,
-                    y = -bottomBarOffsetHeightPx.value.roundToInt()
+                    y = -bottomBarOffsetHeightPx.floatValue.roundToInt()
                 )
             },
         ::shiftPlayerBottomBarDown
     ) {
         coroutineScope.launch {
-            if (bottomBarOffsetHeightPx.value <= ((-bottomBarHeightPx.value + with(localDensity) { Dimens.universalPad.toPx() }) / 2))
+            if (bottomBarOffsetHeightPx.floatValue <= ((-bottomBarHeightPx.floatValue + with(localDensity) { Dimens.universalPad.toPx() }) / 2))
                 shiftPlayerBottomBarDown()
             else
                 shiftPlayerBottomBarUp()

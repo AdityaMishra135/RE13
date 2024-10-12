@@ -10,11 +10,13 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 
 import androidx.compose.ui.Modifier
 import com.kire.audio.presentation.ui.details.common.SuggestionItem
 
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
+import com.kire.audio.presentation.util.rememberDerivedStateOf
 
 /**
  * Список с альбомами для отрисовки в TopBlock
@@ -28,26 +30,30 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
  */
 @Composable
 fun AlbumSuggestionPanel(
-    albums: List<String>,
-    onAlbumSuggestionClick: (String) -> Unit,
-    getImageUri: (String) -> Uri?,
-    getAlbumArtist: (String) -> String
+    albums: () -> List<String> = { emptyList() },
+    onAlbumSuggestionClick: (String) -> Unit = {},
+    getImageUri: (String) -> Uri? = { _ -> null },
+    getAlbumArtist: (String) -> String = { _ -> "" }
 ) {
+    val albums by rememberDerivedStateOf {
+        albums()
+    }
+
     /** Список с альбомами */
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight(),
         contentPadding = PaddingValues(horizontal = Dimens.universalPad),
-        horizontalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy)
+        horizontalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy)
     ) {
-        items(albums) { album ->
+        items(albums, key = { it }) { album ->
 
             /** Элемент списка в виде плитки с обложкой и 2-мя текстами */
             SuggestionItem(
-                imageUri = getImageUri(album),
                 mainText = album,
                 satelliteText = getAlbumArtist(album),
+                imageUri = getImageUri(album),
                 onSuggestionClick = onAlbumSuggestionClick,
             )
         }

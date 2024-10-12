@@ -23,7 +23,7 @@ import androidx.media3.session.MediaController
 
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.details.common.MediaControls
-import com.kire.audio.presentation.ui.details.common.RubikFontText
+import com.kire.audio.presentation.ui.details.common.RubikFontBasicText
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
@@ -34,16 +34,16 @@ import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
  * Область видимости - RowScope
  *
  * @param modifier модификатор
- * @param состояние воспроизведения
+ * @param trackState состояние воспроизведения
  * @param mediaController для управления воспроизведением
  *
  * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun RowScope.AlbumMediaBar(
-    modifier: Modifier = Modifier,
     trackState: TrackState,
-    mediaController: MediaController?
+    modifier: Modifier = Modifier,
+    mediaController: MediaController? = null
 ) {
 
     Column(
@@ -53,16 +53,16 @@ fun RowScope.AlbumMediaBar(
             .shadow(
                 elevation = Dimens.universalShadowElevation,
                 spotColor = AudioExtendedTheme.extendedColors.shadow,
-                shape = RoundedCornerShape(Dimens.universalRoundedCorner)
+                shape = RoundedCornerShape(Dimens.universalRoundedCorners)
             )
-            .clip(RoundedCornerShape(Dimens.universalRoundedCorner))
+            .clip(RoundedCornerShape(Dimens.universalRoundedCorners))
             .background(color = Color.White)
             .padding(Dimens.universalPad),
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AnimatedContent(targetState = trackState.currentTrackPlaying?.title, label = "") {
-            RubikFontText(
+            RubikFontBasicText(
                 text = it ?: LocalizationProvider.strings.nothingWasFound,
                 style = AudioExtendedTheme.extendedType.mediumTitle
                     .copy(color = Color.Black)
@@ -70,7 +70,6 @@ fun RowScope.AlbumMediaBar(
         }
 
         MediaControls(
-            trackState = trackState,
             mediaController = mediaController,
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,

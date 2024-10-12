@@ -1,5 +1,7 @@
 package com.kire.audio.presentation.ui.details.common
 
+import android.net.Uri
+import androidx.annotation.DrawableRes
 import androidx.compose.material3.CircularProgressIndicator
 
 import androidx.compose.runtime.Composable
@@ -16,29 +18,34 @@ import com.kire.audio.R
 /**
  * SubcomposeAsyncImage из Coil с индикатором загрузки
  *
- * @param model изображение для отрисовки
+ * @param imageUri uri изображения для отрисовки
  * @param modifier модификатор
- * @param contentDescription описание изображения
+ * @param contentDescription описание к изображению
  * @param colorFilter цветовой фильтр
+ * @param defaultImage drawable ресурс картинки,
+ * которая должна быть отрисована, если основной нет
  *
  * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun AsyncImageWithLoading(
-    model: Any?,
+    imageUri: Uri?,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
-    colorFilter: ColorFilter = ColorFilter.colorMatrix(ColorMatrix())
+    colorFilter: ColorFilter = ColorFilter.colorMatrix(ColorMatrix()),
+    @DrawableRes defaultImage: Int = R.drawable.logo
 ) {
     SubcomposeAsyncImage(
-        model = model,
+        model = imageUri,
         contentDescription = contentDescription,
         loading = {
+            /** Показываем индикатор загрузки, пока model не отрисован */
             CircularProgressIndicator()
         },
         error = {
+            /** Показываем дефолтную картинку в случае ошибки */
             AsyncImage(
-                model = R.drawable.logo,
+                model = defaultImage,
                 contentDescription = null,
                 modifier = modifier,
                 colorFilter = colorFilter,

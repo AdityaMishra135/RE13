@@ -1,5 +1,6 @@
 package com.kire.audio.presentation.ui.details.player_screen_ui
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 
 import com.kire.audio.presentation.util.modifier.bounceClick
 
@@ -27,14 +29,14 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
  * сворачивание экрана и открытие меню дополнительной информации о треке
  *
  * @param navigateBack действие при нажатии на кнопку закрытия экрана
- * @param modifierToExpandInfoPanel модификатор для открытия меню дополнительной информации о треке
+ * @param expandPanelByNumber модификатор для открытия меню дополнительной информации о треке
  *
  * @author Михаил Гонтарев (KiREHwYE)
  * */
 @Composable
 fun TopButtons(
     navigateBack: () -> Unit,
-    modifierToExpandInfoPanel: Modifier = Modifier
+    expandPanelByNumber: () -> Unit
 ){
 
     Row(modifier = Modifier
@@ -60,8 +62,13 @@ fun TopButtons(
         Icon(
             Icons.Rounded.MoreVert,
             contentDescription = "Info",
-            modifier = modifierToExpandInfoPanel
-                .size(Dimens.universalIconSize),
+            modifier = Modifier
+                .size(Dimens.universalIconSize)
+                .pointerInput(Unit) {
+                    detectTapGestures {
+                        expandPanelByNumber()
+                    }
+                },
             tint = AudioExtendedTheme.extendedColors.playerScreenButton
         )
     }

@@ -35,10 +35,10 @@ import com.kire.audio.presentation.util.modifier.bounceClick
  */
 @Composable
 fun SuggestionItem(
-    imageUri: Uri?,
-    mainText: String,
-    satelliteText: String,
-    onSuggestionClick: (String) -> Unit
+    imageUri: Uri? = null,
+    mainText: String = "",
+    satelliteText: String = "",
+    onSuggestionClick: (String) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -47,17 +47,16 @@ fun SuggestionItem(
             .bounceClick {
                 onSuggestionClick(mainText)
             },
-        verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy),
+        verticalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy),
         horizontalAlignment = Alignment.Start
     ) {
-
         /** Обложка трека или альбома */
         AsyncImageWithLoading(
-            model = imageUri,
+            imageUri = imageUri,
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f / 1f)
-                .clip(RoundedCornerShape(Dimens.universalRoundedCorner))
+                .clip(RoundedCornerShape(Dimens.universalRoundedCorners))
         )
 
         /** Тексты для отображения */

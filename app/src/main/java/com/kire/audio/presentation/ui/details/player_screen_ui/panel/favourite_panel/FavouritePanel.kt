@@ -41,8 +41,9 @@ import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.details.common.ListItem
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.ui.details.common.Divider
-import com.kire.audio.presentation.ui.details.common.RubikFontText
+import com.kire.audio.presentation.ui.details.common.RubikFontBasicText
 import com.kire.audio.presentation.ui.details.player_screen_ui.panel.favourite_panel.TrackItemFavouriteWrapper
+import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
@@ -57,18 +58,19 @@ import kotlinx.coroutines.flow.StateFlow
  * @param onEvent обработчик UI событий
  * @param mediaController для управления воспроизведением
  *
- * @return Михель Гонтарев (KiREHwYE)
+ * @return Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun FavouritePanel(
-    trackState: TrackState,
+    trackState: StateFlow<TrackState>,
     favouriteTracks: StateFlow<List<Track>>,
-    onEvent: (TrackUiEvent) -> Unit,
-    mediaController: MediaController?
+    onEvent: (TrackUiEvent) -> Unit = {},
+    mediaController: MediaController? = null
 ) {
-
     /** Текущее значение списка избранных треков */
     val favouriteTracks by favouriteTracks.collectAsStateWithLifecycle()
+    /** Текущее состояние воспроизведения */
+    val trackState by trackState.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -80,15 +82,16 @@ fun FavouritePanel(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        /** Заголовок панели */
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
-            verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy),
+            verticalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            RubikFontText(
+            /** Заголовок панели */
+            RubikFontBasicText(
                 text = LocalizationProvider.strings.favouriteDialogHeader,
                 style = TextStyle(
                     fontWeight = FontWeight.SemiBold,
@@ -97,6 +100,7 @@ fun FavouritePanel(
                 )
             )
 
+            /** Декоративный разделитель */
             Divider()
         }
 
@@ -105,8 +109,7 @@ fun FavouritePanel(
             visible = favouriteTracks.isEmpty(),
             enter = scaleIn(animationSpec = Animation.universalFiniteSpring())
                     + fadeIn(animationSpec = Animation.universalFiniteSpring()),
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
             Box(
                 modifier = Modifier
@@ -114,7 +117,7 @@ fun FavouritePanel(
                 contentAlignment = Alignment.Center,
                 content = {
                     /** Надпись, уведомляющая о том, что список избранных треков пуст */
-                    RubikFontText(
+                    RubikFontBasicText(
                         text = LocalizationProvider.strings.nothingWasFound,
                         style = TextStyle(
                             fontWeight = FontWeight.SemiBold,
@@ -132,11 +135,11 @@ fun FavouritePanel(
                 .fillMaxWidth()
                 .wrapContentHeight(),
             contentPadding = PaddingValues(vertical = Dimens.universalPad),
-            verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy),
+            verticalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             itemsIndexed(
-                favouriteTracks,
+                items = favouriteTracks,
                 key = { _, track ->
                     track.id
                 }
@@ -150,11 +153,16 @@ fun FavouritePanel(
                     onHeartClick = {
                         /** Добавляем в избранное или убираем оттуда */
                         trackState.currentTrackPlaying?.let {
-                                onEvent(
-                                    TrackUiEvent.upsertAndUpdateCurrentTrack(
-                                        track.copy(isFavourite = !track.isFavourite)
-                                    )
+
+                            val newTrack = track.copy(isFavourite = !track.isFavourite)
+
+                            if (it.id == track.id)
+                                onEvent(TrackUiEvent
+                                    .upsertAndUpdateCurrentTrack(newTrack)
                                 )
+                            else onEvent(TrackUiEvent
+                                .upsertTrack(newTrack)
+                            )
                         }
                     },
                     trackItem = { modifier ->
@@ -162,10 +170,13 @@ fun FavouritePanel(
                         ListItem(
                             track = track,
                             modifier = modifier,
-                            mainTextColor = Color.White,
-                            satelliteTextColor = Color(0xFFEBEBEB),
+                            mainTextColor = AudioExtendedTheme.extendedColors.favouritePanelMainTextColor,
+                            satelliteTextColor = AudioExtendedTheme.extendedColors.favouritePanelSatelliteTextColor,
                             onClick = {
-                                PlayerStateParams.isPlaying = if (track.path == trackState.currentTrackPlaying?.path) !PlayerStateParams.isPlaying else true
+                                PlayerStateParams.isPlaying =
+                                    if (track.id == trackState.currentTrackPlaying?.id)
+                                        !PlayerStateParams.isPlaying
+                                    else true
                                 /** Обновляем информацию о текущем воспроизводимом треке */
                                 onEvent(
                                     TrackUiEvent.updateTrackState(
@@ -178,9 +189,9 @@ fun FavouritePanel(
                                 /** Обрабатываем разные ситуации,
                                  * чтобы понять ставить на паузу/воспроизведение или воспроизводить иной трек */
                                 mediaController?.apply {
-                                    if (PlayerStateParams.isPlaying && trackState.currentTrackPlaying?.path == track.path)
+                                    if (PlayerStateParams.isPlaying && trackState.currentTrackPlaying?.id == track.id)
                                         pause()
-                                    else if (!PlayerStateParams.isPlaying && trackState.currentTrackPlaying?.path == track.path) {
+                                    else if (!PlayerStateParams.isPlaying && trackState.currentTrackPlaying?.id == track.id) {
                                         prepare()
                                         play()
 

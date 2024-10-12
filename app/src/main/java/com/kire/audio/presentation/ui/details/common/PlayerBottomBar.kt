@@ -20,7 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -39,6 +39,7 @@ import androidx.media3.session.MediaController
 import androidx.navigation.NavHostController
 
 import com.kire.audio.presentation.model.PlayerStateParams
+import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.screen.NavGraphs
 import com.kire.audio.presentation.ui.screen.appCurrentDestinationAsState
@@ -48,6 +49,7 @@ import com.kire.audio.presentation.ui.screen.destinations.PlayerScreenDestinatio
 import com.kire.audio.presentation.ui.screen.startAppDestination
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
+import com.kire.audio.presentation.util.rememberDerivedStateOf
 
 import com.ramcosta.composedestinations.navigation.navigate
 
@@ -57,7 +59,8 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /**
- * Небольшая плавающая панель внизу экрана с информацией о текущем треке и кнопками управления
+ * Небольшая плавающая панель внизу экрана с
+ * информацией о текущем треке и кнопками управления
  *
  * @param trackState состояние воспроизведения
  * @param mediaController для управления воспроизведением
@@ -69,9 +72,9 @@ import kotlin.math.roundToInt
 @Composable
 fun PlayerBottomBar(
     trackState: StateFlow<TrackState>,
-    mediaController: MediaController?,
     navHostController: NavHostController,
-    onDragDown: () -> Unit,
+    mediaController: MediaController? = null,
+    onDragDown: () -> Unit = {},
 ) {
     /** Область видимости корутин */
     val coroutineScope = rememberCoroutineScope()
@@ -84,12 +87,17 @@ fun PlayerBottomBar(
 
     /** Высота PlayerBottomBar + отступ от низа экрана */
     var height by remember {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
+    }
+
+    val isPlayerBottomBarVisible by rememberDerivedStateOf {
+        PlayerStateParams.isPlayerBottomBarShown &&
+                currentDestination != PlayerScreenDestination
+                && currentDestination != AlbumScreenDestination
     }
 
     AnimatedVisibility(
-        visible = PlayerStateParams.isPlayerBottomBarShown &&
-                currentDestination != PlayerScreenDestination && currentDestination != AlbumScreenDestination,
+        visible = isPlayerBottomBarVisible,
         enter = slideInVertically(
             initialOffsetY = { height },
             animationSpec = tween(durationMillis = 450, easing = LinearOutSlowInEasing)
@@ -110,12 +118,11 @@ fun PlayerBottomBar(
                 .shadow(
                     elevation = Dimens.universalShadowElevation,
                     spotColor = AudioExtendedTheme.extendedColors.shadow,
-                    shape = RoundedCornerShape(Dimens.universalRoundedCorner)
+                    shape = RoundedCornerShape(Dimens.universalRoundedCorners)
                 )
-                .clip(RoundedCornerShape(Dimens.universalRoundedCorner))
+                .clip(RoundedCornerShape(Dimens.universalRoundedCorners))
                 .pointerInput(Unit) {
                     detectVerticalDragGestures { _, dragAmount ->
-
                         if (dragAmount > 10)
                             coroutineScope.launch(Dispatchers.IO) {
                                 onDragDown()
@@ -124,13 +131,13 @@ fun PlayerBottomBar(
                 }
                 .background(AudioExtendedTheme.extendedColors.controlElementsBackground)
                 .padding(Dimens.universalPad),
-            horizontalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy),
+            horizontalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
             /** Обложка трека, его название и исполнитель */
             ListItem(
-                track = trackState.currentTrackPlaying!!,
+                track = trackState.currentTrackPlaying ?: Track(),
                 modifier = Modifier.weight(1f),
                 onClick = {
                     navHostController.navigate(PlayerScreenDestination)
@@ -140,10 +147,9 @@ fun PlayerBottomBar(
 
             /** Кнопки для управления воспроизведением */
             MediaControls(
-                trackState = trackState,
                 mediaController = mediaController,
                 modifier = Modifier.wrapContentSize(),
-                horizontalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy)
+                horizontalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy)
             )
         }
     }

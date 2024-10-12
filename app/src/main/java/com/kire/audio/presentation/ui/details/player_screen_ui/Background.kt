@@ -29,14 +29,13 @@ import com.kire.audio.presentation.ui.theme.dimen.Dimens
 fun Background(
     imageUri: Uri?
 ){
-
     Crossfade(
         targetState = imageUri,
         label = "Background Image",
         animationSpec = Animation.universalFiniteSpring()
     ) {
         AsyncImageWithLoading(
-            model = it,
+            imageUri = it,
             colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
                 if (isSystemInDarkTheme())
                     setToScale(0.35f,0.35f,0.35f,1f)

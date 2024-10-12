@@ -1,8 +1,9 @@
 package com.kire.audio.presentation.ui.details.list_screen_ui.top_block.action_bar
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateDpAsState
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -21,9 +22,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.input.TextFieldLineLimits
-import androidx.compose.foundation.text.input.clearText
-import androidx.compose.foundation.text.input.rememberTextFieldState
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -35,16 +33,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -59,10 +62,12 @@ import com.kire.audio.presentation.model.state.SearchState
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.model.event.TrackUiEvent
-import com.kire.audio.presentation.ui.details.common.RubikFontText
+import com.kire.audio.presentation.ui.details.common.RubikFontBasicText
 import com.kire.audio.presentation.ui.details.common.SuggestionItem
+import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
+import com.kire.audio.presentation.util.modifier.dynamicPadding
 
 import kotlinx.coroutines.flow.StateFlow
 
@@ -89,22 +94,30 @@ private fun keyboardAsState(): State<Boolean> {
  * @param searchResult результат поиска
  * @param onEvent для обработки UI событий
  * @param navigateToPlayerScreen для перехода на экран плеера
- * @param modifier модификатор
  * @param widenSearchPanel флаг растягивания панели поиска на всю ширину экрана
  *
  * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun SearchPanel(
-    mediaController: MediaController?,
     trackState: StateFlow<TrackState>,
     searchState: StateFlow<SearchState>,
     searchResult: StateFlow<List<Track>>,
-    onEvent: (TrackUiEvent) -> Unit,
-    navigateToPlayerScreen: () -> Unit,
-    modifier: Modifier = Modifier,
-    widenSearchPanel: (Boolean) -> Unit
+    isSearchWidened: () -> Boolean = { false },
+    mediaController: MediaController? = null,
+    onEvent: (TrackUiEvent) -> Unit = {},
+    navigateToPlayerScreen: () -> Unit = {},
+    widenSearchPanel: (Boolean) -> Unit = {}
 ) {
+
+    /** Определяет расстояние между поиском и кнопками обновления и сортировки.
+     * Делает плавным растяжением панели поиска на всю ширину экрана.
+     * Без него при исчезновении SortAndRefreshBar происходит резкий "скачок".
+     * */
+    val spacedBy by animateDpAsState(
+        targetValue = if (isSearchWidened()) 0.dp else Dimens.universalColumnAndRowSpacedBy,
+        animationSpec = Animation.universalFiniteSpring()
+    )
 
     /** Текущее состояние поиска */
     val searchState by searchState.collectAsStateWithLifecycle()
@@ -114,16 +127,22 @@ fun SearchPanel(
     val trackState by trackState.collectAsStateWithLifecycle()
 
     /** Поисковый запрос */
-    val searchString = rememberTextFieldState(initialText = searchState.searchText)
+    var searchString by remember {
+        mutableStateOf(searchState.searchText)
+    }
 
-    /** Прозрачность фона */
-    val backgroundAlpha by animateFloatAsState(targetValue = if (searchString.text.isNotEmpty()) 1f else 0f)
+    /** Цвет фона списка найденных треков */
+    val backgroundColor by animateColorAsState(
+        targetValue = if (searchString.isNotEmpty()) AudioExtendedTheme.extendedColors.roseAccent
+            else Color.Transparent,
+        animationSpec = Animation.universalFiniteSpring()
+    )
 
     /** Обновляем SearchState при изменении поискового запроса */
-    LaunchedEffect(searchString.text) {
+    LaunchedEffect(searchString) {
         onEvent(TrackUiEvent
             .updateSearchState(
-                searchState.copy(searchText = searchString.text.toString())
+                searchState.copy(searchText = searchString)
             )
         )
     }
@@ -139,16 +158,25 @@ fun SearchPanel(
     val isKeyboardOpened by keyboardAsState()
 
     /** Изменяем ширину панели поиска */
-    LaunchedEffect(key1 = isFocused, key2 = isKeyboardOpened, key3 = searchString.text) {
-        if ((isFocused && isKeyboardOpened) || searchString.text.isNotEmpty())
+    LaunchedEffect(key1 = isFocused, key2 = isKeyboardOpened, key3 = searchString) {
+        if ((isFocused && isKeyboardOpened) || searchString.isNotEmpty())
             widenSearchPanel(true)
         else widenSearchPanel(false)
     }
 
+    val textStyle = TextStyle.Default.copy(
+        fontSize = 15.sp,
+        lineHeight = 15.sp,
+        fontFamily = AudioExtendedTheme.extendedFonts.rubikFontFamily,
+        fontWeight = FontWeight.Medium,
+        color = AudioExtendedTheme.extendedColors.primaryText
+    )
+
     Column(
-        modifier = modifier
+        modifier = Modifier
+            .dynamicPadding(start = { spacedBy })
             .wrapContentHeight(),
-        verticalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy),
+        verticalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -157,20 +185,17 @@ fun SearchPanel(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .clip(RoundedCornerShape(Dimens.universalRoundedCorner))
+                .clip(RoundedCornerShape(Dimens.universalRoundedCorners))
                 .background(AudioExtendedTheme.extendedColors.controlElementsBackground)
                 .padding(Dimens.universalPad),
-            state = searchString,
+            value = searchString,
+            onValueChange = {
+                searchString = it
+            },
             interactionSource = interactionSource,
-            textStyle = TextStyle.Default.copy(
-                fontSize = 15.sp,
-                lineHeight = 15.sp,
-                fontFamily = AudioExtendedTheme.extendedFonts.rubikFontFamily,
-                fontWeight = FontWeight.Medium,
-                color = AudioExtendedTheme.extendedColors.primaryText
-            ),
-            lineLimits = TextFieldLineLimits.SingleLine,
-            decorator = { innerTextField ->
+            textStyle = textStyle,
+            singleLine = true,
+            decorationBox = { innerTextField ->
 
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -178,8 +203,9 @@ fun SearchPanel(
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy)
+                        horizontalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy)
                     ) {
+                        /** Иконка поиска в виде лупы */
                         /** Иконка поиска в виде лупы */
                         Icon(
                             Icons.Rounded.Search,
@@ -190,8 +216,10 @@ fun SearchPanel(
                         )
 
                         /** Текст-подсказка для отображения, когда поиск в состоянии покоя */
-                        if (searchString.text.isEmpty())
-                            RubikFontText(
+
+                        /** Текст-подсказка для отображения, когда поиск в состоянии покоя */
+                        if (searchString.isEmpty())
+                            RubikFontBasicText(
                                 text = LocalizationProvider.strings.listScreenSearchHint,
                                 style = TextStyle(
                                     fontWeight = FontWeight.Light,
@@ -205,7 +233,7 @@ fun SearchPanel(
                     }
 
                     /** Иконка очищения поискового запроса */
-                    AnimatedVisibility(visible = searchString.text.isNotEmpty()) {
+                    AnimatedVisibility(visible = searchString.isNotEmpty()) {
                         Icon(
                             Icons.Rounded.Close,
                             contentDescription = "Close",
@@ -213,7 +241,7 @@ fun SearchPanel(
                             modifier = Modifier
                                 .size(Dimens.universalIconSize)
                                 .bounceClick {
-                                    searchString.clearText()
+                                    searchString = ""
                                 }
                         )
                     }
@@ -222,29 +250,31 @@ fun SearchPanel(
         )
 
         /** Список удовлетворяющих поисковому запросу треков */
-        AnimatedVisibility(visible = searchResult.isNotEmpty()) {
+        AnimatedVisibility(
+            visible = searchResult.isNotEmpty(),
+            modifier = Modifier
+                .animateContentSize(Animation.universalFiniteSpring())
+        ) {
             LazyRow(
                 modifier = Modifier
-                    .animateContentSize()
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .clip(RoundedCornerShape(Dimens.universalRoundedCorner))
-                    .background(AudioExtendedTheme.extendedColors.roseAccent.copy(alpha = backgroundAlpha)),
+                    .clip(RoundedCornerShape(Dimens.universalRoundedCorners))
+                    .drawBehind {
+                        drawRect(color = backgroundColor)
+                    },
                 contentPadding = PaddingValues(Dimens.universalPad),
-                horizontalArrangement = Arrangement.spacedBy(Dimens.columnAndRowUniversalSpacedBy),
+                horizontalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 itemsIndexed(
                     searchResult,
                     key = { _, track -> track.id }
                 ) { _, track ->
 
-                    /** Плитка для отображения результата запроса - трека */
-                    SuggestionItem(
-                        imageUri = track.imageUri,
-                        mainText = track.title,
-                        satelliteText = track.artist,
-                        onSuggestionClick = { _ ->
+                    val onSuggestionClickStable = remember {
+                        { _: String->
                             PlayerStateParams.isPlaying = true
                             onEvent(
                                 TrackUiEvent.updateTrackState(
@@ -258,6 +288,14 @@ fun SearchPanel(
                             mediaController?.performPlayMedia(track)
                             navigateToPlayerScreen()
                         }
+                    }
+
+                    /** Плитка для отображения результата запроса - трека */
+                    SuggestionItem(
+                        imageUri = track.imageUri,
+                        mainText = track.title,
+                        satelliteText = track.artist,
+                        onSuggestionClick = onSuggestionClickStable
                     )
                 }
             }

@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedContent
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.wrapContentHeight
 
 import androidx.compose.runtime.Composable
@@ -42,12 +41,12 @@ fun TwoTextsInColumn(
         modifier = modifier
             .wrapContentHeight(),
         horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(Dimens.columnUniversalTextSpacedBy)
+        verticalArrangement = Arrangement.spacedBy(Dimens.universalColumnTextSpacedBy)
     ) {
 
         /** Основной текст */
         AnimatedContent(targetState = mainText, label = "") {
-            RubikFontText(
+            RubikFontBasicText(
                 text = it ?: LocalizationProvider.strings.nothingWasFound,
                 style = TextStyle(fontWeight = FontWeight.Medium).merge(mainTextStyle)
             )
@@ -55,7 +54,7 @@ fun TwoTextsInColumn(
 
         /** Дополнительный текст */
         AnimatedContent(targetState = satelliteText, label = "") {
-            RubikFontText(
+            RubikFontBasicText(
                 text = it ?: LocalizationProvider.strings.nothingWasFound,
                 style = TextStyle(fontWeight = FontWeight.Light).merge(satelliteTextStyle)
             )

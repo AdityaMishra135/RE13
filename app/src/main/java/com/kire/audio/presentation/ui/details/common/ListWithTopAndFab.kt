@@ -22,7 +22,6 @@ import androidx.compose.material3.CircularProgressIndicator
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +43,8 @@ import androidx.compose.ui.zIndex
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
+import com.kire.audio.presentation.util.modifier.dynamicPadding
+import com.kire.audio.presentation.util.rememberDerivedStateOf
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -53,7 +54,7 @@ import kotlin.math.roundToInt
 /**
  * Контейнер с верхним баром и плавающей кнопкой
  *
- * @param listSize размер списка
+ * @param contentIsEmpty флаг того, что ничего нет и нужно оповестить пользователя об этом
  * @param shiftBottomBar сдвигает нижний бар вниз (сам бар за пределами данного контейнера)
  * @param topBar верхний бар
  * @param floatingButton плавающая кнопка
@@ -63,7 +64,7 @@ import kotlin.math.roundToInt
  */
 @Composable
 fun ListWithTopAndFab(
-    listSize: Int = 0,
+    contentIsEmpty: () -> Boolean = { true },
     shiftBottomBar: () -> Unit = {},
     topBar: @Composable () -> Unit = {},
     floatingButton: @Composable () -> Unit = {},
@@ -76,13 +77,19 @@ fun ListWithTopAndFab(
 
     /** высота верхнего бара в пикселях*/
     val topBarHeightPx = remember { mutableStateOf(0f) }
-
     /** свдиг верхнего бара по высоте */
     val topBarOffsetHeightPx = remember { mutableStateOf(0f) }
+    /** динамический отступ для списка */
+    val spaceHeight = rememberDerivedStateOf {
+        (topBarHeightPx.value + topBarOffsetHeightPx.value) / localDensity.density
+    }
+    /** отступ верхней системной панели навигации */
+    val topInsetPaddingPx = with(LocalDensity.current) {
+        WindowInsets.navigationBars.asPaddingValues().calculateTopPadding().toPx()
+    }
 
     /** высота плавающей кнопки в пикселях */
     val fabWidthPx = remember { mutableStateOf(0f) }
-
     /** свдиг нижнего бара по высоте */
     val fabOffsetWidthPx = remember { mutableStateOf(0f) }
 
@@ -91,18 +98,7 @@ fun ListWithTopAndFab(
         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().toPx()
     }
 
-    /** отступ верхней системной панели навигации */
-    val topInsetPaddingPx = with(LocalDensity.current) {
-        WindowInsets.navigationBars.asPaddingValues().calculateTopPadding().toPx()
-    }
-
-    /** динамический отступ для списка */
-    val spaceHeight = remember {
-        derivedStateOf {
-            (topBarHeightPx.value + topBarOffsetHeightPx.value) / localDensity.density
-        }
-    }
-
+    /** Поднимает верхний бар, скрывая его из области видимости */
     fun shiftTopBarUp() {
         coroutineScope.launch {
             while (-topBarOffsetHeightPx.value < topBarHeightPx.value) {
@@ -116,6 +112,7 @@ fun ListWithTopAndFab(
         }
     }
 
+    /** Опускает верхний бар, делая его полностью видимым */
     fun shiftTopBarDown() {
         coroutineScope.launch {
             while (topBarOffsetHeightPx.value < 0) {
@@ -152,13 +149,14 @@ fun ListWithTopAndFab(
         }
     }
 
+    /** Состояние списка */
     val state = rememberLazyListState()
-    val scrollInProgress: Boolean by remember {
-        derivedStateOf {
-            state.isScrollInProgress
-        }
+    /** Флаг активности скролла */
+    val scrollInProgress: Boolean by rememberDerivedStateOf {
+        state.isScrollInProgress
     }
 
+    /** Поднимаем/опускаем нижний бар по окончании скролла */
     LaunchedEffect(scrollInProgress) {
         if (!scrollInProgress) {
             coroutineScope.launch {
@@ -171,6 +169,10 @@ fun ListWithTopAndFab(
         }
     }
 
+    val noElementsMessageTopPadding by rememberDerivedStateOf {
+        (topBarHeightPx.value / localDensity.density).dp
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Основной контент
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -180,10 +182,11 @@ fun ListWithTopAndFab(
             .background(color = AudioExtendedTheme.extendedColors.background)
             .nestedScroll(nestedScrollConnection)
     ) {
-        when (listSize) {
-            0 -> {
+        when (contentIsEmpty()) {
+            true -> {
+                /** Если список пустой, показываем индикатор загрузки */
                 AnimatedVisibility(
-                    visible = listSize == 0,
+                    visible = true,
                     enter = scaleIn(animationSpec = Animation.universalFiniteSpring())
                             + fadeIn(animationSpec = Animation.universalFiniteSpring()),
                     modifier = Modifier
@@ -192,7 +195,7 @@ fun ListWithTopAndFab(
                     Box(
                         modifier = Modifier
                             .zIndex(0f)
-                            .padding(top = (topBarHeightPx.value / localDensity.density).dp)
+                            .dynamicPadding(top = { noElementsMessageTopPadding })
                             .padding(horizontal = Dimens.universalPad)
                             .fillMaxSize(),
                         contentAlignment = Alignment.Center,
@@ -206,11 +209,12 @@ fun ListWithTopAndFab(
                     )
                 }
             }
-            else -> {
+            false -> {
+                /** Контент */
                 content(
                     Modifier
                         .zIndex(0f)
-                        .padding(top = spaceHeight.value.dp)
+                        .dynamicPadding(top = { spaceHeight.value.dp })
                         .padding(horizontal = Dimens.universalPad)
                         .fillMaxSize(),
                     state

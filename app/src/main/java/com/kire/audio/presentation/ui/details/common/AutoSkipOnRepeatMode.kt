@@ -14,6 +14,7 @@ import androidx.media3.session.MediaController
 import com.kire.audio.device.audio.util.MediaCommands
 import com.kire.audio.device.audio.util.RepeatMode
 import com.kire.audio.presentation.model.state.TrackState
+import com.kire.audio.presentation.util.rememberDerivedStateOf
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
@@ -29,23 +30,30 @@ import kotlin.time.Duration.Companion.seconds
  * @param trackState состояние воспроизведения, включает в себя trackRepeatMode - режим повтора
  * @param mediaController для управления воспроизведением
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun AutoSkipOnRepeatMode(
     trackState: StateFlow<TrackState>,
     mediaController: MediaController?
 ){
+    /** Актуальный TrackState */
     val trackState by trackState.collectAsStateWithLifecycle()
 
     /** Текущая позиция слайдера в минутах */
     var minutesCurrent by remember { mutableLongStateOf(0L)}
     /** Текущая позиция слайдера в секундах */
     var secondsCurrent by  remember { mutableLongStateOf(0L) }
+
     /** Длительность трека в минутах */
     var minutesAll by remember { mutableLongStateOf(0L) }
     /** Длительность трека в секундах */
     var secondsAll by remember { mutableLongStateOf(0L) }
+
+    val isSkipOrRepeatRequired by rememberDerivedStateOf {
+        (minutesCurrent >= minutesAll && secondsCurrent >= secondsAll)
+                && !(minutesAll == 0L && secondsAll == 0L)
+    }
 
     LaunchedEffect(key1 = trackState.currentTrackPlaying?.path) {
 
@@ -61,9 +69,7 @@ fun AutoSkipOnRepeatMode(
             minutesCurrent = TimeUnit.MILLISECONDS.toMinutes(mediaController?.currentPosition ?: 0L)
             secondsCurrent = TimeUnit.MILLISECONDS.toSeconds(mediaController?.currentPosition ?: 0L) % 60
 
-            if ((minutesCurrent >= minutesAll && secondsCurrent >= secondsAll)
-                && !(minutesAll == 0L && secondsAll == 0L)
-            ) {
+            if (isSkipOrRepeatRequired) {
                 when (trackState.trackRepeatMode) {
                     RepeatMode.REPEAT_ONCE ->
                         MediaCommands.isNextTrackRequired = true
@@ -80,7 +86,7 @@ fun AutoSkipOnRepeatMode(
                 }
             }
 
-            delay(1.seconds / 70)
+            delay(1.seconds / 60)
         }
     }
 }

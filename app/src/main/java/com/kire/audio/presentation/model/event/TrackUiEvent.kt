@@ -1,6 +1,5 @@
 package com.kire.audio.presentation.model.event
 
-import com.kire.audio.presentation.constants.LyricsRequestMode
 import com.kire.audio.presentation.model.SortOption
 import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.state.AlbumState
@@ -16,12 +15,6 @@ sealed class TrackUiEvent {
     data class updateLyricsState(val lyricsState: LyricsState): TrackUiEvent()
     data class updateSearchState(val searchState: SearchState): TrackUiEvent()
     data class updateArtistWithTracks(val albumState: AlbumState = AlbumState()): TrackUiEvent()
-    data class updateSortOption(val sortOption: SortOption): TrackUiEvent()
-    data class getTrackLyricsFromGeniusAndUpdateTrack(
-        val track: Track,
-        val mode: LyricsRequestMode,
-        val title: String? = "",
-        val artist: String? = "",
-        val userInput: String? = ""
-    ): TrackUiEvent()
+    data class updateSortOptionAndSave(val sortOption: SortOption): TrackUiEvent()
+    data object updateTrackDataBase: TrackUiEvent()
 }

@@ -39,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.Density
 
 import androidx.core.view.WindowCompat
@@ -64,9 +63,7 @@ import com.kire.audio.device.audio.media_controller.rememberManagedMediaControll
 import com.kire.audio.device.audio.util.PlayerState
 import com.kire.audio.device.audio.util.state
 import com.kire.audio.presentation.model.PlayerStateParams
-import com.kire.audio.presentation.model.Track
 import com.kire.audio.presentation.model.event.TrackUiEvent
-import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.navigation.NavigationUI
 import com.kire.audio.presentation.ui.details.common.AutoSkipOnRepeatMode
 import com.kire.audio.presentation.ui.details.common.PlayerBottomBar
@@ -167,7 +164,7 @@ class MainActivity : ComponentActivity() {
                         ) { _ ->
 
                             GetPermissions(
-                                lifecycleOwner = LocalLifecycleOwner.current,
+                                lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current,
                                 updateTrackDataBase = trackViewModel::updateTrackDataBase
                             )
 
@@ -185,8 +182,6 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-
-
                 }
             }
         }

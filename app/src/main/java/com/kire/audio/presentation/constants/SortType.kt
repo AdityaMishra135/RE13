@@ -1,5 +1,8 @@
 package com.kire.audio.presentation.constants
 
+import androidx.compose.runtime.Stable
+
+@Stable
 enum class SortType {
 
     DATE_ASC_ORDER,

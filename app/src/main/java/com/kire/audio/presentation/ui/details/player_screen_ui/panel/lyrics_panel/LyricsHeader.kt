@@ -40,7 +40,7 @@ import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.constants.LyricsRequestMode
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.ui.details.common.Divider
-import com.kire.audio.presentation.ui.details.common.RubikFontText
+import com.kire.audio.presentation.ui.details.common.RubikFontBasicText
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 import com.kire.audio.presentation.util.modifier.animatePlacement
@@ -48,38 +48,55 @@ import com.kire.audio.presentation.util.rememberDerivedStateOf
 
 import kotlinx.coroutines.flow.StateFlow
 
+/**
+ * Заголовок панели текста песни
+ *
+ * @param trackStateFlow Текущее состояние воспроизведения
+ * @param lyricsStateFlow Текущее состояние поиска текста песни
+ * @param onEvent Обработчик UI событий
+ * @param clearUserInput Очищает поле ввода
+ * @param lyricsRequestWithUpdatingTrack Осуществляет запрос текста песни
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @Composable
 fun LyricsHeader(
+    trackStateFlow: StateFlow<TrackState>,
+    lyricsStateFlow: StateFlow<LyricsState>,
     onEvent: (TrackUiEvent) -> Unit,
-    trackState: StateFlow<TrackState>,
     clearUserInput: () -> Unit,
-    lyricsRequest: (LyricsRequestMode) -> Unit,
-    lyricsState: StateFlow<LyricsState>,
+    lyricsRequestWithUpdatingTrack: (LyricsRequestMode) -> Unit,
 ) {
+    /** Текущее состояние воспроизведения */
+    val trackState by trackStateFlow.collectAsStateWithLifecycle()
+    /** Текущее состояние поиска текста песни */
+    val lyricsState by lyricsStateFlow.collectAsStateWithLifecycle()
 
-    val lyricsState by lyricsState.collectAsStateWithLifecycle()
-    val trackState by trackState.collectAsStateWithLifecycle()
-
+    /** Флаг видимости кнопки удаления/очищения пользовательского ввода */
     val showDelete by rememberDerivedStateOf {
         lyricsState.isEditModeEnabled && lyricsState.lyricsRequestMode == LyricsRequestMode.EDIT_CURRENT_TEXT
     }
 
+    /** Флаг видимости кнопки обновления текста песни в автоматическом режиме*/
     val showRefresh by rememberDerivedStateOf {
         lyricsState.lyricsRequestMode != LyricsRequestMode.SELECTOR_IS_VISIBLE
                 || trackState.currentTrackPlaying?.lyrics !is ILyricsRequestState.Success
     }
 
+    /** Флаг необходимости запроса текста песни */
     val shouldMakeLyricsRequest by rememberDerivedStateOf {
         (lyricsState.lyricsRequestMode == LyricsRequestMode.BY_LINK || lyricsState.lyricsRequestMode == LyricsRequestMode.BY_TITLE_AND_ARTIST)
                 && lyricsState.userInput.isNotEmpty()
     }
 
+    /** Иконка справа от заголовка панели */
     val editOrSaveIcon by rememberDerivedStateOf {
         if (!lyricsState.isEditModeEnabled)
             Icons.Rounded.Edit
         else Icons.Rounded.Save
     }
 
+    /** Тип запроса, который должен быть применен */
     val newLyricsRequestMode by rememberDerivedStateOf {
         if (!lyricsState.isEditModeEnabled)
             LyricsRequestMode.SELECTOR_IS_VISIBLE
@@ -103,11 +120,13 @@ fun LyricsHeader(
             horizontalArrangement = Arrangement.SpaceBetween
         ){
 
+            /** */
             AnimatedContent(
                 targetState = showDelete,
                 modifier = Modifier
                     .size(Dimens.universalIconSize)
             ) {
+                /** Иконка удаления/очищения пользовательского ввода */
                 if (it)
                     Icon(
                         imageVector = Icons.Rounded.Delete,
@@ -120,6 +139,7 @@ fun LyricsHeader(
                             }
                     )
                 else if (showRefresh)
+                    /** Иконка обновления текста песни в автоматическом режиме */
                     Icon(
                         imageVector = Icons.Rounded.Refresh,
                         contentDescription = "Refresh",
@@ -127,12 +147,13 @@ fun LyricsHeader(
                         modifier = Modifier
                             .fillMaxSize()
                             .bounceClick {
-                                lyricsRequest(LyricsRequestMode.AUTOMATIC)
+                                lyricsRequestWithUpdatingTrack(LyricsRequestMode.AUTOMATIC)
                             }
                     )
             }
 
-            RubikFontText(
+            /** Заголовок - название панели */
+            RubikFontBasicText(
                 text = LocalizationProvider.strings.lyricsDialogHeader,
                 style = TextStyle(
                     fontWeight = FontWeight.SemiBold,
@@ -141,6 +162,8 @@ fun LyricsHeader(
                 )
             )
 
+            /** Иконка начала редактирования или сохранения
+             * в зависимости от lyricsState.isEditModeEnabled */
             Icon(
                 imageVector = editOrSaveIcon,
                 contentDescription = "",
@@ -151,19 +174,18 @@ fun LyricsHeader(
                         onEvent(
                             TrackUiEvent.updateLyricsState(
                                 lyricsState.copy(
-
                                     lyricsRequestMode = newLyricsRequestMode,
-
                                     isEditModeEnabled = !lyricsState.isEditModeEnabled
                                         .also { isEnabled ->
 
                                             if (shouldMakeLyricsRequest && isEnabled)
-                                                lyricsRequest(lyricsState.lyricsRequestMode)
+                                                lyricsRequestWithUpdatingTrack(lyricsState.lyricsRequestMode)
+
                                             else if (lyricsState.lyricsRequestMode == LyricsRequestMode.EDIT_CURRENT_TEXT && isEnabled)
 
                                                 trackState.currentTrackPlaying?.let { track ->
-                                                    onEvent(
-                                                        TrackUiEvent.upsertAndUpdateCurrentTrack(
+                                                    onEvent(TrackUiEvent
+                                                        .upsertAndUpdateCurrentTrack(
                                                             track = track.copy(
                                                                 lyrics = ILyricsRequestState.Success(
                                                                     lyricsState.userInput
@@ -180,6 +202,7 @@ fun LyricsHeader(
             )
         }
 
+        /** Декоративный разделитель */
         Divider()
     }
 }

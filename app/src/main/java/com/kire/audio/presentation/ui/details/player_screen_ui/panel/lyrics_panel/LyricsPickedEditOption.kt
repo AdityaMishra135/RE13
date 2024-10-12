@@ -25,28 +25,28 @@ import androidx.compose.ui.unit.sp
 
 import com.kire.audio.presentation.model.state.ILyricsRequestState
 import com.kire.audio.presentation.constants.LyricsRequestMode
-import com.kire.audio.presentation.ui.details.common.RubikFontText
+import com.kire.audio.presentation.ui.details.common.RubikFontBasicText
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
 
 @Composable
 fun LyricsPickedEditOption(
-    isClearNeeded: Boolean,
+    isClearNeeded: () -> Boolean = { false },
     changeIsClearNeeded: () -> Unit,
-    lyricsRequestMode: LyricsRequestMode,
+    lyricsRequestMode: () -> LyricsRequestMode,
     lyrics: ILyricsRequestState,
     updateUserInput: (String) -> Unit
 ) {
 
     var input by rememberSaveable {
         mutableStateOf(
-            if (lyricsRequestMode == LyricsRequestMode.EDIT_CURRENT_TEXT && lyrics is ILyricsRequestState.Success)
+            if (lyricsRequestMode() == LyricsRequestMode.EDIT_CURRENT_TEXT && lyrics is ILyricsRequestState.Success)
                 lyrics.lyrics.also { updateUserInput(it) }
             else "".also { updateUserInput(it) }
         )
     }
 
-    LaunchedEffect(key1 = isClearNeeded) {
-        if (isClearNeeded)
+    LaunchedEffect(key1 = isClearNeeded()) {
+        if (isClearNeeded())
             input = "".also {
                 updateUserInput(it)
                 changeIsClearNeeded()
@@ -80,8 +80,8 @@ fun LyricsPickedEditOption(
             ) {
 
                 if (input.isEmpty())
-                    if (lyricsRequestMode == LyricsRequestMode.BY_LINK)
-                        RubikFontText(
+                    if (lyricsRequestMode() == LyricsRequestMode.BY_LINK)
+                        RubikFontBasicText(
                             text = LocalizationProvider.strings.byGeniusLinkModeTextExample,
                             style = TextStyle(
                                 color = Color.White,
@@ -90,8 +90,8 @@ fun LyricsPickedEditOption(
                                 fontWeight = FontWeight.Normal
                             )
                         )
-                    else if (lyricsRequestMode == LyricsRequestMode.BY_TITLE_AND_ARTIST)
-                        RubikFontText(
+                    else if (lyricsRequestMode() == LyricsRequestMode.BY_TITLE_AND_ARTIST)
+                        RubikFontBasicText(
                             text = LocalizationProvider.strings.byArtistAndTitleModeTextExample,
                             style = TextStyle(
                                 color = Color.White,

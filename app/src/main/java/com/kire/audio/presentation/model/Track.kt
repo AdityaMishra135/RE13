@@ -1,8 +1,10 @@
 package com.kire.audio.presentation.model
 
 import android.net.Uri
+import androidx.compose.runtime.Immutable
 import com.kire.audio.presentation.model.state.ILyricsRequestState
 
+@Immutable
 data class Track(
     val title: String = "",
     val album: String? = null,

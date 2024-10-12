@@ -19,9 +19,17 @@ import androidx.compose.ui.unit.sp
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.util.modifier.animatePlacement
 
+/**
+ * Результат запроса текста песни
+ *
+ * @param lyrics текст, который
+ * соответствует данному состоянию запроса
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @Composable
 fun LyricsResult(
-    lyrics: String
+    lyrics: () -> String
 ) {
 
     Box(
@@ -32,7 +40,7 @@ fun LyricsResult(
         contentAlignment = Alignment.TopStart
     ){
         Text(
-            text = lyrics,
+            text = lyrics(),
             style = TextStyle(
                 color = Color.White,
                 fontSize = 19.sp,
