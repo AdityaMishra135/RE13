@@ -10,7 +10,9 @@ import androidx.media3.session.MediaSession
 import com.google.common.collect.ImmutableList
 
 @UnstableApi
-class CustomMediaNotificationProvider(context: Context) : DefaultMediaNotificationProvider(context) {
+class CustomMediaNotificationProvider(
+    context: Context
+) : DefaultMediaNotificationProvider(context) {
 
     override fun addNotificationActions(
         mediaSession: MediaSession,

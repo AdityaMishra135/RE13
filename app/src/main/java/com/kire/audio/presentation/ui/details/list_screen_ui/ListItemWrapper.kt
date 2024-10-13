@@ -1,17 +1,27 @@
 package com.kire.audio.presentation.ui.details.list_screen_ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
 
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Pause
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -31,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.media3.session.MediaController
+import com.kire.audio.presentation.model.PlayerStateParams
 
 import com.kire.audio.presentation.model.state.TrackState
 import com.kire.audio.presentation.ui.details.common.Divider
@@ -39,6 +50,7 @@ import com.kire.audio.presentation.ui.details.common.slider.SliderWithDurationAn
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.animation.Animation
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
+import com.kire.audio.presentation.util.modifier.bounceClick
 import com.kire.audio.presentation.util.modifier.dynamicPadding
 import kotlinx.coroutines.flow.StateFlow
 
@@ -119,15 +131,22 @@ fun ListItemWrapper(
                 Modifier
                     .weight(1f)
                     .padding(end = Dimens.universalPad)
-            ) { isClicked = !isClicked }
+            ) { isClicked = !isClicked.also {
+                PlayerStateParams.isPlaying = !it
+            } }
 
-            /** Кнопки управления воспроизведением */
+            /** Иконка начала воспроизвеления и постановки на паузу */
             AnimatedVisibility(visible = isClicked) {
-                MediaControls(
-                    mediaController = mediaController,
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(Dimens.universalColumnAndRowSpacedBy)
-                )
+                PlayPauseIcon {
+                    mediaController?.apply {
+                        if (PlayerStateParams.isPlaying)
+                            pause()
+                        else {
+                            prepare()
+                            play()
+                        }
+                    }
+                }
             }
         }
 
@@ -150,6 +169,41 @@ fun ListItemWrapper(
                         }
                 )
             }
+        }
+    }
+}
+
+/**
+ * Иконка начала воспроизвеления и постановки на паузу
+ *
+ * @param onClick Действие при нажатии
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ * */
+@Composable
+private fun PlayPauseIcon(
+    onClick: () -> Unit
+) {
+    AnimatedContent(targetState = PlayerStateParams.isPlaying) {
+        Box(
+            modifier = Modifier
+                .wrapContentSize()
+                .clip(CircleShape)
+                .background(color = AudioExtendedTheme.extendedColors.listItemWrapperPlayPauseCircleTint)
+                .bounceClick {
+                    onClick()
+                }
+                .padding(Dimens.universalPad),
+        ) {
+            Icon(
+                imageVector =
+                    if (it) Icons.Rounded.Pause
+                    else Icons.Rounded.PlayArrow,
+                contentDescription = null,
+                tint = AudioExtendedTheme.extendedColors.button,
+                modifier = Modifier
+                    .size(Dimens.playPauseIconSize)
+            )
         }
     }
 }

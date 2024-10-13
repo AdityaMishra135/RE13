@@ -90,14 +90,10 @@ fun PlayerBottomBar(
         mutableIntStateOf(0)
     }
 
-    val isPlayerBottomBarVisible by rememberDerivedStateOf {
-        PlayerStateParams.isPlayerBottomBarShown &&
-                currentDestination != PlayerScreenDestination
-                && currentDestination != AlbumScreenDestination
-    }
-
     AnimatedVisibility(
-        visible = isPlayerBottomBarVisible,
+        visible = PlayerStateParams.isPlayerBottomBarShown &&
+                currentDestination != PlayerScreenDestination
+                && currentDestination != AlbumScreenDestination,
         enter = slideInVertically(
             initialOffsetY = { height },
             animationSpec = tween(durationMillis = 450, easing = LinearOutSlowInEasing)

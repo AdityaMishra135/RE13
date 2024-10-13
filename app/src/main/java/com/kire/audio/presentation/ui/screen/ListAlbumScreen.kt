@@ -101,7 +101,6 @@ fun ListAlbumScreen(
                 }
 
                 ListItemAlbumWrapper(
-                    modifier = Modifier,
                     trackStateFlow = trackViewModel.trackState,
                     tracks = tracks,
                     onEvent = trackViewModel::onEvent,

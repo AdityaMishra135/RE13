@@ -6,24 +6,32 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
-import com.kire.audio.data.mapper.toDomain
 
+import com.kire.audio.data.mapper.toDomain
 import com.kire.audio.data.model.TrackEntity
 import com.kire.audio.domain.model.TrackDomain
 
 import java.io.File
 import javax.inject.Inject
 
+/**
+ * Реализует загрузку в базу данных треков,
+ * сохраненных на устройстве пользователя
+ *
+ * @param context Контекст
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ * */
 class TracksLoading @Inject constructor(
     private val context: Context
 ) {
-
     @SuppressLint("Range")
-    suspend fun getTracksFromLocalStorage(
+    suspend operator fun invoke(
         getTrack: suspend (String) -> TrackEntity,
         upsertTrack: suspend (TrackDomain) -> Unit
     ) {
 
+        /** Дает доступ к хранилищу */
         val cursor: Cursor? = context.contentResolver?.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             null,
@@ -31,28 +39,25 @@ class TracksLoading @Inject constructor(
             null,
             null
         )
-        val sArtworkUri = Uri
-            .parse("content://media/external/audio/albumart")
+
+        /** Базовый путь для обложки трека */
+        val basePath = Uri.parse("content://media/external/audio/albumart")
 
         cursor?.apply {
 
             if (moveToFirst()) {
                 do {
-                    val trackTitle =
-                        getString(getColumnIndex(MediaStore.Audio.Media.TITLE))
-
-                    val trackArtist =
-                        getString(getColumnIndex(MediaStore.Audio.Media.ARTIST))
-
+                    /** Название */
+                    val trackTitle = getString(getColumnIndex(MediaStore.Audio.Media.TITLE))
+                    /** Имя исполнителя */
+                    val trackArtist = getString(getColumnIndex(MediaStore.Audio.Media.ARTIST))
+                    /** Путь */
                     val trackPath = getString(getColumnIndex(MediaStore.Audio.Media.DATA))
-
-                    val trackAlbumId =
-                        getLong(getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))
-
-                    val trackImageUri = ContentUris.withAppendedId(sArtworkUri, trackAlbumId)
-
-//                    val trackImageUri: Uri? = getAlbumArt(trackAlbumId, context)
-
+                    /** ID альбома */
+                    val trackAlbumId = getLong(getColumnIndex(MediaStore.Audio.Media.ALBUM_ID))
+                    /** Uri обложки трека */
+                    val trackImageUri = ContentUris.withAppendedId(basePath, trackAlbumId)
+                    /** Готовая сущность трека */
                     val track = TrackEntity(
                         id = getString(getColumnIndex(MediaStore.Audio.Media._ID)),
                         title = when (trackTitle) {
@@ -73,16 +78,19 @@ class TracksLoading @Inject constructor(
                         defaultImageUri = trackImageUri
                     )
 
+                    /** Проверяем, сохранен ли уже данный трек в базе */
                     if (File(trackPath).exists()) {
+                        /** Получаем трек из базы данных по id */
                         val existingTrack: TrackEntity? = getTrack(track.id)
 
+                        /** Если путь не совпадает, добавляем в базу */
                         if (existingTrack?.path != track.path)
                             upsertTrack(track.toDomain())
                     }
 
                 } while (moveToNext())
             }
-
+            /** Прекращает работу Cursor */
             close()
         }
     }

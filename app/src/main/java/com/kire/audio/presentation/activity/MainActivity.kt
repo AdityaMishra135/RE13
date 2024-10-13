@@ -53,15 +53,13 @@ import com.google.accompanist.navigation.material.ExperimentalMaterialNavigation
 
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
-
 import com.kire.audio.device.audio.AudioPlayerService
+
 import com.kire.audio.device.audio.media_controller.MediaControllerManager
 import com.kire.audio.device.audio.util.SkipTrackAction
 import com.kire.audio.device.audio.media_controller.performPlayMedia
 import com.kire.audio.device.audio.util.MediaCommands
 import com.kire.audio.device.audio.media_controller.rememberManagedMediaController
-import com.kire.audio.device.audio.util.PlayerState
-import com.kire.audio.device.audio.util.state
 import com.kire.audio.presentation.model.PlayerStateParams
 import com.kire.audio.presentation.model.event.TrackUiEvent
 import com.kire.audio.presentation.navigation.NavigationUI
@@ -71,6 +69,7 @@ import com.kire.audio.presentation.ui.details.common.PlayerBottomBar
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
+import com.kire.audio.presentation.util.rememberDerivedStateOf
 import com.kire.audio.presentation.viewmodel.TrackViewModel
 import com.kire.audio.screen.functional.GetPermissions
 
@@ -124,21 +123,6 @@ class MainActivity : ComponentActivity() {
 
                     if (MediaCommands.isRepeatRequired)
                         skipTrack(this@MainActivity, SkipTrackAction.REPEAT, trackViewModel)
-
-                    /** Текущее состояние плеера */
-                    var playerState: PlayerState? by remember {
-                        mutableStateOf(mediaController?.state())
-                    }
-
-                    /** Создаем экземпляр состояния плеера */
-                    DisposableEffect(key1 = mediaController) {
-                        mediaController?.run {
-                            playerState = state()
-                        }
-                        onDispose {
-                            playerState?.dispose()
-                        }
-                    }
 
                     NestedContainer { nestedScrollConnection, modifier, shiftPlayerBottomBarDown, shiftPlayerBottomBar ->
                         Scaffold(

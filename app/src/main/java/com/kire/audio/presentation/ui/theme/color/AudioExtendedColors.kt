@@ -30,5 +30,6 @@ data class AudioExtendedColors(
     val albumSuggestionItemText: Color = Color.Unspecified,
     val heartPressed: Color = Color.Unspecified,
     val favouritePanelMainTextColor: Color = Color.White,
-    val favouritePanelSatelliteTextColor: Color = Color(0xFFEBEBEB)
+    val favouritePanelSatelliteTextColor: Color = Color(0xFFEBEBEB),
+    val listItemWrapperPlayPauseCircleTint: Color = Color.Unspecified
 )

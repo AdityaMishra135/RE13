@@ -22,6 +22,16 @@ import java.io.File
 
 import javax.inject.Inject
 
+/**
+ * Репозиторий для базы данных,
+ * содержащей информацию о треках,
+ * сохраненных на устройстве
+ *
+ * @param trackDatabaseDao Функционал базы данных
+ * @param tracksLoading Класс для загрузки информации о треках из памяти устройства
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @SuppressLint("Range")
 class TrackRepository @Inject constructor(
     private val trackDatabaseDao: TrackDao,
@@ -46,7 +56,7 @@ class TrackRepository @Inject constructor(
 
     override suspend fun updateIsLoved(track: TrackDomain) =
         withContext(coroutineDispatcher) {
-            trackDatabaseDao.updateIsLoved(track.toEntity())
+            trackDatabaseDao.updateIsFavourite(track.toEntity())
         }
 
     override suspend fun getFavouriteTracks(): Flow<List<TrackDomain>> =
@@ -101,10 +111,10 @@ class TrackRepository @Inject constructor(
 
     @SuppressLint("Range")
     override suspend fun loadTracksToDatabase() {
-
         withContext(coroutineDispatcher) {
-            tracksLoading.getTracksFromLocalStorage(
-                getTrack = ::getTrack, upsertTrack = ::upsertTrack
+            tracksLoading(
+                getTrack = ::getTrack,
+                upsertTrack = ::upsertTrack
             )
         }
     }

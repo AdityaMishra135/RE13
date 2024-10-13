@@ -1,13 +1,17 @@
 package com.kire.audio.data.trackDatabase
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+
 import com.kire.audio.data.model.TrackEntity
 import com.kire.audio.data.trackDatabase.util.Converters
 
+/**
+ * База данных для треков
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ * */
 @Database(
     entities = [TrackEntity::class],
     version = 6

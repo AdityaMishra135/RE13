@@ -94,7 +94,7 @@ fun ListItem(
  * @param modifier модификатор
  * @param onClick действие при клике на элемент
  *
- * @author Michael Gontarev (KiREHwYE)
+ * @author Михаил Гонтарев (KiREHwYE)
  */
 @Composable
 fun ListItem(

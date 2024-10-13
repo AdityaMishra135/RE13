@@ -10,5 +10,4 @@ class GetFavouriteTracksUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(): Flow<List<TrackDomain>> =
         trackRepository.getFavouriteTracks()
-
 }
