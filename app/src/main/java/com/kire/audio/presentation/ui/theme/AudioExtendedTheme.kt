@@ -68,7 +68,7 @@ val extendedDarkColors = AudioExtendedColors(
     sliderDurationAndDivider = Color.White,
     albumSuggestionItemText = Color.White,
     heartPressed = Color.Red,
-    listItemWrapperPlayPauseCircleTint = Color.Black
+    listItemWrapperPlayPauseCircleTint = Color(0xFF5c5c5c)
 )
 
 val LocalAudioExtendedType = staticCompositionLocalOf { AudioExtendedType() }

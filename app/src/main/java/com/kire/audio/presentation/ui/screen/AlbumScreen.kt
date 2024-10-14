@@ -158,10 +158,7 @@ fun AlbumScreen(
                 .pointerInput(Unit) {
                     detectVerticalDragGestures { _, dragAmount ->
                         if (dragAmount > 60) {
-                            navigator.popBackStack(
-                                ListAlbumScreenDestination,
-                                inclusive = false
-                            )
+                            navigator.popBackStack()
                         }
                     }
                 }
@@ -196,10 +193,7 @@ fun AlbumScreen(
                     albumTitle = { trackState.currentList[0].album ?: LocalizationProvider.strings.nothingWasFound },
                     animatedTopPad = { animatedTopPad },
                     onArrowBackClick = {
-                        navigator.popBackStack(
-                            ListAlbumScreenDestination,
-                            inclusive = false
-                        )
+                        navigator.popBackStack()
                     },
                     onInfoClick = {
                         expandPanelByNumber(PanelNumber.FIRST)

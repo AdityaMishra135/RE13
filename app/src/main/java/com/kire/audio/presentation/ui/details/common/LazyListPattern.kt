@@ -88,11 +88,16 @@ fun LazyListPattern(
                 goToPlayerScreen = navigateToPlayerScreen
             ) { trackItemModifier, changeIsClicked ->
 
-                val onClickStable: () -> Unit = remember(track, listIndex) {
-                    {
+                /** Базовый элемент списка */
+                ListItem(
+                    modifier = trackItemModifier,
+                    track = track,
+                    onClick = {
+                        /** Регистрируем клик по всей плитке трека */
                         /** Регистрируем клик по всей плитке трека */
                         changeIsClicked()
                         PlayerStateParams.isPlaying = if (track.path == trackState.currentTrackPlaying?.path) !PlayerStateParams.isPlaying else true
+                        /** Обновляем информацию о текущем треке */
                         /** Обновляем информацию о текущем треке */
                         onEvent(
                             TrackUiEvent.updateTrackState(
@@ -103,6 +108,11 @@ fun LazyListPattern(
                                 )
                             )
                         )
+
+                        /** Запускаем воспроизведение трека или ставим на паузу
+                         * в зависимости от того поменялся ли играющий трек или нет.
+                         * Клик по отличному от текущего треку всегда инициирует начало его проигрывания
+                         * */
 
                         /** Запускаем воспроизведение трека или ставим на паузу
                          * в зависимости от того поменялся ли играющий трек или нет.
@@ -119,13 +129,6 @@ fun LazyListPattern(
                                 performPlayMedia(track)
                         }
                     }
-                }
-
-                /** Базовый элемент списка */
-                ListItem(
-                    modifier = trackItemModifier,
-                    track = track,
-                    onClick = onClickStable
                 )
             }
         }
