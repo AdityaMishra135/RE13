@@ -1,16 +1,13 @@
 package com.kire.audio.presentation.ui.screen
 
 import androidx.activity.compose.BackHandler
+
 import androidx.compose.animation.core.animateDpAsState
+
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
@@ -19,13 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowCircleLeft
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material3.Icon
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -36,45 +27,50 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.media3.session.MediaController
 
 import com.kire.audio.presentation.navigation.transitions.AlbumScreenTransitions
+
 import com.kire.audio.presentation.ui.details.album_screen_ui.AlbumInfoPanel
+import com.kire.audio.presentation.ui.details.album_screen_ui.AlbumScreenCentralDraggableControls
 import com.kire.audio.presentation.ui.details.common.AsyncImageWithLoading
 import com.kire.audio.presentation.ui.details.common.BlurPanel
 import com.kire.audio.presentation.ui.details.common.LazyListPattern
 import com.kire.audio.presentation.ui.details.common.PanelNumber
-import com.kire.audio.presentation.ui.details.common.RubikFontBasicText
 import com.kire.audio.presentation.ui.screen.destinations.ListAlbumScreenDestination
 import com.kire.audio.presentation.ui.screen.destinations.PlayerScreenDestination
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
 import com.kire.audio.presentation.ui.theme.localization.LocalizationProvider
-import com.kire.audio.presentation.util.modifier.bounceClick
 import com.kire.audio.presentation.util.modifier.dynamicPadding
 import com.kire.audio.presentation.viewmodel.TrackViewModel
 
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+/**
+ * Экран отдельного альбома. Содержит список всех треков данного альбома.
+ *
+ * @param trackViewModel VievModel, содержащая все необходимые для работы с треками поля и методы
+ * @param mediaController для управления воспроизведением
+ * @param navigator для навигации между экранами
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ * */
 @Destination(style = AlbumScreenTransitions::class)
 @Composable
 fun AlbumScreen(
@@ -82,37 +78,41 @@ fun AlbumScreen(
     mediaController: MediaController? = null,
     navigator: DestinationsNavigator
 ) {
-
+    /** Переопределяем жест назад */
     BackHandler {
         navigator.popBackStack()
         return@BackHandler
     }
-
+    /** Экземпляр TrackState. Содержит информацию о состоянии воспроизведения */
     val trackState by trackViewModel.trackState.collectAsStateWithLifecycle()
 
+    /** Текущая плотность пикселей */
     val localDensity = LocalDensity.current
 
-    /** высота верхнего бара в пикселях*/
+    /** Высота верхнего бара в пикселях*/
     val topBarHeightPx = remember { mutableStateOf(0f) }
-
-    /** свдиг верхнего бара по высоте */
+    /** Свдиг верхнего бара по высоте */
     val topBarOffsetHeightPx = remember { mutableStateOf(0f) }
 
-    /** динамический отступ для списка */
+    /** Динамический отступ для списка */
     val spaceHeight = remember {
         derivedStateOf {
             (topBarHeightPx.value + topBarOffsetHeightPx.value) / localDensity.density
         }
     }
 
-    var isTopBarExpanded by rememberSaveable {
+    /** Флаг того, что центральная панель сдвинута в крайнее верхнее положение */
+    var isCentralBlockShifted by rememberSaveable {
         mutableStateOf(true)
     }
 
-    val displayCutoutPad by animateDpAsState(targetValue = if (isTopBarExpanded) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateTopPadding())
+    /** Анимированный отступ от верхнего края экрана */
+    val animatedTopPad by animateDpAsState(targetValue = if (isCentralBlockShifted) 0.dp else WindowInsets.displayCutout.asPaddingValues().calculateTopPadding())
 
+    /** Область выполнения корутин */
     val coroutineScope = rememberCoroutineScope()
 
+    /** Поднимет вверх облажку альбома за границы экрана */
     fun shiftImageUp() {
         coroutineScope.launch {
             while (-topBarOffsetHeightPx.value < topBarHeightPx.value) {
@@ -123,10 +123,10 @@ fun AlbumScreen(
                 topBarOffsetHeightPx.value = newTopBarOffset
                 delay(1)
             }
-            isTopBarExpanded = false
+            isCentralBlockShifted = false
         }
     }
-
+    /** Опускает вниз облажку альбома */
     fun shiftImageDown() {
         coroutineScope.launch {
             while (topBarOffsetHeightPx.value < 0) {
@@ -137,10 +137,11 @@ fun AlbumScreen(
                 topBarOffsetHeightPx.value = newTopBarOffset
                 delay(1)
             }
-            isTopBarExpanded = true
+            isCentralBlockShifted = true
         }
     }
 
+    /** Основной контент */
     BlurPanel(
         onTopOfBlurPanel1 = {
             AlbumInfoPanel(
@@ -166,6 +167,7 @@ fun AlbumScreen(
                 }
         ) {
 
+            /** Обложка альбома */
             AsyncImageWithLoading(
                 imageUri = trackState.currentList[0].imageUri,
                 modifier = Modifier
@@ -188,81 +190,39 @@ fun AlbumScreen(
                     .dynamicPadding(top = { spaceHeight.value.dp })
                     .fillMaxSize()
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .pointerInput(Unit) {
-                            detectDragGestures(
-                                onDrag = { _, dragAmount ->
-                                    val deltaY = dragAmount.y
-
-                                    val newTopBarOffset =
-                                        (topBarOffsetHeightPx.value + deltaY).coerceIn(
-                                            minimumValue = -topBarHeightPx.value,
-                                            maximumValue = 0f
-                                        )
-                                    topBarOffsetHeightPx.value = newTopBarOffset
-                                },
-                                onDragEnd = {
-                                    coroutineScope.launch {
-                                        if (topBarOffsetHeightPx.value >= (-topBarHeightPx.value / 2))
-                                            shiftImageDown()
-                                        else
-                                            shiftImageUp()
-                                    }
-                                }
+                /** Центральная часть экрана, содержащая название альбома,
+                 * кнопку возвращения назад и кнопку открытия панели информации об альбоме */
+                AlbumScreenCentralDraggableControls(
+                    albumTitle = { trackState.currentList[0].album ?: LocalizationProvider.strings.nothingWasFound },
+                    animatedTopPad = { animatedTopPad },
+                    onArrowBackClick = {
+                        navigator.popBackStack(
+                            ListAlbumScreenDestination,
+                            inclusive = false
+                        )
+                    },
+                    onInfoClick = {
+                        expandPanelByNumber(PanelNumber.FIRST)
+                    },
+                    onDrag = { deltaY ->
+                        val newTopBarOffset =
+                            (topBarOffsetHeightPx.value + deltaY).coerceIn(
+                                minimumValue = -topBarHeightPx.value,
+                                maximumValue = 0f
                             )
+                        topBarOffsetHeightPx.value = newTopBarOffset
+                    },
+                    onDragEnd = {
+                        coroutineScope.launch {
+                            if (topBarOffsetHeightPx.value >= (-topBarHeightPx.value / 2))
+                                shiftImageDown()
+                            else
+                                shiftImageUp()
                         }
-                        .padding(Dimens.universalPad)
-                        .dynamicPadding(top = { displayCutoutPad }),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                    }
+                )
 
-                    Icon(
-                        imageVector = Icons.Rounded.ArrowCircleLeft,
-                        contentDescription = null,
-                        tint = if (!isSystemInDarkTheme()) Color.White else AudioExtendedTheme.extendedColors.button,
-                        modifier = Modifier
-                            .size(Dimens.albumScreenIconSize)
-                            .bounceClick {
-                                navigator.popBackStack(
-                                    ListAlbumScreenDestination,
-                                    inclusive = false
-                                )
-                            }
-                    )
-
-
-                    RubikFontBasicText(
-                        text = trackState.currentList[0].album
-                            ?: LocalizationProvider.strings.nothingWasFound,
-                        style = TextStyle(
-                            color = if (!isSystemInDarkTheme()) Color.White else AudioExtendedTheme.extendedColors.primaryText,
-                            fontSize = 24.sp,
-                            lineHeight = 24.sp,
-                            fontWeight = FontWeight.Medium,
-                        ),
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = Dimens.universalPad)
-                    )
-
-                    Icon(
-                        imageVector = Icons.Rounded.Info,
-                        contentDescription = null,
-                        tint = if (!isSystemInDarkTheme()) Color.White else AudioExtendedTheme.extendedColors.button,
-                        modifier = Modifier
-                            .size(Dimens.albumScreenIconSize)
-                            .pointerInput(Unit) {
-                                detectTapGestures {
-                                    expandPanelByNumber(PanelNumber.FIRST)
-                                }
-                            }
-                    )
-                }
-
+                /** Треки данного альбома */
                 LazyListPattern(
                     trackStateFlow = trackViewModel.trackState,
                     onEvent = trackViewModel::onEvent,

@@ -39,76 +39,82 @@ class TrackRepository @Inject constructor(
     @IoDispatcher private val coroutineDispatcher: CoroutineDispatcher
 ): ITrackRepository {
 
-    override suspend fun getTrack(id: String): TrackEntity {
-       return withContext(coroutineDispatcher) {
+    /** Возвращает трек с указанным id */
+    override suspend fun getTrack(id: String): TrackEntity =
+       withContext(coroutineDispatcher) {
            trackDatabaseDao.getTrack(id)
        }
-    }
-    override suspend fun upsertTrack(track: TrackDomain) {
-        return withContext(coroutineDispatcher) {
+    /** Обновляет соответствующий трек в базе, либо добавляет, если его еще в ней нет */
+    override suspend fun upsertTrack(track: TrackDomain) =
+        withContext(coroutineDispatcher) {
             trackDatabaseDao.upsertTrack(track.toEntity())
         }
-    }
+    /** Удаляет соответствующий трек из базы */
     override suspend fun deleteTrack(track: TrackEntity) =
         withContext(coroutineDispatcher) {
             trackDatabaseDao.deleteTrack(track)
         }
 
-    override suspend fun updateIsLoved(track: TrackDomain) =
+    /** Добавляет трек в избранное или убирает оттуда */
+    override suspend fun updateIsFavourite(track: TrackDomain) =
         withContext(coroutineDispatcher) {
             trackDatabaseDao.updateIsFavourite(track.toEntity())
         }
-
+    /** Список любимых треков (isFavoutite = true) */
     override suspend fun getFavouriteTracks(): Flow<List<TrackDomain>> =
         withContext(coroutineDispatcher) {
             trackDatabaseDao.getFavouriteTracks().toDomain()
         }
 
+    /** Возвращает список треков отсортированный по дате добавления в порядке возрастания */
     override suspend fun getTracksOrderedByDateAddedASC(): Flow<List<TrackDomain>> =
         withContext(coroutineDispatcher) {
             trackDatabaseDao.getTracksOrderedByDateAddedASC().toDomain()
         }
-
+    /** Возвращает список треков отсортированный по дате добавления в порядке убывания */
     override suspend fun getTracksOrderedByDateAddedDESC(): Flow<List<TrackDomain>> =
         withContext(coroutineDispatcher) {
             trackDatabaseDao.getTracksOrderedByDateAddedDESC().toDomain()
         }
-
+    /** Возвращает список треков отсортированный по названию в порядке возрастания */
     override suspend fun getTracksOrderedByTitleASC(): Flow<List<TrackDomain>> =
         withContext(coroutineDispatcher) {
             trackDatabaseDao.getTracksOrderedByTitleASC().toDomain()
         }
-
+    /** Возвращает список треков отсортированный по названию в порядке убывания */
     override suspend fun getTracksOrderedByTitleDESC(): Flow<List<TrackDomain>> =
         withContext(coroutineDispatcher) {
             trackDatabaseDao.getTracksOrderedByTitleDESC().toDomain()
         }
-
+    /** Возвращает список треков отсортированный по имени исполнителя в порядке возрастания */
     override suspend fun getTracksOrderedByArtistASC(): Flow<List<TrackDomain>> =
         withContext(coroutineDispatcher) {
             trackDatabaseDao.getTracksOrderedByArtistASC().toDomain()
         }
-
+    /** Возвращает список треков отсортированный по имени исполнителя в порядке убывания */
     override suspend fun getTracksOrderedByArtistDESC(): Flow<List<TrackDomain>> =
         withContext(coroutineDispatcher) {
             trackDatabaseDao.getTracksOrderedByArtistDESC().toDomain()
         }
-
+    /** Возвращает список треков отсортированный по длительности в порядке возрастания */
     override suspend fun getTracksOrderedByDurationASC(): Flow<List<TrackDomain>> =
         withContext(coroutineDispatcher) {
             trackDatabaseDao.getTracksOrderedByDurationASC().toDomain()
         }
-
+    /** Возвращает список треков отсортированный по длительности в порядке убывания */
     override suspend fun getTracksOrderedByDurationDESC(): Flow<List<TrackDomain>> =
         withContext(coroutineDispatcher) {
             trackDatabaseDao.getTracksOrderedByDurationDESC().toDomain()
         }
 
+    /** Возвращает словарь с ключом - названием альбома и
+     * значением - списком треков, ему соответствующих*/
     override suspend fun getAlbumsWithTracks(): Map<String, List<TrackDomain>> =
         withContext(coroutineDispatcher) {
             trackDatabaseDao.getAlbumsWithTracks().toDomain()
         }
 
+    /** Обновляет базу данных, добавляя в нее те треки, которых в ней еще нет */
     @SuppressLint("Range")
     override suspend fun loadTracksToDatabase() {
         withContext(coroutineDispatcher) {
@@ -118,9 +124,8 @@ class TrackRepository @Inject constructor(
             )
         }
     }
-
+    /** Обновляет базу данных, удаляя из нее те треки, которых на устройстве больше нет */
     override suspend fun deleteNoLongerExistingTracksFromDatabase() {
-
         withContext(coroutineDispatcher) {
 
             getTracksOrderedByDateAddedASC().collect { tracks ->
@@ -131,7 +136,7 @@ class TrackRepository @Inject constructor(
             }
         }
     }
-
+    /** Совмещает в себе добавление новых треков и удаление тех, которых на устройстве больше нет */
     override suspend fun updateTracks() {
         withContext(coroutineDispatcher) {
             launch { loadTracksToDatabase() }

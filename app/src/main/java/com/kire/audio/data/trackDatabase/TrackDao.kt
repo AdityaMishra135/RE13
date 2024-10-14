@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TrackDao {
 
-    /** Обновляет трек, если он уже есть в базе, либо добавляет новый объект */
+    /** Обновляет соответствующий трек в базе, либо добавляет, если его еще в ней нет */
     @Upsert
     fun upsertTrack(track: TrackEntity)
 
@@ -25,7 +25,7 @@ interface TrackDao {
     @Delete
     fun deleteTrack(track: TrackEntity)
 
-    /** Список любимых треков (isFavoutite = true)*/
+    /** Возвращает список любимых треков (isFavoutite = true) */
     @Query("SELECT * FROM track WHERE isFavourite LIKE :value")
     fun getFavouriteTracks(value: Boolean = true): Flow<List<TrackEntity>>
 

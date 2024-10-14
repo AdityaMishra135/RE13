@@ -32,7 +32,7 @@ class PreferencesRepository @Inject constructor(
             preferencesDataStore.saveSortOption(key, value)
         }
 
-    /** Возвращает опцию сортировки, выбранную пользлвателем */
+    /** Возвращает опцию сортировки, выбранную пользователем */
     override suspend fun readSortOption(key: String): Flow<SortTypeDomain> =
         withContext(coroutineDispatcher) {
             preferencesDataStore.readSortOption(key).toDomain()

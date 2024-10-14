@@ -55,10 +55,12 @@ fun ListScreen(
         trackViewModel.onEvent(TrackUiEvent.updateArtistWithTracks())
     }
 
+    /** Флаг того, что список пуст и нужно уведомить об этом пользователя */
     val contentIsEmpty by rememberDerivedStateOf {
         { allTracks.isEmpty() }
     }
 
+    /** Действие при клике на плитку альбома в с списке быстрого доступа в TopBlock */
     val onAlbumSuggestionClick by rememberDerivedStateOf {
         { albumTitle: String ->
             val album = trackViewModel.artistWithTracks.value[albumTitle]

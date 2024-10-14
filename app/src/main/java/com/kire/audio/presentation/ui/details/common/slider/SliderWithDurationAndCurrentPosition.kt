@@ -11,6 +11,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -34,6 +35,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 
 /** Время в минутах и секундах в формате 00:00 */
+@Immutable
 private data class TimePosition(
     val minutes: Long,
     val seconds: Long
@@ -58,12 +60,10 @@ fun SliderWithDurationAndCurrentPosition(
 ){
     /** Длительность трека*/
     var duration by rememberSaveable { mutableFloatStateOf(0f) }
-
     /** Текущая позиция слайдера */
     var sliderPosition by rememberSaveable {
         mutableFloatStateOf(mediaController?.currentPosition?.toFloat() ?: 0f)
     }
-
     /** Поток взаимодействий */
     val interactionSource = remember { MutableInteractionSource() }
 

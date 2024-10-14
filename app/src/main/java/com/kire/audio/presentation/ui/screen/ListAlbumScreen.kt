@@ -41,6 +41,16 @@ import com.kire.audio.presentation.viewmodel.TrackViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
+/**
+ * Экран альбомов. Отображает список всех альбомов.
+ *
+ * @param trackViewModel VievModel, содержащая все необходимые для работы с треками поля и методы
+ * @param shiftPlayerBottomBar функция, опускающая PlayerBottomBar за границы экрана
+ * @param mediaController для управления воспроизведением
+ * @param navigator для навигации между экранами
+ *
+ * @author Михаил Гонтарев (KiREHwYE)
+ */
 @Destination(style = ListAlbumScreenTransitions::class)
 @Composable
 fun ListAlbumScreen(
@@ -49,24 +59,30 @@ fun ListAlbumScreen(
     mediaController: MediaController? = null,
     navigator: DestinationsNavigator
 ){
+    /** Словарь с ключами - альбомами и значениями - списками треков, им соответствующими */
     val albumsWithTracks by trackViewModel.artistWithTracks.collectAsStateWithLifecycle()
+    /** Список названий альбомов */
     val albums by rememberDerivedStateOf {
         albumsWithTracks.keys.toList()
     }
 
+    /** Флаг того, что список пуст и нужно уведомить об этом пользователя */
     val contentIsEmpty by rememberDerivedStateOf {
         { albums.isEmpty() }
     }
 
+    /** Переопределяем жест назад */
     BackHandler {
         navigator.popBackStack(ListScreenDestination, inclusive = false)
         return@BackHandler
     }
 
+    /** Отрисовываем контент экрана */
     ListWithTopAndFab(
         contentIsEmpty = contentIsEmpty,
         shiftBottomBar = shiftPlayerBottomBar,
         topBar = {
+            /** Шапка с названием экрана, поиском, сортировкой треков и возможностью перехода на экран альбомов*/
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -87,6 +103,7 @@ fun ListAlbumScreen(
         }
     ) { modifier, state ->
 
+        /** Список альбомов */
         LazyColumn(
             state = state,
             modifier = modifier,
@@ -96,10 +113,12 @@ fun ListAlbumScreen(
 
             itemsIndexed(albums, key = {_, title -> title}) { _, album ->
 
+                /** Треки, соответствующие данному альбому */
                 val tracks by rememberDerivedStateOf {
                     albumsWithTracks[album] ?: emptyList()
                 }
 
+                /** Обертка для элемента списка, предоставляющая быстрый доступ к трекам альбома */
                 ListItemAlbumWrapper(
                     trackStateFlow = trackViewModel.trackState,
                     tracks = tracks,
