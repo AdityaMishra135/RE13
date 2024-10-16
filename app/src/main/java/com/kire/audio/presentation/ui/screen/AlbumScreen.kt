@@ -47,7 +47,6 @@ import com.kire.audio.presentation.ui.details.common.AsyncImageWithLoading
 import com.kire.audio.presentation.ui.details.common.BlurPanel
 import com.kire.audio.presentation.ui.details.common.LazyListPattern
 import com.kire.audio.presentation.ui.details.common.PanelNumber
-import com.kire.audio.presentation.ui.screen.destinations.ListAlbumScreenDestination
 import com.kire.audio.presentation.ui.screen.destinations.PlayerScreenDestination
 import com.kire.audio.presentation.ui.theme.AudioExtendedTheme
 import com.kire.audio.presentation.ui.theme.dimen.Dimens
@@ -80,7 +79,7 @@ fun AlbumScreen(
 ) {
     /** Переопределяем жест назад */
     BackHandler {
-        navigator.popBackStack()
+        navigator.navigateUp()
         return@BackHandler
     }
     /** Экземпляр TrackState. Содержит информацию о состоянии воспроизведения */
@@ -158,7 +157,7 @@ fun AlbumScreen(
                 .pointerInput(Unit) {
                     detectVerticalDragGestures { _, dragAmount ->
                         if (dragAmount > 60) {
-                            navigator.popBackStack()
+                            navigator.navigateUp()
                         }
                     }
                 }
@@ -193,7 +192,7 @@ fun AlbumScreen(
                     albumTitle = { trackState.currentList[0].album ?: LocalizationProvider.strings.nothingWasFound },
                     animatedTopPad = { animatedTopPad },
                     onArrowBackClick = {
-                        navigator.popBackStack()
+                        navigator.navigateUp()
                     },
                     onInfoClick = {
                         expandPanelByNumber(PanelNumber.FIRST)
