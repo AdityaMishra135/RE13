@@ -11,9 +11,7 @@ RE13 is a **minimalistic, lightweight music player** built for everyone, especia
 
 ## 📸 Screenshots 
 
-| Day Theme | Night Theme |
-|-----------|-------------|
-| ![re13-day-theme](https://github.com/user-attachments/assets/04583de9-8c71-4d0f-af1a-9c83064c8b02) | ![re13-night-theme](https://github.com/user-attachments/assets/36860675-c259-4f28-8d5c-4d7da28aa10f) |
+![RE13](https://github.com/user-attachments/assets/f2802ebf-23ec-4a3c-ab7e-acea58dba7a7)
 
 ## ⚙️ Technology Stack 
 
