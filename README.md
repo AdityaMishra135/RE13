@@ -1,4 +1,4 @@
-![re13-night-theme](https://github.com/user-attachments/assets/06a17d38-b01c-4ec2-b121-3ebfabfa9c12)
+
 ---
 
 # RE13 Music Player 🎵
