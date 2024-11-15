@@ -1,70 +1,103 @@
 
 ---
 
-# RE13 Music Player 🎵
+# RE13 
 
-RE13 is a feature-rich music player app designed with an intuitive, stylish user interface. It offers both Day and Night themes, customizable controls, and detailed album and song views, making it an ideal app for music lovers who value aesthetics and functionality.
+Welcome to **RE13**, your modern and stylish music player app designed for an immersive audio experience. With a sleek, user-friendly interface available in both **Day** and **Night** themes, RE13 brings your music to life with vibrant visuals and seamless navigation. 
 
-## Features
+## 🧩 About the App 
 
-- **Day & Night Themes**: Toggle between light and dark modes to suit your preference or save battery in dark environments.
-- **All Music**: Browse your entire music library with easy access to all songs.
-- **Albums**: View your music by album, complete with album art and details.
-- **Favourite**: Add songs to your Favourite playlist with a single tap, making it easy to organize and quickly access your most-loved tracks.
-- **Playback Controls**: Control playback with play/pause, next, and previous buttons.
-- **Lyrics**: Enjoy real-time lyrics display, automatically fetched from Genius, so you can sing along with your favorite tracks effortlessly.
-- **Song Info**: Access detailed information about the currently playing track, including artist, album, genre, and more.
-- **Notification Playback Control**: Manage playback directly from your device's notification bar. Play, pause, skip without opening the app, for seamless control even when multitasking.
+RE13 is a **minimalistic, lightweight music player** built for everyone, especially users with low-power smartphones. Designed to prioritize performance and efficiency, RE13 delivers a smooth listening experience without draining your device's battery. Its simple yet visually appealing design lets you focus on your music without unnecessary clutter. Additionally, RE13 **automatically fetches song lyrics** from Genius, so you can sing along with ease.
 
-## Screenshots
+## 🔑 Key Features 
 
-Day Theme             |  Night Theme
-:-------------------------:|:-------------------------:
-![re13-day-theme](https://github.com/user-attachments/assets/10cea359-a469-4c40-873a-c43c3c868048) | ![re13-night-theme](https://github.com/user-attachments/assets/5eae5d66-aa95-4920-b456-d125e83bd7eb)
+### 🎨 Dual Themes
+- **Day Theme:** A bright, energetic interface for your daytime listening sessions.
+- **Night Theme:** A dark, smooth interface perfect for nighttime or low-light environments.
 
-## Getting Started
+### 🎵 All Music
+- Browse through all your music tracks effortlessly.
+- Quick search and filter options make it easy to find the songs you love.
 
-To build and run RE13 on your device, follow these steps:
+### 💿 Albums
+- Explore your favorite albums in one place.
+- Enjoy full album views with track listings and playback controls.
 
-### Prerequisites
+### 🎧 Lyrics
+- Enjoy real-time lyrics display, automatically fetched from Genius, so you can sing along with your favorite tracks effortlessly.
+
+### ℹ️ Song Info
+- Detailed information on each song, including title, artist, album, and more.
+
+### 💖 Favourite
+- Add songs to your Favourite playlist with a single tap, making it easy to organize and quickly access your most-loved tracks.
+
+## ⚙️ Technology Stack 
+
+RE13 is built with a robust and efficient stack to ensure smooth performance:
+
+- **Kotlin**: For a modern, concise, and expressive coding experience.
+- **Jetpack Compose**: Enables fast UI building with a declarative approach.
+- **Coroutines and Flow**: Ensures smooth asynchronous operations for playback and data handling.
+- **Hilt**: For dependency injection, providing a modular and scalable codebase.
+- **Room**: Local database management for efficient storage and retrieval of user data.
+- **Coil**: For loading and caching album artwork, keeping the app lightweight and fast.
+
+## 📸 Screenshots 
+
+| Day Theme | Night Theme |
+|-----------|-------------|
+| ![re13-day-theme](https://github.com/user-attachments/assets/04583de9-8c71-4d0f-af1a-9c83064c8b02) | ![re13-night-theme](https://github.com/user-attachments/assets/36860675-c259-4f28-8d5c-4d7da28aa10f) |
+
+## 🚀 Getting Started
+
+Follow these steps to set up and run the app locally:
+
+### ⚙️ Prerequisites
 
 - **Android Studio**: Make sure Android Studio is installed with the latest SDK and build tools.
 - **Kotlin**: RE13 is built with Kotlin and requires a compatible Kotlin setup in your project.
 - **Jetpack Compose**: The app is built using Jetpack Compose for UI development, so make sure your Android Studio version supports Compose.
 
-### Installation
+### 📥 Installation
 
-1. **Clone the Repository**
+1. Clone the repository from GitHub:
    ```bash
-   git clone https://github.com/KiREHwYE/RE13.git
-   cd RE13
+   git clone https://github.com/kirehwye/RE13.git
    ```
+2. Open the project in Android Studio.
+3. Build the project and ensure all dependencies are installed.
 
-2. **Open in Android Studio**
-   - Open the project in Android Studio and let it sync all dependencies.
+### 📲 First Launch
 
-3. **Build and Run**
-   - Connect an Android device or start an emulator, then run the app.
+1. Accept the permission to read media files so the app can load all your songs.
 
-## Usage
+## 🕹️ How to Use
 
 - **Browsing Music**: Use the "All Music" tab to browse all available songs, or switch to the "Albums" tab for an album-centric view. Switch between tabs by tapping the title of the screen itself (e.g., "All Music").
 - **Playback**: Tap on a song to start playback. Use the playback controls for play, pause, and skip functionality.
 - **View Lyrics**: Access song lyrics by tapping the track cover.
 - **Hide Album Cover on Album Screen**: Improve your browsing experience by dragging the album cover upward to reveal more of the song list, making it easier to navigate through your tracks.
 
-## Contributing
+## 🌟 Contributing
 
 Contributions are welcome! If you'd like to add features, fix bugs, or improve documentation, please follow these steps:
 
 1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/your-feature-name`).
-3. Make your changes and commit (`git commit -m 'Add some feature'`).
-4. Push to the branch (`git push origin feature/your-feature-name`).
+2. Create a new branch (git checkout -b feature/your-feature-name).
+3. Make your changes and commit (git commit -m 'Add some feature').
+4. Push to the branch (git push origin feature/your-feature-name).
 5. Open a pull request.
 
-## License
+## 📂 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache2 License - see the [LICENSE](LICENSE) file for details.
+
+## ✉️ Feedback and Support
+
+I'd love to hear your thoughts and suggestions! Contact me at:
+
+- **Email**: [wsk.iyui@gmail.com](mailto:wsk.iyui@gmail.com)
+- **Telegram**: [KiRE_HwYE1](https://t.me/KiRE_HwYE1)
 
 ---
