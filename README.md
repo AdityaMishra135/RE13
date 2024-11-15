@@ -1,4 +1,5 @@
-![RE13](https://github.com/user-attachments/assets/1669ac3c-ee8e-4116-bd2c-78e83d816744)---
+
+---
 
 # RE13 Music Player 🎵
 
