@@ -1,10 +1,10 @@
----
+![RE13](https://github.com/user-attachments/assets/1669ac3c-ee8e-4116-bd2c-78e83d816744)---
 
 # RE13 Music Player 🎵
 
 RE13 is a feature-rich music player app designed with an intuitive, stylish user interface. It offers both Day and Night themes, customizable controls, and detailed album and song views, making it an ideal app for music lovers who value aesthetics and functionality.
 
-![RE13 Day and Night Themes](path/to/RE13.jpg)
+![Uploading RE13.jpg…]()
 
 ## Features
 
@@ -21,7 +21,8 @@ RE13 is a feature-rich music player app designed with an intuitive, stylish user
 
 Day Theme             |  Night Theme
 :-------------------------:|:-------------------------:
-![Day Theme](path/to/day_theme.jpg) | ![Night Theme](path/to/night_theme.jpg)
+![Uploading RE13 Light Theme.jpg…]()
+ | ![Uploading RE13 Night Theme.jpg…]()
 
 ## Getting Started
 
