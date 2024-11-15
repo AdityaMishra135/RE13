@@ -61,7 +61,7 @@ Follow these steps to set up and run the app locally:
 
 1. Clone the repository from GitHub:
    ```bash
-   git clone https://github.com/kirehwye/RE13.git
+   git clone [https://github.com/KiREHwYE/RE13.git](https://github.com/KiREHwYE/RE13.git)
    ```
 2. Open the project in Android Studio.
 3. Build the project and ensure all dependencies are installed.
