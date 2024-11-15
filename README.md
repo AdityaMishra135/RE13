@@ -9,6 +9,23 @@ Welcome to **RE13**, your modern and stylish music player app designed for an im
 
 RE13 is a **minimalistic, lightweight music player** built for everyone, especially users with low-power smartphones. Designed to prioritize performance and efficiency, RE13 delivers a smooth listening experience without draining your device's battery. Its simple yet visually appealing design lets you focus on your music without unnecessary clutter. Additionally, RE13 **automatically fetches song lyrics** from Genius, so you can sing along with ease.
 
+## 📸 Screenshots 
+
+| Day Theme | Night Theme |
+|-----------|-------------|
+| ![re13-day-theme](https://github.com/user-attachments/assets/04583de9-8c71-4d0f-af1a-9c83064c8b02) | ![re13-night-theme](https://github.com/user-attachments/assets/36860675-c259-4f28-8d5c-4d7da28aa10f) |
+
+## ⚙️ Technology Stack 
+
+RE13 is built with a robust and efficient stack to ensure smooth performance:
+
+- **Kotlin**: For a modern, concise, and expressive coding experience.
+- **Jetpack Compose**: Enables fast UI building with a declarative approach.
+- **Coroutines and Flow**: Ensures smooth asynchronous operations for playback and data handling.
+- **Hilt**: For dependency injection, providing a modular and scalable codebase.
+- **Room**: Local database management for efficient storage and retrieval of user data.
+- **Coil**: For loading and caching album artwork, keeping the app lightweight and fast.
+
 ## 🔑 Key Features 
 
 ### 🎨 Dual Themes
@@ -31,23 +48,6 @@ RE13 is a **minimalistic, lightweight music player** built for everyone, especia
 
 ### 💖 Favourite
 - Add songs to your Favourite playlist with a single tap, making it easy to organize and quickly access your most-loved tracks.
-
-## ⚙️ Technology Stack 
-
-RE13 is built with a robust and efficient stack to ensure smooth performance:
-
-- **Kotlin**: For a modern, concise, and expressive coding experience.
-- **Jetpack Compose**: Enables fast UI building with a declarative approach.
-- **Coroutines and Flow**: Ensures smooth asynchronous operations for playback and data handling.
-- **Hilt**: For dependency injection, providing a modular and scalable codebase.
-- **Room**: Local database management for efficient storage and retrieval of user data.
-- **Coil**: For loading and caching album artwork, keeping the app lightweight and fast.
-
-## 📸 Screenshots 
-
-| Day Theme | Night Theme |
-|-----------|-------------|
-| ![re13-day-theme](https://github.com/user-attachments/assets/04583de9-8c71-4d0f-af1a-9c83064c8b02) | ![re13-night-theme](https://github.com/user-attachments/assets/36860675-c259-4f28-8d5c-4d7da28aa10f) |
 
 ## 🚀 Getting Started
 
