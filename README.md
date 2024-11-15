@@ -91,7 +91,7 @@ Contributions are welcome! If you'd like to add features, fix bugs, or improve d
 
 ## 📂 License
 
-This project is licensed under the Apache2 License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache-2.0 License - see the [LICENSE](LICENSE) file for details.
 
 ## ✉️ Feedback and Support
 
